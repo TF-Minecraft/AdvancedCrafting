@@ -42,6 +42,8 @@ public final class AcItemLoreRefresher {
 		return getLiveRevision(item) > AcItemTags.getStoredRevision(item);
 	}
 
+	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
+	@SuppressWarnings("deprecation")
 	public static RefreshResult refresh(ItemStack item) {
 		if (item == null || item.getType().isAir() || !item.hasItemMeta()) {
 			return RefreshResult.unchanged();

@@ -278,6 +278,8 @@ public class CraftingManager implements Listener{
 		discardBrokenStation(loc);
 	}
 
+	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
+	@SuppressWarnings("deprecation")
 	private void discardBrokenStation(Location loc) {
 		if (!hasStation(loc)) {
 			return;
@@ -383,6 +385,8 @@ public class CraftingManager implements Listener{
 	}
 
 	
+	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void invenClick(InventoryClickEvent e) {
 		Player p = (Player) e.getWhoClicked();

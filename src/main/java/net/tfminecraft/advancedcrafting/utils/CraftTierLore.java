@@ -45,6 +45,8 @@ public final class CraftTierLore {
 		item.setItemMeta(meta);
 	}
 
+	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
+	@SuppressWarnings("deprecation")
 	public static void applyTierLine(ItemStack item, int tier) {
 		if (item == null || !item.hasItemMeta() || tier <= 0) {
 			return;
@@ -57,6 +59,8 @@ public final class CraftTierLore {
 		applyPdc(item, tierIndex, tier);
 	}
 
+	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
+	@SuppressWarnings("deprecation")
 	public static void refreshTierLine(ItemStack item, int tier) {
 		if (item == null || !item.hasItemMeta() || tier <= 0) {
 			return;

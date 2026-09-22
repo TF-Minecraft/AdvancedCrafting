@@ -31,6 +31,8 @@ import net.tfminecraft.advancedcrafting.utils.StatTemplateMath;
 public class InventoryManager {
 	public static final String STAT_PREVIEW_TITLE = "§7Stat Preview";
 
+	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
+	@SuppressWarnings("deprecation")
 	public void categoryView(Player p) {
 		Inventory i = AdvancedCrafting.plugin.getServer().createInventory(null, 27, "§7Select Category");
 		int x = 0;
@@ -51,6 +53,8 @@ public class InventoryManager {
 		}
 		p.openInventory(i);
 	}
+	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
+	@SuppressWarnings("deprecation")
 	public void recipeView(Player p, RecipeCategory c) {
 		Inventory i = AdvancedCrafting.plugin.getServer().createInventory(null, 27, "§7Select Recipe");
 		int x = 0;
@@ -72,6 +76,8 @@ public class InventoryManager {
 		p.openInventory(i);
 	}
 
+	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
+	@SuppressWarnings("deprecation")
 	public void templatePreviewView(Player p, StatData source) {
 		int count = 0;
 		for (StatTemplate template : StatTemplateLoader.getAll()) {
@@ -107,6 +113,8 @@ public class InventoryManager {
 		p.openInventory(i);
 	}
 
+	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
+	@SuppressWarnings("deprecation")
 	private ItemStack getTemplatePreviewItem(StatData source, StatTemplate template) {
 		ItemStack icon = template.getIcon();
 		ItemStack item = icon != null ? icon.clone() : new ItemStack(Material.BARRIER, 1);
@@ -119,6 +127,8 @@ public class InventoryManager {
 		return item;
 	}
 	
+	// Keep the existing legacy text representation, formatting, and exact-string comparisons. This path mutates the existing ItemStack; replacing it would change aliases held by callers.
+	@SuppressWarnings("deprecation")
 	private ItemStack getCategoryItem(RecipeCategory c) {
 		ItemStack i = new ItemStack(Material.BARRIER, 1);
 		if(c.getRecipes().size() == 0) {
@@ -149,6 +159,8 @@ public class InventoryManager {
 		return i;
 	}
 	
+	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
+	@SuppressWarnings("deprecation")
 	private ItemStack getRecipeItem(CraftingRecipe r) {
 		ItemStack fallback = new ItemStack(Material.BARRIER, 1);
 		ItemAPI api = TLibs.getItemAPI();
