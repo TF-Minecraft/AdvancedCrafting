@@ -4,7 +4,7 @@ Minecraft crafting and alloy plugin for TF-Minecraft, with ingredient conversion
 crafting stations, smithing hits, alloy discovery, MMOItems stat calculation and
 item provenance. Source originally authored by Drefvelin.
 
-- [Technical documentation](https://github.com/TF-Minecraft/docs/tree/main/projects/AdvancedCrafting)
+- [Technical documentation](https://github.com/TF-Minecraft/Docs/blob/main/projects/AdvancedCrafting/README.md)
 - [Build and release conventions](https://github.com/TF-Minecraft/docs/blob/main/PIPELINES.md)
 - [Source import provenance](SOURCE.md)
 
