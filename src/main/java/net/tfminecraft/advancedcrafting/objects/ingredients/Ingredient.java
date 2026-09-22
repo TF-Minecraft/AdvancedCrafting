@@ -61,6 +61,8 @@ public class Ingredient {
 	}
 
 	
+	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
+	@SuppressWarnings("deprecation")
 	public void buildTo(ItemStack i) {
 		ItemMeta m = i.getItemMeta();
 		m.getPersistentDataContainer().set(PDCKeys.ingredientId(), PersistentDataType.STRING, id);

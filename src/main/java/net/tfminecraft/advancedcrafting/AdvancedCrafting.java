@@ -191,6 +191,8 @@ public class AdvancedCrafting extends JavaPlugin{
 		loadConfigs();
 		revisionTracker.flush();
 	}
+	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
+	@SuppressWarnings("deprecation")
 	public void reloadMessage(Player p) {
 		p.sendMessage(ChatColor.GREEN + "[AdvancedCrafting]" + ChatColor.YELLOW + " Reloading plugin...");
 		reload();

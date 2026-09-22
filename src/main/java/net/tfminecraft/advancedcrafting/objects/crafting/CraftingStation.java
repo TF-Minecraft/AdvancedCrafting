@@ -174,6 +174,8 @@ public class CraftingStation {
 		return types;
 	}
 
+	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
+	@SuppressWarnings("deprecation")
 	public StationFeedback addMaterial(Player p, ItemStack i) {
 		CraftStack c = new CraftStack(i);
 		if(!c.isAlloy() && !c.isIngredient()) {
@@ -380,6 +382,8 @@ public class CraftingStation {
 		}
 	}
 
+	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
+	@SuppressWarnings("deprecation")
 	private StationFeedback createItem(Player p, Double forcedQualityPercent) {
 		if (!checkItems(p)) {
 			return StationFeedback.LACKING_ITEMS;
@@ -498,6 +502,8 @@ public class CraftingStation {
 		return StationFeedback.SUCCESS;
 	}
 	
+	// This path mutates the existing ItemStack; replacing it would change aliases held by callers.
+	@SuppressWarnings("deprecation")
 	private ItemStack applyModel(ItemStack i, ModelScheme scheme) {
 		String path = scheme.getModel(recipe.getType());
 		if(path == null) {
@@ -530,6 +536,8 @@ public class CraftingStation {
 		
 	}
 	
+	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
+	@SuppressWarnings("deprecation")
 	private void addHit(Player p, CraftingHit hit) {
 		if(hits.containsKey(hit)) {
 			hits.get(hit).increaseCurrent(1);

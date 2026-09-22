@@ -100,6 +100,8 @@ public class AlloyManager implements Listener{
 		}.runTaskTimer(AdvancedCrafting.plugin, 0, 20L);
 	}
 	
+	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void addIngredient(PlayerInteractEvent e) {
 		if(!e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
@@ -158,6 +160,8 @@ public class AlloyManager implements Listener{
 		p.sendTitle("§aAdded "+i.getItemMeta().getDisplayName(), station.getStatus(), 5, 30, 5);
 		i.setAmount(i.getAmount()-1);
 	}
+	// Keep the existing legacy text representation, formatting, and exact-string comparisons. This path mutates the existing ItemStack; replacing it would change aliases held by callers.
+	@SuppressWarnings("deprecation")
 	public void forgeAlloy(PlayerInteractEvent e) {
 		Block b = e.getClickedBlock();
 		Player p = e.getPlayer();
@@ -187,6 +191,8 @@ public class AlloyManager implements Listener{
 		}
 	}
 
+	// This path mutates the existing ItemStack; replacing it would change aliases held by callers.
+	@SuppressWarnings("deprecation")
 	public void nameAlloy(Player p, String s) {
 		if(!naming.containsKey(p)) {
 			p.sendMessage("§cYou have no alloy to name");
