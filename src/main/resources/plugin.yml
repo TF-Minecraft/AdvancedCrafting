@@ -1,4 +1,4 @@
-main: net.tfminecraft.AdvancedCrafting.AdvancedCrafting
+main: net.tfminecraft.advancedcrafting.AdvancedCrafting
 api-version: '1.21.10'
 name: AdvancedCrafting
 version: ${project.version}
