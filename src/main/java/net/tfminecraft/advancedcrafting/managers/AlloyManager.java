@@ -20,7 +20,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import dev.lone.itemsadder.api.CustomStack;
 import io.lumine.mythic.lib.api.item.NBTItem;
 import net.tfminecraft.tlibs.TLibs;
-import net.tfminecraft.tlibs.enums.APIType;
 import net.tfminecraft.tlibs.objects.api.BlockAPI;
 import net.tfminecraft.tlibs.objects.api.subapi.StringFormatter;
 import net.tfminecraft.advancedcrafting.AdvancedCrafting;
@@ -71,7 +70,7 @@ public class AlloyManager implements Listener{
 	
 	public boolean isAlloyStation(Block b) {
 		String path = Cache.alloyStation;
-		BlockAPI api = (BlockAPI) TLibs.getApiInstance(APIType.BLOCK_API);
+		BlockAPI api = TLibs.getBlockAPI();
 		return api.getChecker().checkBlock(b, path);
 	}
 

@@ -1,5 +1,7 @@
 package net.tfminecraft.advancedcrafting.objects.crafting;
 
+import net.tfminecraft.advancedcrafting.util.LegacyModelData;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +19,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import io.lumine.mythic.lib.api.item.NBTItem;
 import net.tfminecraft.tlibs.TLibs;
-import net.tfminecraft.tlibs.enums.APIType;
 import net.tfminecraft.tlibs.objects.api.ItemAPI;
 import net.tfminecraft.tlibs.objects.utils.IntCounter;
 import net.Indyuce.mmoitems.ItemStats;
@@ -386,7 +387,7 @@ public class CraftingStation {
 		if (forcedQualityPercent == null && !checkHits(p)) {
 			return StationFeedback.LACKING_HITS;
 		}
-		ItemAPI api = (ItemAPI) TLibs.getApiInstance(APIType.ITEM_API);
+		ItemAPI api = TLibs.getItemAPI();
 		result = api.getCreator().getItemFromPath("m."+recipe.getTemplate());
 		MMOItem mmo = new LiveMMOItem(NBTItem.get(result));
 		MMOStatApplicator.applyExternalLayer(mmo, stats, CraftStatCalculator.collectManagedStatIds(recipe), true);
@@ -439,7 +440,7 @@ public class CraftingStation {
 
 
 		mmo.replaceData(ItemStats.NAME, itemName);
-		StatHistory hist = StatHistory.from(mmo, ItemStats.NAME);
+		StatHistory hist = mmo.computeStatHistory(ItemStats.NAME);
 		if (hist != null) {
             NameData og = (NameData) hist.getOriginalData();
             og.setString(result);
@@ -507,10 +508,10 @@ public class CraftingStation {
 		if(type.equalsIgnoreCase("v")) {
 			i.setType(Material.valueOf(path.split("\\.")[1].toUpperCase()));
 			ItemMeta m = i.getItemMeta();
-			m.setCustomModelData(Integer.parseInt(path.split("\\.")[2]));
+			LegacyModelData.set(m, Integer.parseInt(path.split("\\.")[2]));
 			i.setItemMeta(m);
 		} else if(type.equalsIgnoreCase("ia")) {
-			ItemAPI api = (ItemAPI) TLibs.getApiInstance(APIType.ITEM_API);
+			ItemAPI api = TLibs.getItemAPI();
 			i = api.getArmorMerger().merge(i, Optional.empty(), path);
 		}
 		return i;

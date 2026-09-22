@@ -31,7 +31,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import dev.lone.itemsadder.api.Events.FurnitureBreakEvent;
 import io.lumine.mythic.lib.api.item.NBTItem;
 import net.tfminecraft.tlibs.TLibs;
-import net.tfminecraft.tlibs.enums.APIType;
 import net.tfminecraft.tlibs.objects.api.BlockAPI;
 import net.tfminecraft.tlibs.objects.api.ItemAPI;
 import net.tfminecraft.advancedcrafting.AdvancedCrafting;
@@ -67,7 +66,7 @@ public class CraftingManager implements Listener{
 		if (b == null || Cache.craftingStation == null) {
 			return false;
 		}
-		BlockAPI blockApi = (BlockAPI) TLibs.getApiInstance(APIType.BLOCK_API);
+		BlockAPI blockApi = TLibs.getBlockAPI();
 		return blockApi.getChecker().checkBlock(b, Cache.craftingStation);
 	}
 
