@@ -1,5 +1,7 @@
 package net.tfminecraft.advancedcrafting.objects.alloys;
 
+import net.tfminecraft.advancedcrafting.util.LegacyModelData;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +15,6 @@ import org.bukkit.persistence.PersistentDataType;
 
 import io.lumine.mythic.lib.api.item.NBTItem;
 import net.tfminecraft.tlibs.TLibs;
-import net.tfminecraft.tlibs.enums.APIType;
 import net.tfminecraft.tlibs.objects.api.ItemAPI;
 import net.tfminecraft.tlibs.objects.api.subapi.StringFormatter;
 import net.Indyuce.mmoitems.ItemStats;
@@ -58,13 +59,13 @@ public class Alloy {
 	
 	@SuppressWarnings("deprecation")
 	public ItemStack build() {
-		ItemAPI api = (ItemAPI) TLibs.getApiInstance(APIType.ITEM_API);
+		ItemAPI api = TLibs.getItemAPI();
 		ItemStack template = api.getCreator().getItemFromPath(data.getColourScheme().getItem());
 		MMOItem mmo = new LiveMMOItem(NBTItem.get(template));
 		StringData itemName = (StringData) mmo.getData(ItemStats.NAME);
 		itemName.setString(name);
 		mmo.replaceData(ItemStats.NAME, itemName);
-		StatHistory hist = StatHistory.from(mmo, ItemStats.NAME);
+		StatHistory hist = mmo.computeStatHistory(ItemStats.NAME);
 		if (hist != null) {
             NameData og = (NameData) hist.getOriginalData();
             og.setString(name);
@@ -79,7 +80,7 @@ public class Alloy {
 		ItemMeta m = i.getItemMeta();
 		m.addEnchant(Enchantment.UNBREAKING, 1, true);
 		m.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-		m.setCustomModelData(data.getModel());
+		LegacyModelData.set(m, data.getModel());
 		m.getPersistentDataContainer().set(PDCKeys.alloyId(), PersistentDataType.STRING, id);
 		AcItemTags.write(m, revision, loreBlock);
 		i.setItemMeta(m);

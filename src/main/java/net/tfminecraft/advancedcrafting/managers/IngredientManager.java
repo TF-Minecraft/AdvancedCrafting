@@ -13,7 +13,6 @@ import org.bukkit.inventory.ItemStack;
 import dev.lone.itemsadder.api.CustomStack;
 import io.lumine.mythic.lib.api.item.NBTItem;
 import net.tfminecraft.tlibs.TLibs;
-import net.tfminecraft.tlibs.enums.APIType;
 import net.tfminecraft.tlibs.objects.api.BlockAPI;
 import net.tfminecraft.advancedcrafting.cache.Cache;
 import net.tfminecraft.advancedcrafting.objects.alloys.Alloy;
@@ -35,7 +34,7 @@ public class IngredientManager implements Listener{
 
 	public boolean isIngredientStation(Block b) {
 		String path = Cache.ingredientStation;
-		BlockAPI api = (BlockAPI) TLibs.getApiInstance(APIType.BLOCK_API);
+		BlockAPI api = TLibs.getBlockAPI();
 		return api.getChecker().checkBlock(b, path);
 	}
 	

@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
@@ -82,13 +83,9 @@ public final class PlayerAlloyForgeTracker {
 		CACHE.put(playerUuid, forged);
 
 		File file = playerFile(playerUuid);
-		JSONArray array = new JSONArray();
-		for (String id : forged) {
-			array.add(id);
-		}
 
 		try (PrintWriter writer = new PrintWriter(new FileWriter(file, false))) {
-			writer.print(array.toJSONString());
+			writer.print(JSONArray.toJSONString(new ArrayList<>(forged)));
 			writer.flush();
 		} catch (Exception e) {
 			e.printStackTrace();

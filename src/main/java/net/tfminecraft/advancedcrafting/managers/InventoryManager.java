@@ -1,5 +1,7 @@
 package net.tfminecraft.advancedcrafting.managers;
 
+import net.tfminecraft.advancedcrafting.util.LegacyModelData;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +14,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import net.tfminecraft.tlibs.TLibs;
-import net.tfminecraft.tlibs.enums.APIType;
 import net.tfminecraft.tlibs.objects.api.ItemAPI;
 import net.tfminecraft.tlibs.objects.api.subapi.StringFormatter;
 import net.tfminecraft.advancedcrafting.AdvancedCrafting;
@@ -129,14 +130,14 @@ public class InventoryManager {
 			i.setItemMeta(m);
 			return i;
 		}
-		ItemAPI api = (ItemAPI) TLibs.getApiInstance(APIType.ITEM_API);
+		ItemAPI api = TLibs.getItemAPI();
 		ItemStack template = api.getCreator().getItemFromPath("m."+c.getRecipes().get(0).getTemplate());
 		if(template != null) {
 			i.setType(template.getType());
 		} 
 		ItemMeta m = i.getItemMeta();
-		if(template != null && template.getItemMeta().hasCustomModelData()) {
-			m.setCustomModelData(template.getItemMeta().getCustomModelData());
+		if(template != null && LegacyModelData.has(template.getItemMeta())) {
+			LegacyModelData.set(m, LegacyModelData.get(template.getItemMeta()));
 		}
 		m.setDisplayName(c.getName());
 		List<String> lore = new ArrayList<>();
@@ -150,7 +151,7 @@ public class InventoryManager {
 	
 	private ItemStack getRecipeItem(CraftingRecipe r) {
 		ItemStack fallback = new ItemStack(Material.BARRIER, 1);
-		ItemAPI api = (ItemAPI) TLibs.getApiInstance(APIType.ITEM_API);
+		ItemAPI api = TLibs.getItemAPI();
 		String path = r.resolveMenuIconPath();
 		ItemStack base = api.getCreator().getItemFromPath(path);
 		if (base == null || (path.toLowerCase().startsWith("ia.") && base.getType() == Material.DIRT)) {

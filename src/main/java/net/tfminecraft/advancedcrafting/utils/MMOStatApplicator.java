@@ -92,7 +92,7 @@ public final class MMOStatApplicator {
 			if (itemStat == null) {
 				continue;
 			}
-			StatHistory hist = StatHistory.from(mmo, itemStat);
+			StatHistory hist = mmo.computeStatHistory(itemStat);
 			if (hist != null) {
 				hist.clearExternalData();
 				mmo.setStatHistory(itemStat, hist);
@@ -110,7 +110,7 @@ public final class MMOStatApplicator {
 			if (itemStat == null) {
 				continue;
 			}
-			StatHistory hist = StatHistory.from(mmo, itemStat);
+			StatHistory hist = mmo.computeStatHistory(itemStat);
 			if (hist != null) {
 				Object og = hist.getOriginalData();
 				if (og instanceof DoubleData doubleOg) {
@@ -124,7 +124,7 @@ public final class MMOStatApplicator {
 
 	@SuppressWarnings("deprecation")
 	private static void registerExternal(MMOItem mmo, ItemStat<?, ?> itemStat, DoubleData data) {
-		StatHistory hist = StatHistory.from(mmo, itemStat);
+		StatHistory hist = mmo.computeStatHistory(itemStat);
 		if (hist != null) {
 			hist.registerExternalData(data);
 			mmo.setStatHistory(itemStat, hist);

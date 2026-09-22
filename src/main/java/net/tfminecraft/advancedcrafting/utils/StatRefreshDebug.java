@@ -91,7 +91,7 @@ public final class StatRefreshDebug {
 		double total = current != null ? current.getValue() : 0;
 		double og = 0;
 		double external = 0;
-		StatHistory hist = StatHistory.from(mmo, itemStat);
+		StatHistory hist = mmo.computeStatHistory(itemStat);
 		if (hist != null) {
 			Object ogData = hist.getOriginalData();
 			if (ogData instanceof DoubleData doubleOg) {
