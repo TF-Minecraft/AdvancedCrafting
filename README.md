@@ -1,42 +1,35 @@
 # AdvancedCrafting
 
-Minecraft crafting and alloy plugin for TF-Minecraft, with ingredient conversion,
-crafting stations, smithing hits, alloy discovery, MMOItems stat calculation and
-item provenance. Source originally authored by Drefvelin.
+> Materials, smithing, and alloy discovery for TF-Minecraft.
 
-- [Technical documentation](https://github.com/TF-Minecraft/Docs/blob/main/projects/AdvancedCrafting/README.md)
-- [Build and release conventions](https://github.com/TF-Minecraft/docs/blob/main/PIPELINES.md)
-- [Source import provenance](SOURCE.md)
+AdvancedCrafting turns equipment crafting into a hands-on workshop activity.
+Players prepare ingredients, combine materials, and work recipes at crafting
+stations. The materials they choose and the quality of their work shape the
+finished item.
 
-## Build
+## Features
 
-Requires Java 25, Maven, Python 3 and read access to the private ServerAssets
-repository for the remaining third-party APIs. Clone TLibs next to this checkout.
+- **Crafting stations** — make items through recipes with material requirements
+  and sequences of tool hits.
+- **Ingredient conversion** — turn supported items into crafting materials with
+  their own properties.
+- **Alloy discovery** — experiment with ingredients and catalysts, name newly
+  discovered alloys, and reproduce known combinations.
+- **Material-driven equipment** — carry ingredient stats and crafting quality
+  into the finished item's attributes through MMOItems.
+- **Crafting identity** — retain the recipe, materials, and quality behind a
+  crafted item, with support for naming, appearance, and branding.
+- **Profession progression** — connect recipes and materials to profession
+  access and experience rewards.
 
-```sh
-python3 ../tlibs/tools/install-plugins.py --pom pom.xml
-GH_TOKEN="$(gh auth token)" bash .github/scripts/prepare-release.sh
-mvn clean verify
-```
+## Credits
 
-The JAR is `target/advancedcrafting-1.2.2.jar`. TLibs is a separate `provided`
-plugin; it is not bundled. Packaging does not copy files to a server.
+Originally authored by **Drefvelin**. See [source provenance](SOURCE.md) for the
+import history. The supplied source archive contained no license file; this
+import does not add a new license grant.
 
-CI uses the latest verified TLibs release and records its exact version/checksum
-alongside UTC-dated development builds. A tag matching the Maven version (for
-example `v1.2.2`) builds and tests the source, then creates a draft release with
-the JAR, `SHA256SUMS`, and source/dependency provenance in `build.json`.
-The imported archive contains no unit tests; CI performs compilation and packaging,
-and downstream plugins verify their use of its APIs.
+## Documentation
 
-## Runtime
+[Project documentation](https://github.com/TF-Minecraft/Docs/blob/main/projects/AdvancedCrafting/README.md)
 
-Use Java 25 and a compatible Minecraft 1.21 server. The descriptor requires
-TLibs, MMOCore, MMOItems and MythicLib. Configured ItemsAdder furniture also
-requires the matching ItemsAdder installation and assets. Supply server-specific
-recipes and schemes as described in the technical documentation before use.
-Preserve `plugins/AdvancedCrafting/` when updating, replace the old JAR with one
-version only, and restart the server. Release publication does not deploy it.
-
-The supplied archive contained no license file; this import does not add a new
-license grant.
+Technical documentation is maintained in [TF-Minecraft/Docs](https://github.com/TF-Minecraft/Docs).
