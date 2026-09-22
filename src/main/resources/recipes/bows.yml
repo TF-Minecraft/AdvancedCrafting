@@ -1,0 +1,35 @@
+shortbow:
+    name: "%material% Shortbow"
+    template: shortbows.custom_shortbow
+    category: bows
+    type: shortbow
+    main-type: wood
+    stat-template: shortbow
+    socket-group: gemstones
+    recipe:
+        - wood.4
+        - feather.4
+
+crossbow:
+    name: "%material% Crossbow"
+    template: crossbows.custom_crossbow
+    category: bows
+    type: crossbow
+    main-type: wood
+    stat-template: crossbow
+    socket-group: gemstones
+    recipe:
+        - wood.4
+        - feather.4
+        
+longbow:
+    name: "%material% Longbow"
+    template: longbows.custom_longbow
+    category: bows
+    type: longbow
+    main-type: wood
+    stat-template: longbow
+    socket-group: gemstones
+    recipe:
+        - wood.8
+        - feather.4

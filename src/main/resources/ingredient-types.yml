@@ -1,0 +1,14 @@
+metal:
+    name: "#9e968aMetal"
+wood:
+    name: "#964B00Wood"
+crystal:
+    name: "#ce89d6Crystal"
+leather:
+    name: "#f29857Leather"
+feather:
+    name: "#faf9f7Feather"
+wool:
+    name: "#ede2afWool"
+paper:
+    name: "#faf9f7Paper"

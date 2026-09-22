@@ -1,0 +1,28 @@
+# Socket colours granted to a crafted item, per craft quality.
+# A recipe picks its group with the "socket-group" key, defaulting to "gemstones".
+# Group ids and colour strings must match TLibs "socket-tier-groups" or nothing will fit the slot.
+# Each quality maps to a list, so a quality can grant more than one socket.
+
+gemstones:
+    slots:
+        crude: []
+        common:
+            - "Basic Gemstone"
+        rare:
+            - "Polished Gemstone"
+        epic:
+            - "Radiant Gemstone"
+        legendary:
+            - "Mythical Gemstone"
+
+mage_armor_runes:
+    slots:
+        crude: []
+        common:
+            - "Minor Armor Rune"
+        rare:
+            - "Lesser Armor Rune"
+        epic:
+            - "Greater Armor Rune"
+        legendary:
+            - "Ascendant Armor Rune"

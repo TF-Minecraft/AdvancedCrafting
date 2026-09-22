@@ -1,0 +1,275 @@
+standard:
+  name: "§fStandard Weapon"
+  icon: v.iron_sword
+  base-stats:
+    - attack_speed(1.6)
+  stats:
+    - attack_damage
+    - attack_speed
+    - pvp_damage
+    - physical_damage
+    - magic_damage
+    - spell_vampirism
+    - lifesteal
+    - max_item_damage
+  factors:
+    attack_damage: 0.90
+
+sword:
+  name: "§fSword"
+  icon: v.iron_sword
+  base-stats:
+    - attack_speed(1.6)
+  stats:
+    - attack_damage
+    - attack_speed
+    - physical_damage
+    - magic_damage
+    - spell_vampirism
+    - lifesteal
+    - max_item_damage
+
+battleaxe:
+  name: "§fBattleaxe"
+  icon: v.iron_axe
+  base-stats:
+    - attack_speed(1.6)
+  stats:
+    - attack_damage
+    - attack_speed
+    - physical_damage
+    - magic_damage
+    - spell_vampirism
+    - lifesteal
+    - movement_speed
+    - max_item_damage
+  factors:
+    attack_damage: 0.90
+
+dagger:
+  name: "§fDagger"
+  icon: v.iron_axe
+  base-stats:
+    - attack_speed(1.6)
+  stats:
+    - attack_damage
+    - attack_speed
+    - physical_damage
+    - magic_damage
+    - spell_vampirism
+    - lifesteal
+    - critical_strike_chance
+    - max_item_damage
+  factors:
+    attack_damage: 0.90
+
+warhammer:
+  name: "§fWarhammer"
+  icon: v.iron_axe
+  base-stats:
+    - attack_speed(1.6)
+  stats:
+    - attack_damage
+    - attack_speed
+    - physical_damage
+    - magic_damage
+    - spell_vampirism
+    - lifesteal
+    - damage_reduction
+    - max_item_damage
+  factors:
+    attack_damage: 0.90
+
+spear:
+  name: "§fSpear"
+  icon: v.iron_axe
+  base-stats:
+    - attack_speed(1.6)
+    - entity_interaction_range(0.2)
+  stats:
+    - attack_damage
+    - attack_speed
+    - physical_damage
+    - magic_damage
+    - spell_vampirism
+    - lifesteal
+    - max_item_damage
+  factors:
+    attack_damage: 0.90
+
+polearm:
+  name: "§fPolearm"
+  icon: v.trident
+  base-stats:
+    - attack_speed(1.2)
+    - entity_interaction_range(0.4)
+  stats:
+    - attack_damage
+    - attack_speed
+    - physical_damage
+    - magic_damage
+    - spell_vampirism
+    - lifesteal
+    - max_item_damage
+
+longsword:
+  name: "§fLongsword"
+  icon: v.iron_sword
+  base-stats:
+    - attack_speed(1.2)
+    - critical_strike_chance(5.0)
+  stats:
+    - attack_damage
+    - attack_speed
+    - physical_damage
+    - magic_damage
+    - spell_vampirism
+    - lifesteal
+    - critical_strike_chance
+    - max_item_damage
+
+greathammer:
+  name: "§fGreathammer"
+  icon: v.netherite_axe
+  base-stats:
+    - attack_speed(1.2)
+    - blunt_power(3)
+    - damage_reduction(4.0)
+  stats:
+    - attack_damage
+    - attack_speed
+    - blunt_power
+    - blunt_rating
+    - physical_damage
+    - magic_damage
+    - spell_vampirism
+    - lifesteal
+    - damage_reduction
+    - max_item_damage
+
+greataxe:
+  name: "§fGreataxe"
+  icon: v.netherite_axe
+  base-stats:
+    - attack_speed(1.2)
+    - blunt_power(3)
+    - movement_speed(0.6)
+  stats:
+    - attack_damage
+    - attack_speed
+    - blunt_power
+    - blunt_rating
+    - physical_damage
+    - magic_damage
+    - spell_vampirism
+    - lifesteal
+    - movement_speed
+    - max_item_damage
+
+light_armor:
+  name: "§fLight Armor"
+  icon: v.chainmail_helmet
+  base-stats:
+    - armor(0.5)
+    - movement_speed(0.4)
+  stats:
+    - armor
+    - armor_toughness
+    - max_health
+    - physical_damage_reduction
+    - projectile_damage_reduction
+    - magic_damage_reduction
+    - max_item_damage
+
+medium_armor:
+  name: "§fMedium Armor"
+  icon: v.iron_chestplate
+  base-stats:
+    - armor(1.0)
+    - armor_toughness(0.5)
+    - movement_speed(-0.2)
+  stats:
+    - armor
+    - armor_toughness
+    - max_health
+    - physical_damage_reduction
+    - projectile_damage_reduction
+    - magic_damage_reduction
+    - max_item_damage
+
+heavy_armor:
+  name: "§fHeavy Armor"
+  icon: v.netherite_chestplate
+  base-stats:
+    - armor(1.5)
+    - armor_toughness(1.0)
+    - movement_speed(-0.4)
+  stats:
+    - armor
+    - armor_toughness
+    - max_health
+    - physical_damage_reduction
+    - projectile_damage_reduction
+    - magic_damage_reduction
+    - max_item_damage
+
+infantry_armor:
+  name: "§fInfantry Armor"
+  icon: v.leather_helmet
+  base-stats:
+    - armor(1.0)
+    - movement_speed(0.2)
+  stats:
+    - armor
+    - max_health
+    - physical_damage_reduction
+    - projectile_damage_reduction
+    - magic_damage_reduction
+    - max_item_damage
+
+shortbow:
+  name: "§fShortbow"
+  icon: v.bow
+  base-stats:
+    - arrow_velocity(0.9)
+    - attack_damage(1.5)
+  stats:
+    - arrow_velocity
+    - attack_damage
+    - projectile_damage
+    - spell_vampirism
+    - lifesteal
+    - max_item_damage
+
+crossbow:
+  name: "§fCrossbow"
+  icon: v.crossbow
+  base-stats:
+    - arrow_velocity(1.3)
+  stats:
+    - arrow_velocity
+    - attack_damage
+    - projectile_damage
+    - pvp_damage
+    - skill_damage
+    - lifesteal
+    - spell_vampirism
+    - dodge_rating
+    - max_item_damage
+
+longbow:
+  name: "§fLongbow"
+  icon: v.bow
+  base-stats:
+    - arrow_velocity(1.1)
+    - attack_damage(3.0)
+  stats:
+    - arrow_velocity
+    - attack_damage
+    - projectile_damage
+    - pvp_damage
+    - skill_damage
+    - lifesteal
+    - spell_vampirism
+    - dodge_rating
+    - max_item_damage

@@ -1,0 +1,113 @@
+default: #This is so catalysts have a scheme model but it does nothing, only base items can use scheme models
+    models:
+
+iron:
+    models:
+        - sword(v.iron_sword.0)
+        - battleaxe(v.iron_axe.4)
+        - dagger(v.iron_sword.4)
+        - warhammher(v.iron_shovel.2)
+        - spear(v.iron_hoe.2)
+        - polearm(v.iron_hoe.6)
+        - greathammer(v.iron_shovel.6)
+        - longsword(v.iron_sword.8)
+        - greataxe(v.iron_axe.8)
+        - helmet(v.chainmail_helmet.0)
+        - chestplate(v.chainmail_chestplate.0)
+        - leggings(v.chainmail_leggings.0)
+        - boots(v.chainmail_boots.0)
+        
+steel:
+    models:
+        - sword(v.iron_sword.1)
+        - battleaxe(v.iron_axe.5)
+        - dagger(v.iron_sword.5)
+        - warhammher(v.iron_shovel.3)
+        - spear(v.iron_hoe.2)
+        - polearm(v.iron_hoe.7)
+        - greathammer(v.iron_shovel.7)
+        - longsword(v.iron_sword.9)
+        - greataxe(v.iron_axe.9)
+        - helmet(v.iron_helmet.0)
+        - chestplate(v.iron_chestplate.0)
+        - leggings(v.iron_leggings.0)
+        - boots(v.iron_boots.0)
+        
+bronze: #Needs weapon models, using steel rn
+    models:
+        - sword(v.iron_sword.22)
+        - battleaxe(v.iron_axe.12)
+        - dagger(v.iron_sword.23)
+        - warhammher(v.iron_shovel.14)
+        - spear(v.iron_hoe.3)
+        - polearm(v.iron_hoe.8)
+        - greathammer(v.iron_shovel.15)
+        - longsword(v.iron_sword.24)
+        - greataxe(v.iron_axe.13)
+        - helmet(v.iron_helmet.0)
+        - chestplate(v.iron_chestplate.0)
+        - leggings(v.iron_leggings.0)
+        - boots(v.iron_boots.0)
+        
+abyssalite:
+    models:
+        - sword(v.iron_sword.2)
+        - battleaxe(v.iron_axe.6)
+        - dagger(v.iron_sword.6)
+        - warhammher(v.iron_shovel.4)
+        - spear(v.iron_hoe.4)
+        - polearm(v.iron_hoe.9)
+        - greathammer(v.iron_shovel.8)
+        - longsword(v.iron_sword.10)
+        - greataxe(v.iron_axe.10)
+        - helmet(v.netherite_helmet.0)
+        - chestplate(v.netherite_chestplate.0)
+        - leggings(v.netherite_leggings.0)
+        - boots(v.netherite_boots.0)
+        
+mythril:
+    models:
+        - sword(v.iron_sword.3)
+        - battleaxe(v.iron_axe.7)
+        - dagger(v.iron_sword.7)
+        - warhammher(v.iron_shovel.5)
+        - spear(v.iron_hoe.5)
+        - polearm(v.iron_hoe.9)
+        - greathammer(v.iron_shovel.9)
+        - longsword(v.iron_sword.11)
+        - greataxe(v.iron_axe.11)
+        - helmet(v.diamond_helmet.0)
+        - chestplate(v.diamond_chestplate.0)
+        - leggings(v.diamond_leggings.0)
+        - boots(v.diamond_boots.0)
+
+infantry:
+    models:
+        - helmet(v.carved_pumpkin.1)
+        - chestplate(v.golden_chestplate.0)
+        - leggings(v.golden_leggings.0)
+        - boots(v.golden_boots.0)
+
+barkwood:
+    models:
+        - shortbow(v.bow.0)
+        - longbow(v.bow.4)
+        - crossbow(v.crossbow.0)
+
+maplewood:
+    models:
+        - shortbow(v.bow.1)
+        - longbow(v.bow.5)
+        - crossbow(v.crossbow.1)
+
+elderwood:
+    models:
+        - shortbow(v.bow.2)
+        - longbow(v.bow.6)
+        - crossbow(v.crossbow.2)
+
+demonwood:
+    models:
+        - shortbow(v.bow.3)
+        - longbow(v.bow.7)
+        - crossbow(v.crossbow.3)

@@ -1,0 +1,81 @@
+scrap-path: crafting.scrap
+branding-tool: m.tools.skin_branding_tool
+
+# TLibs block path for each station (iaf(...) for ItemsAdder furniture).
+crafting-station: v(ANVIL)
+alloy-station: iaf(tfmc:alloy_forge)
+ingredient-station: iaf(tfmc:ingredient_converter)
+
+# New alloy discovery roll: success% = min(max, base + sqrt(totalValue) * bonus). totalValue = sum of ingredient value fields (base + catalysts).
+alloy-forge:
+  base-success-percent: 2.0
+  success-bonus-per-sqrt-value: 4.0
+  max-success-percent: 85.0
+
+max-factor: 1.2
+
+# Warn when a tool is this many percent over its requirement (16 vs 12 = 33).
+# Set to 0 or below to disable. Existing live configs keep working via loader defaults.
+hit-overshoot-warn-percent: 30.0
+hit-overshoot-warn-message: "§cYour over-reliance on %hit% ruins the result further"
+
+# Raw stat lines on ingredient/alloy items. Converter GUI still shows per-template factors.
+show-ingredient-stats: true
+
+# Log stat template / ingredient revision refreshes to console ([AC][StatRefresh]).
+debug-stat-refresh: false
+
+# Divide bucket-averaged stat values before template factors (movement_speed config uses ~100x larger numbers than MMOItems).
+global-stat-offsets:
+  movement_speed: 100
+
+stat-aliases:
+    - max_item_damage->Durability
+    - max_health->Max Health
+    - health_regeneration->Health Regeneration
+    - armor->Armor
+    - armor_toughness->Armor Toughness
+    - damage_reduction->Damage Reduction
+    - pvp_damage_reduction->PvP Damage Reduction
+    - physical_damage_reduction->Physical Damage Reduction
+    - projectile_damage_reduction->Projectile Damage Reduction 
+    - magic_damage_reduction->Magic Damage Reduction
+    - fall_damage_reduction->Fall Damage Reduction
+    - fire_damage_reduction->Fire Damage Reduction
+    - attack_damage->Attack Damage
+    - blunt_rating->Blunt Rating
+    - blunt_power->Blunt Power
+    - pvp_damage->PvP Damage
+    - physical_damage->Physical Damage
+    - projectile_damage->Projectile Damage
+    - magic_damage->Magic Damage
+    - skill_damage->Skill Damage
+    - spell_vampirism->Spell Vampirism
+    - lifesteal->Lifesteal
+    - critical_strike_chance->Critical Strike Chance
+    - parry_rating->Parry Rating
+    - dodge_rating->Dodge Rating
+    - movement_speed->Movement Speed
+    - max_mana->Max Mana
+    - cooldown_reduction->Cooldown Reduction
+
+combinations:
+    metal:
+        - crystal
+    wood:
+        - crystal
+
+permission-prefix: professions.
+
+permission-namespaces:
+  ingredient:
+    display: "#e6a817Ingredient"
+  iron_smith:
+    display: "#e6a817Iron_Smith"
+  steel_smith:
+    display: "#e6a817Steel_Smith"
+  abyssalite_smith:
+    display: "#e6a817Abyssalite_Smith"
+  mythril_smith:
+    display: "#e6a817Mythril_Smith"
+

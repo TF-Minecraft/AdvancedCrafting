@@ -1,0 +1,108 @@
+sword:
+    name: "%material% Sword"
+    template: sword.custom_sword
+    category: weapons
+    type: sword
+    main-type: metal
+    stat-template: sword
+    socket-group: gemstones
+    recipe:
+        - metal.4
+        - leather.2
+        - wool.2
+battleaxe:
+    name: "%material% Battleaxe"
+    template: battleaxes.custom_battleaxe
+    category: weapons
+    type: battleaxe
+    main-type: metal
+    stat-template: battleaxe
+    socket-group: gemstones
+    recipe:
+        - metal.4
+        - leather.2
+        - wool.2
+dagger:
+    name: "%material% Dagger"
+    template: daggers.custom_dagger
+    category: weapons
+    type: dagger
+    main-type: metal
+    stat-template: dagger
+    socket-group: gemstones
+    recipe:
+        - metal.4
+        - leather.2
+        - wool.2
+warhammer:
+    name: "%material% Warhammer"
+    template: warhammers.custom_warhammer
+    category: weapons
+    type: warhammer
+    main-type: metal
+    stat-template: warhammer
+    socket-group: gemstones
+    recipe:
+        - metal.4
+        - leather.2
+        - wool.2
+spear:
+    name: "%material% Spear"
+    template: spears.custom_spear
+    category: weapons
+    type: spear
+    main-type: metal
+    stat-template: spear
+    socket-group: gemstones
+    recipe:
+        - metal.4
+        - leather.2
+        - wool.2
+polearm:
+    name: "%material% Polearm"
+    template: polearms.custom_polearm
+    category: weapons
+    type: polearm
+    main-type: metal
+    stat-template: polearm
+    socket-group: gemstones
+    recipe:
+        - metal.8
+        - leather.2
+        - wool.2
+greathammer:
+    name: "%material% Greathammer"
+    template: greathammers.custom_greathammer
+    category: weapons
+    type: greathammer
+    main-type: metal
+    stat-template: greathammer
+    socket-group: gemstones
+    recipe:
+        - metal.8
+        - leather.2
+        - wool.2
+longsword:
+    name: "%material% Longsword"
+    template: longswords.custom_longsword
+    category: weapons
+    type: longsword
+    main-type: metal
+    stat-template: longsword
+    socket-group: gemstones
+    recipe:
+        - metal.8
+        - leather.2
+        - wool.2
+greataxe:
+    name: "%material% Greataxe"
+    template: greataxes.custom_greataxe
+    category: weapons
+    type: greataxe
+    main-type: metal
+    stat-template: greataxe
+    socket-group: gemstones
+    recipe:
+        - metal.8
+        - leather.2
+        - wool.2

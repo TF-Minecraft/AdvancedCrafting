@@ -1,0 +1,107 @@
+mixed:
+  item: m.crafting.alloy
+  models: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53]
+  colours:
+    - B0B3B5  # neutral silver-gray
+    - 9DA3A6  # cool slate
+    - 7E8C94  # blue-gray
+    - C2A583  # muted bronze
+    - 8C726A  # dull copper
+    - 5F6B5F  # olive-gray
+    - 86918F  # moss metal
+    - D1C0A8  # warm sand
+    - 6E777B  # stormy gray
+    - 9CA89A  # sage steel
+    - C9BBA0  # aged brass
+    - 758390  # steel blue
+    - 918B84  # weathered pewter
+    - A09C92  # concrete dust
+    - B38D6E  # burnished copper
+    - 8FA8A3  # oxidized teal
+    - 7A726F  # rusted tin
+    - 989C94  # dull jade
+    - A98D83  # faded rose gold
+    - 79858A  # cold iron
+    - 879486  # tarnished nickel
+    - BCB9AE  # chalk
+    - 9D7B6F  # rust brown
+    - C4C1B7  # antique silver
+    - 5E6568  # gunmetal
+    - A6B4AE  # fog green
+    - CBB99C  # bronze powder
+    - BBAEA5  # weathered clay
+    - 8F9A92  # muted forest
+    - 716963  # graphite
+    - B7AA9C  # faded tan
+    - 808B91  # dull steel blue
+    - 9C948F  # soft ash
+    - B3C2C0  # mist
+    - 786A61  # soot bronze
+    - AFA195  # dry stone
+    - D4C4B4  # bleached brass
+    - 9CACA6  # soft mint iron
+    - 675D57  # dark nickel
+    - 9098A0  # dim steel
+    - 8B7F7A  # dusty copper
+    - DAD2C5  # ivory metal
+    - 889E9B  # washed jade
+    - A77C63  # rose bronze
+    - 6D7875  # slate green
+    - B8B0AA  # soft pewter
+    - 9E8675  # oxidized brass
+    - BFC9C8  # cool chrome
+    - A28E82  # worn leather
+
+wood:
+  item: m.crafting.custom_wood
+  models: [23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38]
+  colours:
+    - B0B3B5  # neutral silver-gray
+    - 9DA3A6  # cool slate
+    - 7E8C94  # blue-gray
+    - C2A583  # muted bronze
+    - 8C726A  # dull copper
+    - 5F6B5F  # olive-gray
+    - 86918F  # moss metal
+    - D1C0A8  # warm sand
+    - 6E777B  # stormy gray
+    - 9CA89A  # sage steel
+    - C9BBA0  # aged brass
+    - 758390  # steel blue
+    - 918B84  # weathered pewter
+    - A09C92  # concrete dust
+    - B38D6E  # burnished copper
+    - 8FA8A3  # oxidized teal
+    - 7A726F  # rusted tin
+    - 989C94  # dull jade
+    - A98D83  # faded rose gold
+    - 79858A  # cold iron
+    - 879486  # tarnished nickel
+    - BCB9AE  # chalk
+    - 9D7B6F  # rust brown
+    - C4C1B7  # antique silver
+    - 5E6568  # gunmetal
+    - A6B4AE  # fog green
+    - CBB99C  # bronze powder
+    - BBAEA5  # weathered clay
+    - 8F9A92  # muted forest
+    - 716963  # graphite
+    - B7AA9C  # faded tan
+    - 808B91  # dull steel blue
+    - 9C948F  # soft ash
+    - B3C2C0  # mist
+    - 786A61  # soot bronze
+    - AFA195  # dry stone
+    - D4C4B4  # bleached brass
+    - 9CACA6  # soft mint iron
+    - 675D57  # dark nickel
+    - 9098A0  # dim steel
+    - 8B7F7A  # dusty copper
+    - DAD2C5  # ivory metal
+    - 889E9B  # washed jade
+    - A77C63  # rose bronze
+    - 6D7875  # slate green
+    - B8B0AA  # soft pewter
+    - 9E8675  # oxidized brass
+    - BFC9C8  # cool chrome
+    - A28E82  # worn leather

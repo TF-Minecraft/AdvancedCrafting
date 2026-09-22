@@ -1,0 +1,20 @@
+main: net.tfminecraft.AdvancedCrafting.AdvancedCrafting
+api-version: 1.20
+name: AdvancedCrafting
+version: ${project.version}
+author: Drefvelin
+
+depend: [TLibs, MMOCore, MMOItems, MythicLib]
+
+commands:
+  ac:
+    useage: /<command>
+    description: AdvancedCrafting Command
+  alloy:
+    useage: /<command>
+    description: Alloy Command
+
+permissions:
+  advancedcrafting.admin:
+    description: AdvancedCrafting admin commands
+    default: op
