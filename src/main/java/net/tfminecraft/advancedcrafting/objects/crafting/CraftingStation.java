@@ -238,22 +238,6 @@ public class CraftingStation {
 				hitTypes.put(h.getType(), counter);
 			}
 		}
-		//This is debug
-		/*
-		p.sendMessage("§e==========================");
-		for(IngredientType t : types.keySet()) {
-			p.sendMessage(t.getName()+": "+types.get(t).getCurrent()+"/"+types.get(t).getNeeded());
-		}
-		p.sendMessage("§e==========================");
-		for(CraftingHit h : hits.keySet()) {
-			p.sendMessage(h.getName()+": "+hits.get(h).getCurrent()+"/"+hits.get(h).getNeeded());
-		}
-		p.sendMessage("§e==========================");
-		for(HitType h : hitTypes.keySet()) {
-			p.sendMessage(h.getName()+" hits: "+hitTypes.get(h).getCurrent()+"/"+hitTypes.get(h).getNeeded());
-		}
-		p.sendMessage("§e==========================");
-		*/
 		p.sendTitle("§aAdded "+name, type.getName() + " §e"+types.get(type).getCurrent()+"/"+types.get(type).getNeeded(), 5, 20, 5);
 		p.getInventory().getItemInMainHand().setAmount(p.getInventory().getItemInMainHand().getAmount()-1);
 		return StationFeedback.SUCCESS;

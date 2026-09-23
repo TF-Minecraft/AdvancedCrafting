@@ -19,7 +19,6 @@ import net.tfminecraft.advancedcrafting.loaders.RecipeLoader;
 import net.tfminecraft.advancedcrafting.loaders.SchemeLoader;
 import net.tfminecraft.advancedcrafting.loaders.SocketGroupLoader;
 import net.tfminecraft.advancedcrafting.loaders.StatTemplateLoader;
-import net.tfminecraft.advancedcrafting.loaders.StationLoader;
 import net.tfminecraft.advancedcrafting.loaders.TypeLoader;
 import net.tfminecraft.advancedcrafting.managers.AlloyManager;
 import net.tfminecraft.advancedcrafting.managers.CommandManager;
@@ -38,7 +37,6 @@ public class AdvancedCrafting extends JavaPlugin{
 	private static final RevisionTracker revisionTracker = new RevisionTracker();
 	private final CategoryLoader categoryLoader = new CategoryLoader();
 	private final RecipeLoader recipeLoader = new RecipeLoader();
-	private final StationLoader stationLoader = new StationLoader();
 	private final ConfigLoader configLoader = new ConfigLoader();
 	private final TypeLoader typeLoader = new TypeLoader();
 	private final IngredientLoader ingredientLoader = new IngredientLoader();
@@ -100,9 +98,6 @@ public class AdvancedCrafting extends JavaPlugin{
 		getServer().getPluginManager().registerEvents(mmoItemRebuildListener, this);
 	}
 	public void loadConfigs() {
-		/*
-		stationLoader.load(new File(getDataFolder(), "stations.yml"));
-		*/
 		File folder = new File(getDataFolder(), "colour-schemes");
     	for (final File file : folder.listFiles()) {
     		if(!file.isDirectory()) {
