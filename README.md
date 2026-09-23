@@ -24,9 +24,7 @@ finished item.
 
 ## Credits
 
-Originally authored by **Drefvelin**. See [source provenance](SOURCE.md) for the
-import history. The supplied source archive contained no license file; this
-import does not add a new license grant.
+Originally authored by **Drefvelin**.
 
 ## Documentation
 
