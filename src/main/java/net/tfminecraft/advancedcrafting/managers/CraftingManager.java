@@ -336,6 +336,11 @@ public class CraftingManager implements Listener{
 				);
 				return;
 			} else {
+				if (!station.hasRecipe()) {
+					p.sendMessage("§cNo recipe on this station. Select a recipe first.");
+					p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1f, 1f);
+					return;
+				}
 				StationFeedback f = station.craft(p);
 				if (f.equals(StationFeedback.SUCCESS)) {
 					p.getWorld().playSound(station.getLoc(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
