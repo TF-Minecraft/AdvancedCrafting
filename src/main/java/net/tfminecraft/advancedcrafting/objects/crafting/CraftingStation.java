@@ -278,14 +278,14 @@ public class CraftingStation {
 				Ingredient ingredient = IngredientLoader.getByString(mId); // Assuming you have a method like this
 				if (ingredient != null && ingredient.getIngredientData().hasXP()) {
 					String raw = ingredient.getIngredientData().getXP();
-					xpPerUnit = Double.parseDouble(raw.split("\\(")[1].replace(")", ""));
+					xpPerUnit = parseXPAmount(raw);
 					skill = raw.split("\\(")[0]; // Assuming you store "agriculturist" here
 				}
 			} else if (type.equalsIgnoreCase("alloy")) {
 				Alloy alloy = AlloyManager.getAlloyById(mId); // Likewise for alloy
 				if (alloy != null && alloy.getData().hasXP()) {
 					String raw = alloy.getData().getXP();
-					xpPerUnit = Double.parseDouble(raw.split("\\(")[1].replace(")", ""));
+					xpPerUnit = parseXPAmount(raw);
 					skill = raw.split("\\(")[0]; // Assuming you store "agriculturist" here
 				}
 			}
@@ -307,6 +307,16 @@ public class CraftingStation {
 	}
 
 	
+	// XP is paid after the item drops, so a bad value must not throw and leave the station uncleared.
+	private double parseXPAmount(String raw) {
+		try {
+			return Double.parseDouble(raw.split("\\(")[1].replace(")", ""));
+		} catch (RuntimeException e) {
+			Bukkit.getLogger().warning("AC: Invalid xp value '" + raw + "', expected skill(amount)");
+			return 0.0;
+		}
+	}
+
 	private boolean checkItems(Player p) {
 		boolean complete = true;
 		for(IngredientType t : types.keySet()) {
