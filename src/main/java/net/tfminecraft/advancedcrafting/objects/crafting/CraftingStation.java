@@ -253,8 +253,12 @@ public class CraftingStation {
 
 	public StationFeedback craft(Player p, Double forcedQualityPercent) {
 		stats = CraftStatCalculator.compute(recipe, currentMaterials);
-		giveXP(p);
-		return createItem(p, forcedQualityPercent);
+		StationFeedback f = createItem(p, forcedQualityPercent);
+		// Failed attempts keep the station's materials, so paying XP before the checks let every retry pay again.
+		if (f == StationFeedback.SUCCESS) {
+			giveXP(p);
+		}
+		return f;
 	}
 
 	private void giveXP(Player p) {
