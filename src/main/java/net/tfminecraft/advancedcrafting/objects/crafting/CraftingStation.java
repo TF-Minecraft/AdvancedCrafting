@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
@@ -253,9 +255,16 @@ public class CraftingStation {
 
 	public StationFeedback craft(Player p, Double forcedQualityPercent) {
 		stats = CraftStatCalculator.compute(recipe, currentMaterials);
-		giveXP(p);
-		return createItem(p, forcedQualityPercent);
+		StationFeedback f = createItem(p, forcedQualityPercent);
+		// Failed attempts keep the station's materials, so paying XP before the checks let every retry pay again.
+		if (f == StationFeedback.SUCCESS) {
+			giveXP(p);
+		}
+		return f;
 	}
+
+	// skill(amount), e.g. crafter(2.0)
+	private static final Pattern XP_FORMAT = Pattern.compile("([A-Za-z0-9_-]+)\\((\\d+(?:\\.\\d+)?)\\)");
 
 	private void giveXP(Player p) {
 		// Map of skill name -> total XP to give
@@ -267,26 +276,31 @@ public class CraftingStation {
 			String mId = split[1];
 			int amount = currentMaterials.get(s);
 
-			double xpPerUnit = 0.0;
-			String skill = null;
+			String raw = null;
 
 			if (type.equalsIgnoreCase("ingredient")) {
 				Ingredient ingredient = IngredientLoader.getByString(mId); // Assuming you have a method like this
 				if (ingredient != null && ingredient.getIngredientData().hasXP()) {
-					String raw = ingredient.getIngredientData().getXP();
-					xpPerUnit = Double.parseDouble(raw.split("\\(")[1].replace(")", ""));
-					skill = raw.split("\\(")[0]; // Assuming you store "agriculturist" here
+					raw = ingredient.getIngredientData().getXP();
 				}
 			} else if (type.equalsIgnoreCase("alloy")) {
 				Alloy alloy = AlloyManager.getAlloyById(mId); // Likewise for alloy
 				if (alloy != null && alloy.getData().hasXP()) {
-					String raw = alloy.getData().getXP();
-					xpPerUnit = Double.parseDouble(raw.split("\\(")[1].replace(")", ""));
-					skill = raw.split("\\(")[0]; // Assuming you store "agriculturist" here
+					raw = alloy.getData().getXP();
 				}
 			}
+			if (raw == null) continue;
 
-			if (skill != null && xpPerUnit > 0) {
+			// XP is paid after the item drops, so a bad value must be skipped rather than throw and leave the station uncleared.
+			Matcher m = XP_FORMAT.matcher(raw.trim());
+			if (!m.matches()) {
+				Bukkit.getLogger().warning("AC: Invalid xp value '" + raw + "', expected skill(amount)");
+				continue;
+			}
+			String skill = m.group(1);
+			double xpPerUnit = Double.parseDouble(m.group(2));
+
+			if (xpPerUnit > 0) {
 				double totalXP = xpPerUnit * amount;
 				xpBySkill.put(skill, xpBySkill.getOrDefault(skill, 0.0) + totalXP);
 			}
