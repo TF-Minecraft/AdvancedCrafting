@@ -17,6 +17,7 @@ import net.tfminecraft.advancedcrafting.database.AlloyDatabase;
 import net.tfminecraft.advancedcrafting.managers.AlloyManager;
 import net.tfminecraft.advancedcrafting.objects.crafting.hits.CraftingHit;
 import net.tfminecraft.advancedcrafting.objects.data.AlloyRecipe;
+import net.tfminecraft.advancedcrafting.objects.data.ScrapProvenance;
 import net.tfminecraft.advancedcrafting.objects.data.StatData;
 import net.tfminecraft.advancedcrafting.objects.ingredients.Ingredient;
 import net.tfminecraft.advancedcrafting.objects.stats.StatModifier;
@@ -86,6 +87,7 @@ public class AlloyForger {
 			String scrapId = Cache.scrap.split("\\.")[1].toUpperCase();
 			ItemManager itemManager = MMOItems.plugin.getItems();
 			ItemStack template = itemManager.getMMOItem(MMOItems.plugin.getTypes().get(scrapType),scrapId).newBuilder().build();
+			if(station.getBaseItem() != null) ScrapProvenance.applyTo(template, station.getBaseItem().getId());
 			loc.getWorld().dropItem(loc, template);
 			return null;
 		}
