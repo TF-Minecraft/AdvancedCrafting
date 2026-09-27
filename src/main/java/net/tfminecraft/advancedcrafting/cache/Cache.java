@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.tfminecraft.advancedcrafting.objects.data.PermissionNamespace;
+import net.tfminecraft.advancedcrafting.objects.ingredients.Ingredient;
 import net.tfminecraft.advancedcrafting.objects.ingredients.IngredientType;
 
 public class Cache {
@@ -17,6 +18,8 @@ public class Cache {
 	public static double alloyForgeBaseSuccess = 2.0;
 	public static double alloyForgeBonusPerSqrtValue = 4.0;
 	public static double alloyForgeMaxSuccess = 85.0;
+	/** Flat success% added when the ingredient (lowercase id) is the alloy base. Catalysts never get it. */
+	public static Map<String, Double> alloyForgeBaseBonus = new HashMap<>();
 
 	public static String brandingTool;
 
@@ -41,5 +44,10 @@ public class Cache {
 		if(base.getId().equalsIgnoreCase(type.getId())) return true;
 		if(!combinations.containsKey(base)) return true;
 		return combinations.get(base).contains(type);
+	}
+
+	public static double getAlloyForgeBaseBonus(Ingredient base) {
+		if(base == null) return 0.0;
+		return alloyForgeBaseBonus.getOrDefault(base.getId().toLowerCase(), 0.0);
 	}
 }
