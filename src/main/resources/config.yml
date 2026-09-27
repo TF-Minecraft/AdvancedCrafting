@@ -13,10 +13,13 @@ alloy-forge:
   max-success-percent: 85.0
   # Flat success% added when this ingredient is the base. Catalysts never get it; unlisted ingredients get 0.
   base-bonus-percent:
-    steel_ingot: 10.0
-    bronze_ingot: 15.0
-    abyssalite_ingot: 20.0
-    mythril_ingot: 25.0
+    steel_ingot: 8.0
+    bronze_ingot: 12.0
+    abyssalite_ingot: 16.0
+    mythril_ingot: 24.0
+    refined_maplewood: 8.0
+    refined_elderwood: 16.0
+    refined_demonwood: 24.0
 
 max-factor: 1.2
 
