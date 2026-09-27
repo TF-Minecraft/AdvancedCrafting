@@ -1,5 +1,7 @@
 package net.tfminecraft.advancedcrafting.objects.data;
 
+import java.util.Locale;
+
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -21,7 +23,7 @@ public final class ScrapProvenance {
 		if (meta == null) {
 			return;
 		}
-		meta.getPersistentDataContainer().set(PDCKeys.scrapBase(), PersistentDataType.STRING, baseId.toLowerCase());
+		meta.getPersistentDataContainer().set(PDCKeys.scrapBase(), PersistentDataType.STRING, baseId.toLowerCase(Locale.ROOT));
 		item.setItemMeta(meta);
 	}
 
