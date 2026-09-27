@@ -132,7 +132,8 @@ public class AlloyForger {
 	private boolean isScrap() {
 		double chance = Math.min(
 				Cache.alloyForgeMaxSuccess,
-				Cache.alloyForgeBaseSuccess + Cache.alloyForgeBonusPerSqrtValue * Math.sqrt(value));
+				Cache.alloyForgeBaseSuccess + Cache.alloyForgeBonusPerSqrtValue * Math.sqrt(value)
+						+ Cache.getAlloyForgeBaseBonus(station.getBaseItem()));
 		return ThreadLocalRandom.current().nextDouble(100.0) >= chance;
 	}
 	

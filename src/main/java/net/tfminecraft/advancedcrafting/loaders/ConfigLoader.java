@@ -40,6 +40,15 @@ public class ConfigLoader implements LoaderInterface{
 		if (Cache.alloyForgeMaxSuccess < Cache.alloyForgeBaseSuccess) {
 			Cache.alloyForgeMaxSuccess = Cache.alloyForgeBaseSuccess;
 		}
+		Cache.alloyForgeBaseBonus.clear();
+		if (config.isConfigurationSection("alloy-forge.base-bonus-percent")) {
+			for (String ingredientId : config.getConfigurationSection("alloy-forge.base-bonus-percent").getKeys(false)) {
+				double bonus = clampPercent(config.getDouble("alloy-forge.base-bonus-percent." + ingredientId, 0.0));
+				if (bonus > 0.0) {
+					Cache.alloyForgeBaseBonus.put(ingredientId.toLowerCase(), bonus);
+				}
+			}
+		}
 
 		Cache.brandingTool = config.getString("branding-tool", null);
 
