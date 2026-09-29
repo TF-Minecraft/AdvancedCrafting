@@ -112,6 +112,48 @@ class LoaderCoverageTest extends CoverageSupport {
   }
 
   @Test
+  void nullYamlIconsUseDefaultAndDoNotPreventLaterTemplatesLoading() throws Exception {
+    String content =
+        """
+        explicit-null:
+          name: Explicit null
+          icon: null
+        tilde-null:
+          name: Tilde null
+          icon: ~
+        empty-null:
+          name: Empty null
+          icon:
+        omitted:
+          name: Omitted icon
+        later-template:
+          name: Later template
+          icon: v.iron_sword
+        """;
+    // Use Bukkit's actual YAML parser and ConfigurationSection, not a mocked null getter.
+    var parsed = yaml(content);
+    for (String id : List.of("explicit-null", "tilde-null", "empty-null", "omitted")) {
+      var section = parsed.getConfigurationSection(id);
+      assertNotNull(section);
+      assertNull(section.getString("icon"));
+      assertEquals("v.paper", section.getString("icon", "v.paper"));
+    }
+    new StatTemplateLoader().load(config("nullable-icons.yml", content));
+    assertEquals(
+        List.of("explicit-null", "tilde-null", "empty-null", "omitted", "later-template"),
+        StatTemplateLoader.getAll().stream().map(template -> template.getId()).toList());
+    for (String id : List.of("explicit-null", "tilde-null", "empty-null", "omitted")) {
+      assertEquals(
+          org.bukkit.Material.PAPER, StatTemplateLoader.getByString(id).getIcon().getType());
+    }
+    assertEquals(
+        org.bukkit.Material.IRON_SWORD,
+        StatTemplateLoader.getByString("later-template").getIcon().getType());
+    verify(items.getCreator(), times(4)).getItemFromPath("v.paper");
+    verify(items.getCreator()).getItemFromPath("v.iron_sword");
+  }
+
+  @Test
   void configurationClampsPercentagesAndParsesOffsetsCombinationsAndPermissions() throws Exception {
     var loader = new ConfigLoader();
     loader.load(config("defaults.yml", ""));
