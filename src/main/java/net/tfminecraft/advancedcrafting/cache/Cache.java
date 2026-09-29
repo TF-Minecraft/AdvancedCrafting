@@ -18,6 +18,8 @@ public class Cache {
 	public static double alloyForgeBaseSuccess = 2.0;
 	public static double alloyForgeBonusPerSqrtValue = 4.0;
 	public static double alloyForgeMaxSuccess = 85.0;
+	public static double gemstoneStatBaseChance = 55.0;
+	public static double gemstoneStatBonusPerValue = 5.0;
 	/** Flat success% added when the ingredient (lowercase id) is the alloy base. Catalysts never get it. */
 	public static Map<String, Double> alloyForgeBaseBonus = new HashMap<>();
 

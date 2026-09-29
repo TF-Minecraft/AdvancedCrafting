@@ -37,6 +37,8 @@ public class ConfigLoader implements LoaderInterface{
 		Cache.alloyForgeBaseSuccess = clampPercent(config.getDouble("alloy-forge.base-success-percent", 2.0));
 		Cache.alloyForgeBonusPerSqrtValue = Math.max(0.0, config.getDouble("alloy-forge.success-bonus-per-sqrt-value", 4.0));
 		Cache.alloyForgeMaxSuccess = clampPercent(config.getDouble("alloy-forge.max-success-percent", 85.0));
+		Cache.gemstoneStatBaseChance = clampPercent(config.getDouble("alloy-forge.gem-stat-base-percent", 55.0));
+		Cache.gemstoneStatBonusPerValue = Math.max(0.0, config.getDouble("alloy-forge.gem-stat-bonus-per-value", 5.0));
 		if (Cache.alloyForgeMaxSuccess < Cache.alloyForgeBaseSuccess) {
 			Cache.alloyForgeMaxSuccess = Cache.alloyForgeBaseSuccess;
 		}
