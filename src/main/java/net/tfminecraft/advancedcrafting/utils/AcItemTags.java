@@ -35,7 +35,7 @@ public final class AcItemTags {
 
 	public static String getId(ItemStack item) {
 		Kind kind = getKind(item);
-		if (kind == null || !item.hasItemMeta()) {
+		if (kind == null) {
 			return null;
 		}
 		ItemMeta meta = item.getItemMeta();

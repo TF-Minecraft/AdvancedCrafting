@@ -15,6 +15,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import dev.lone.itemsadder.api.CustomStack;
@@ -104,6 +105,7 @@ public class AlloyManager implements Listener{
 	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void addIngredient(PlayerInteractEvent e) {
+		if (e.isCancelled() || e.getHand() != EquipmentSlot.HAND) return;
 		if(!e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) return;
 		Block b = e.getClickedBlock();
 		if (!isAlloyStation(b)) {
@@ -130,6 +132,10 @@ public class AlloyManager implements Listener{
 			return;
 		}
 		Ingredient ing = cs.getIngredient();
+		if (ing == null) {
+			p.sendMessage("§cThis ingredient is no longer configured.");
+			return;
+		}
 		if (!ProfessionPermissions.canUseIngredient(p, ing)) {
 			p.sendMessage(ProfessionPermissions.missingIngredientPermissionMessage(
 					ing.getIngredientData().getPermission()));
@@ -205,8 +211,13 @@ public class AlloyManager implements Listener{
 		String name = StringFormatter.formatHex(new String(s).replace("_", " "));
 		NamableAlloy alloy = naming.get(p);
 		String oldId = alloy.getAlloy().getId();
+		String id = StringFormatter.clean(s).toLowerCase(java.util.Locale.ROOT);
+		Alloy existing = getAlloyById(id);
+		if (existing != null && existing != alloy.getAlloy()) {
+			p.sendMessage("§cAn alloy with that name already exists.");
+			return;
+		}
 		removeAlloy(oldId);
-		String id = StringFormatter.clean(s);
 		alloy.getAlloy().setId(id);
 		alloy.getAlloy().setName(name);
 		ItemStack i = alloy.getItem();
@@ -232,6 +243,7 @@ public class AlloyManager implements Listener{
 	
 	@EventHandler
 	public void breakStation(BlockBreakEvent e) {
+		if (e.isCancelled()) return;
 		Block b = e.getBlock();
 		if (!isValidAlloyStation(b)) {
 			return;

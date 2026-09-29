@@ -45,7 +45,7 @@ public class IngredientManager implements Listener{
 		if(!isIngredientStation(b)) return;
 		Player p = e.getPlayer();
 		ItemStack i = p.getInventory().getItemInMainHand();
-		if(i == null || i.getType().isAir()) return;
+		if(i.getType().isAir()) return;
 
 		CraftStack cs = new CraftStack(i);
 		StatData source = resolveStatData(cs, i);
@@ -55,7 +55,6 @@ public class IngredientManager implements Listener{
 
 		if(!cs.isIngredient() && !cs.isAlloy()) {
 			Ingredient ing = getFromItem(i);
-			if(ing == null) return;
 			ing.buildTo(i);
 		}
 

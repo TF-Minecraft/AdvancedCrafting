@@ -32,7 +32,7 @@ public class StatTemplate {
 		id = key;
 		name = StringFormatter.formatHex(config.getString("name", key));
 		iconPath = config.getString("icon", "v.paper");
-		if (iconPath == null || !iconPath.contains(".")) {
+		if (!iconPath.contains(".")) {
 			Bukkit.getLogger().warning("AC: Stat template " + key
 					+ " icon must be a TLibs path (e.g. v.iron_sword), got: " + iconPath);
 		}

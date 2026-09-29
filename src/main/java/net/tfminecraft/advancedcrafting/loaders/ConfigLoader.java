@@ -121,6 +121,9 @@ public class ConfigLoader implements LoaderInterface{
 		if (entry == null || entry.isBlank() || !entry.contains("(")) {
 			return;
 		}
+		if (entry.lastIndexOf(')') < entry.indexOf('(')) {
+			return;
+		}
 		String statId = entry.substring(0, entry.indexOf('(')).trim().toLowerCase();
 		String amountPart = entry.substring(entry.indexOf('(') + 1, entry.lastIndexOf(')')).trim();
 		try {

@@ -90,6 +90,14 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      - name: Upload code coverage reports
+        if: ${{ !cancelled() && hashFiles('target/site/jacoco/jacoco.xml') != '' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: code-coverage-${{ github.run_id }}-${{ github.run_attempt }}
+          path: target/site/jacoco/
+          if-no-files-found: error
+
   publish:
     needs: build
     runs-on: ubuntu-24.04

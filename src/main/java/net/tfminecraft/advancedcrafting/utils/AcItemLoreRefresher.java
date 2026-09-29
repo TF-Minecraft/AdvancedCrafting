@@ -50,7 +50,7 @@ public final class AcItemLoreRefresher {
 		}
 		Kind kind = AcItemTags.getKind(item);
 		String id = AcItemTags.getId(item);
-		if (kind == null || id == null) {
+		if (kind == null) {
 			return RefreshResult.unchanged();
 		}
 
@@ -107,7 +107,7 @@ public final class AcItemLoreRefresher {
 	private static int getLiveRevision(ItemStack item) {
 		Kind kind = AcItemTags.getKind(item);
 		String id = AcItemTags.getId(item);
-		if (kind == null || id == null) {
+		if (kind == null) {
 			return 0;
 		}
 		if (kind == Kind.INGREDIENT) {

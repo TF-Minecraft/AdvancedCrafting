@@ -54,7 +54,7 @@ public class AlloyRecipeStore {
 	public void upsert(AlloyRecipe recipe, String resultId) {
 		File indexFile = recipe.resolveIndexFile(root);
 		File parent = indexFile.getParentFile();
-		if (parent != null && !parent.exists()) {
+		if (!parent.exists()) {
 			parent.mkdirs();
 		}
 		try (PrintWriter writer = new PrintWriter(indexFile, StandardCharsets.UTF_8)) {
@@ -122,7 +122,7 @@ public class AlloyRecipeStore {
 		Map<String, String> map = new LinkedHashMap<>();
 		for (File indexFile : listIndexFiles()) {
 			IndexEntry entry = readIndexEntry(indexFile);
-			if (entry == null || entry.comboKey == null || entry.resultId == null) {
+			if (entry == null || entry.comboKey == null) {
 				continue;
 			}
 			map.put(entry.comboKey, entry.resultId);
@@ -199,10 +199,10 @@ public class AlloyRecipeStore {
 		if (fileBase.equals(baseId)) {
 			return new AlloyRecipe(baseId, java.util.List.of());
 		}
-		String catalystPart = fileBase.substring(baseId.length() + 2);
 		if (!fileBase.startsWith(baseId + "__")) {
 			return null;
 		}
+		String catalystPart = fileBase.substring(baseId.length() + 2);
 		return new AlloyRecipe(baseId, java.util.Arrays.asList(catalystPart.split("__")));
 	}
 

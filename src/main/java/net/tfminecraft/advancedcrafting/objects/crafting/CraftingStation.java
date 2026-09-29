@@ -190,6 +190,7 @@ public class CraftingStation {
 		int materialTier = 0;
 		if(c.isIngredient()) {
 			Ingredient ing = c.getIngredient();
+			if (ing == null) return StationFeedback.NOT_INGREDIENT;
 			if (!ProfessionPermissions.canUseIngredient(p, ing)) {
 				p.sendMessage(ProfessionPermissions.missingIngredientPermissionMessage(
 						ing.getIngredientData().getPermission()));
@@ -202,6 +203,7 @@ public class CraftingStation {
 		}
 		if(c.isAlloy()) {
 			Alloy a = c.getAlloy();
+			if (a == null) return StationFeedback.NOT_INGREDIENT;
 			key = "alloy."+a.getId();
 			type = a.getData().getType();
 			mergeHits = a.getData().getHits();
@@ -352,7 +354,7 @@ public class CraftingStation {
 			double d = hits.get(h).getPercentage();
 			if(d >= 200.0) continue;
 			if(d <= 100.0) amount = amount+d;
-			if(d > 100.0 && d <= 200.0) amount = amount+(200.0-d);
+			if(d > 100.0) amount = amount+(200.0-d);
 		}
 		return Math.round((amount/counter));
 	}
@@ -413,6 +415,8 @@ public class CraftingStation {
 			Alloy a = AlloyManager.getAlloyById(mId);
 			name = a.getName();
 			scheme = a.getData().getModelScheme();
+		} else {
+			return StationFeedback.NOT_INGREDIENT;
 		}
 
 		// ✅ New logic starts here — replaces the old itemName.setString(...) line
@@ -566,6 +570,9 @@ public class CraftingStation {
 			} else if(type.equalsIgnoreCase("alloy")) {
 				Alloy a = AlloyManager.getAlloyById(mId);
 				i = a.build();
+			} else {
+				Bukkit.getLogger().warning("AC: Cannot refund unknown material kind: " + s);
+				continue;
 			}
 			i.setAmount(currentMaterials.get(s));
 			loc.getWorld().dropItem(loc, i);
@@ -583,6 +590,9 @@ public class CraftingStation {
 			} else if(type.equalsIgnoreCase("alloy")) {
 				Alloy a = AlloyManager.getAlloyById(mId);
 				i = a.build();
+			} else {
+				Bukkit.getLogger().warning("AC: Cannot refund unknown material kind: " + s);
+				continue;
 			}
 			i.setAmount(currentMaterials.get(s));
 			loc.getWorld().dropItem(loc.clone().add(0, offset, 0), i);

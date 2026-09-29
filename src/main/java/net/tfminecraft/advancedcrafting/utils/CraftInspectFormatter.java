@@ -32,10 +32,6 @@ public final class CraftInspectFormatter {
 			return;
 		}
 		CraftProvenance provenance = cs.getProvenance();
-		if (provenance == null) {
-			sender.sendMessage("§cNo provenance data on this item.");
-			return;
-		}
 
 		sender.sendMessage("§e--- Craft inspect ---");
 		String recipeId = provenance.getRecipeId();

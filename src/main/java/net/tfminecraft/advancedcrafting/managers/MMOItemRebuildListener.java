@@ -29,6 +29,7 @@ public class MMOItemRebuildListener implements Listener {
 			loreIndex = readTierLoreStart(event.getOldItem());
 		}
 		if (loreIndex != null) {
+			CraftTierLore.applyPdc(result, loreIndex, tier);
 			CraftTierLore.refreshTierLine(result, tier);
 		} else {
 			CraftTierLore.applyTierLine(result, tier);
