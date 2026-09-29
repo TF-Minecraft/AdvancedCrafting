@@ -11,6 +11,9 @@ alloy-forge:
   base-success-percent: 2.0
   success-bonus-per-sqrt-value: 4.0
   max-success-percent: 85.0
+  # Gemstone catalyst stat roll, before the total-value merge roll. Defaults also apply to existing configs without these keys.
+  gem-stat-base-percent: 55.0
+  gem-stat-bonus-per-value: 5.0
   # Flat success% added when this ingredient is the base. Catalysts never get it; unlisted ingredients get 0.
   base-bonus-percent:
     steel_ingot: 8.0

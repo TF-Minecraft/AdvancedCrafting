@@ -24,6 +24,7 @@ import net.tfminecraft.advancedcrafting.objects.stats.StatModifier;
 import net.tfminecraft.advancedcrafting.lifecycle.CraftLifecycle;
 
 public class AlloyForger {
+	private static final String GEMSTONE_PATH_PREFIX = "m.gemstones.";
 	private int value;
 	private AlloyStation station;
 	private StatData stats;
@@ -181,11 +182,23 @@ public class AlloyForger {
 		}
 		List<StatModifier> merge = new ArrayList<>();
 		for(Ingredient i : station.getCatalysts()) {
+			// Gemstones span metal and crystal ingredient types; their item paths identify them consistently.
+			boolean gemstone = isGemstonePath(i.getPath());
 			for(StatModifier m : i.getIngredientData().getStatData().getModifiers()) {
 				if(baseItem.getIngredientData().statIsProtected(m)) continue;
-				if(base.containsKey(m.getType())) {
-					StatModifier n = new StatModifier(m.getType(), m.getAmount()-base.get(m.getType()).getAmount());
-					merge.add(n);
+				StatModifier baseModifier = base.get(m.getType());
+				if(gemstone) {
+					if(Math.random()*100 >= gemstoneInheritanceChance(i.getIngredientData().getValue())) continue;
+					merge.add(modifierForMerge(m, baseModifier, true));
+					if(baseModifier == null) {
+						StatModifier limit = m.copy();
+						limit.setAmount(limit.getAmount()*Cache.maxFactor);
+						// A later, weaker gem with the same stat must not lower an earlier gem's cap.
+						max.merge(m.getType(), limit, (current, candidate) ->
+								current.getAmount() >= candidate.getAmount() ? current : candidate);
+					}
+				} else if(baseModifier != null) {
+					merge.add(modifierForMerge(m, baseModifier, false));
 				} else {
 					if(Math.random()*100 < (20+i.getIngredientData().getValue()*3)) {
 						merge.add(m.copy());
@@ -212,6 +225,20 @@ public class AlloyForger {
 				}
 			}
 		}
+	}
+
+	static boolean isGemstonePath(String path) {
+		return path != null && path.regionMatches(true, 0, GEMSTONE_PATH_PREFIX, 0, GEMSTONE_PATH_PREFIX.length());
+	}
+
+	static double gemstoneInheritanceChance(int ingredientValue) {
+		return Math.max(0.0, Math.min(100.0,
+				Cache.gemstoneStatBaseChance + Cache.gemstoneStatBonusPerValue * ingredientValue));
+	}
+
+	static StatModifier modifierForMerge(StatModifier catalyst, StatModifier base, boolean gemstone) {
+		if(gemstone || base == null) return catalyst.copy();
+		return new StatModifier(catalyst.getType(), catalyst.getAmount() - base.getAmount());
 	}
 	
 	private void merge(HashMap<String, StatModifier> base, HashMap<String, StatModifier> max, List<StatModifier> list) {
