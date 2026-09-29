@@ -6,6 +6,8 @@ import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -19,6 +21,7 @@ import org.json.simple.parser.JSONParser;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import net.tfminecraft.advancedcrafting.AdvancedCrafting;
 import net.tfminecraft.advancedcrafting.loaders.HitLoader;
 import net.tfminecraft.advancedcrafting.loaders.RecipeLoader;
 import net.tfminecraft.advancedcrafting.objects.crafting.CraftingRecipe;
@@ -27,15 +30,20 @@ import net.tfminecraft.advancedcrafting.objects.crafting.hits.CraftingHit;
 
 public class Database {
 	private JSONObject json; // org.json.simple
+    private final Set<File> rejectedStationFiles = new HashSet<>();
     JSONParser parser = new JSONParser();
     public HashMap<Location, CraftingStation> loadStations() {
     	HashMap<Location, CraftingStation> map = new HashMap<>();
-    	File folder = new File("plugins/AdvancedCrafting/data/stations");
-    	for(final File file : folder.listFiles()) {
+        File folder = new File(AdvancedCrafting.plugin.getDataFolder(), "data/stations");
+        File[] files = folder.listFiles();
+        if (files == null) return map;
+        for(final File file : files) {
     		if(!file.isDirectory()) {
     			try {
     				json = (JSONObject) parser.parse(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-    				Location loc = new Location(Bukkit.getServer().getWorld((String) json.get("world")), (Double) json.get("xPos"),(Double) json.get("yPos"),(Double) json.get("zPos"));
+                    org.bukkit.World world = Bukkit.getServer().getWorld((String) json.get("world"));
+                if (world == null) throw new IllegalStateException("Station world is not loaded: " + json.get("world"));
+                Location loc = new Location(world, (Double) json.get("xPos"),(Double) json.get("yPos"),(Double) json.get("zPos"));
     				CraftingRecipe r = RecipeLoader.getByString((String) json.get("recipe"));
     				HashMap<String, Integer> materials = new HashMap<>();
     				int i = 0;
@@ -58,8 +66,10 @@ public class Database {
     					i++;
     				}
     				map.put(loc, new CraftingStation(loc, r, materials, hits));
+                rejectedStationFiles.remove(file);
     				
     			} catch (Exception ex) {
+                rejectedStationFiles.add(file);
     				ex.printStackTrace();
     			}
     		}
@@ -67,9 +77,11 @@ public class Database {
     	return map;
 	}
     public void clear() {
-    	File folder = new File("plugins/AdvancedCrafting/data/stations");
-    	for(final File file : folder.listFiles()) {
-    		if(!file.isDirectory()) {
+        File folder = new File(AdvancedCrafting.plugin.getDataFolder(), "data/stations");
+        File[] files = folder.listFiles();
+        if (files == null) return;
+        for(final File file : files) {
+            if(!file.isDirectory() && !rejectedStationFiles.contains(file)) {
     			file.delete();
     		}
     	}
@@ -78,7 +90,12 @@ public class Database {
 	public void saveStation(CraftingStation s) {
 		if(!s.hasRecipe()) return;
 		try {
-			File file = new File("plugins/AdvancedCrafting/data/stations",UUID.randomUUID().toString()+".json");
+            File folder = new File(AdvancedCrafting.plugin.getDataFolder(), "data/stations");
+            folder.mkdirs();
+            File file = new File(folder, UUID.randomUUID().toString()+".json");
+			while (rejectedStationFiles.contains(file)) {
+				file = new File(folder, UUID.randomUUID().toString()+".json");
+			}
 			if(file.exists() == true) {
 				file.delete();
 			}
@@ -90,7 +107,7 @@ public class Database {
         	pw.close();
             HashMap<String, Object> defaults = new HashMap<String, Object>();
         	json = (JSONObject) parser.parse(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-        	defaults.put("world", s.getLoc().getWorld().toString().replace("CraftWorld{name=", "").replace("}", ""));
+            defaults.put("world", s.getLoc().getWorld().getName());
         	defaults.put("xPos", s.getLoc().getX());
         	defaults.put("yPos", s.getLoc().getY());
         	defaults.put("zPos", s.getLoc().getZ());

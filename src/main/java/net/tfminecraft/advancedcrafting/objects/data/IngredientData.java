@@ -119,7 +119,7 @@ public class IngredientData {
 	}
 
 	public boolean hasPermission() {
-		return permission != null && !permission.isBlank();
+		return permission != null;
 	}
 
 	public IngredientType getType() {

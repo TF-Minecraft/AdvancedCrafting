@@ -8,10 +8,10 @@ depend: [TLibs, MMOCore, MMOItems, MythicLib]
 
 commands:
   ac:
-    useage: /<command>
+    usage: /<command>
     description: AdvancedCrafting Command
   alloy:
-    useage: /<command>
+    usage: /<command>
     description: Alloy Command
 
 permissions:

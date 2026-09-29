@@ -96,6 +96,9 @@ public class InventoryManager {
 			if (!StatTemplateMath.hasOverlap(source, template)) {
 				continue;
 			}
+			if (slot >= i.getSize()) {
+				break;
+			}
 			i.setItem(slot, getTemplatePreviewItem(source, template));
 			slot++;
 		}
@@ -117,7 +120,8 @@ public class InventoryManager {
 	@SuppressWarnings("deprecation")
 	private ItemStack getTemplatePreviewItem(StatData source, StatTemplate template) {
 		ItemStack icon = template.getIcon();
-		ItemStack item = icon != null ? icon.clone() : new ItemStack(Material.BARRIER, 1);
+		ItemStack item = icon != null && !icon.getType().isAir()
+				? icon.clone() : new ItemStack(Material.BARRIER, 1);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(template.getName());
 		List<String> lore = new ArrayList<>();

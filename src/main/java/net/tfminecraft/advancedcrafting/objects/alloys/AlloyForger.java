@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.DoubleSupplier;
 import java.util.jar.Attributes.Name;
 
 import org.bukkit.Location;
@@ -28,12 +29,18 @@ public class AlloyForger {
 	private int value;
 	private AlloyStation station;
 	private StatData stats;
+	private final DoubleSupplier random;
 	
 	private HashMap<CraftingHit, Integer> hits = new HashMap<>();
 	
 	public AlloyForger(AlloyStation station) {
+		this(station, Math::random);
+	}
+
+	AlloyForger(AlloyStation station, DoubleSupplier random) {
 		this.station = station;
 		this.value = station.getTotalValue();
+		this.random = random;
 	}
 
 	public NamableAlloy forge(Player p) {
@@ -75,7 +82,7 @@ public class AlloyForger {
 				a = db.loadAlloy(result);
 				if(a == null) {
 					db.deleteRecipe(station);
-					return forge(p, i);
+					return forge(p, i + 1);
 				} else {
 					AlloyManager.addAlloy(a);
 				}
@@ -103,7 +110,7 @@ public class AlloyForger {
 		for(Ingredient i : station.getIngredients()) {
 			for(CraftingHit h : i.getIngredientData().getHits().keySet()) {
 				if(!hits.containsKey(h)) {
-					int r = (int) (Math.floor(Math.random()*3)+1);
+					int r = (int) (Math.floor(random.getAsDouble()*3)+1);
 					hits.put(h, r);
 				}
 			}
@@ -127,7 +134,7 @@ public class AlloyForger {
 			if(current < min) min = current;
 			if(current > max) max = current;
 		}
-		double randomValue = min + (Math.random() * (max - min));
+		double randomValue = min + (random.getAsDouble() * (max - min));
 		randomValue = Math.round(randomValue*100)/100.0;
 		return type+"("+randomValue+")";
 	}
@@ -151,17 +158,17 @@ public class AlloyForger {
 				backups.add(name);
 			}
 		}
-		int i = (int) Math.round(Math.random()*(names.size()-1));
+		int i = (int) Math.round(random.getAsDouble()*(names.size()-1));
 		String name = names.get(i);
 		String id = name.replace(" ", "_").toLowerCase();
 		while(AlloyManager.getAlloyById(id) != null && names.size() > 0) {
-			i = (int) Math.round(Math.random()*(names.size()-1));
+			i = (int) Math.round(random.getAsDouble()*(names.size()-1));
 			name = names.get(i);
 			id = new String(name.replace(" ", "_").toLowerCase());
 			names.remove(i);
 		}
 		while(AlloyManager.getAlloyById(id) != null && backups.size() > 0) {
-			i = (int) Math.round(Math.random()*(backups.size()-1));
+			i = (int) Math.round(random.getAsDouble()*(backups.size()-1));
 			name = backups.get(i);
 			id = new String(name.replace(" ", "_").toLowerCase());
 			backups.remove(i);
@@ -188,7 +195,7 @@ public class AlloyForger {
 				if(baseItem.getIngredientData().statIsProtected(m)) continue;
 				StatModifier baseModifier = base.get(m.getType());
 				if(gemstone) {
-					if(Math.random()*100 >= gemstoneInheritanceChance(i.getIngredientData().getValue())) continue;
+					if(random.getAsDouble()*100 >= gemstoneInheritanceChance(i.getIngredientData().getValue())) continue;
 					merge.add(modifierForMerge(m, baseModifier, true));
 					if(baseModifier == null) {
 						StatModifier limit = m.copy();
@@ -200,7 +207,7 @@ public class AlloyForger {
 				} else if(baseModifier != null) {
 					merge.add(modifierForMerge(m, baseModifier, false));
 				} else {
-					if(Math.random()*100 < (20+i.getIngredientData().getValue()*3)) {
+					if(random.getAsDouble()*100 < (20+i.getIngredientData().getValue()*3)) {
 						merge.add(m.copy());
 						StatModifier copy = m.copy();
 						copy.setAmount(copy.getAmount()*Cache.maxFactor);
@@ -220,7 +227,7 @@ public class AlloyForger {
 			for(StatModifier m : stats.getModifiers()) {
 				if(!o.getType().equalsIgnoreCase(m.getType())) continue;
 				if(o.getAmount() == m.getAmount()) {
-					double percent = 0.9 + (Math.random() * 0.2); // Between 0.9 and 1.1
+					double percent = 0.9 + (random.getAsDouble() * 0.2); // Between 0.9 and 1.1
 					m.setAmount(Math.round(m.getAmount() * percent * 100.0) / 100.0);
 				}
 			}
@@ -244,14 +251,14 @@ public class AlloyForger {
 	private void merge(HashMap<String, StatModifier> base, HashMap<String, StatModifier> max, List<StatModifier> list) {
 		for(StatModifier m : list) {
 			if(m.getAmount() < 0) {
-				if(Math.floor(Math.random()*value) < 8) {
+				if(Math.floor(random.getAsDouble()*value) < 8) {
 					if(base.containsKey(m.getType())) {
 						base.get(m.getType()).modify(randomize(m.getType(), m.getAmount()));
 						continue;
 					}
 				}
 			}
-			if(Math.floor(Math.random()*100)+value > 25) {
+			if(Math.floor(random.getAsDouble()*100)+value > 25) {
 				if(base.containsKey(m.getType())) {
 					base.get(m.getType()).modify(randomize(m.getType(), m.getAmount()));
 					continue;
@@ -271,14 +278,14 @@ public class AlloyForger {
 	private double randomize(String t, double d) {
 		double multiplier = 0.0;
 		if(d < 0) {
-			if(Math.floor(Math.random()*100)+value > 65) {
+			if(Math.floor(random.getAsDouble()*100)+value > 65) {
 				d = d/2*-1;
 			}
 		}
 		if(d > 0) {
-			multiplier = (Math.floor(Math.random()*100)+10+(value*2))/100;
+			multiplier = (Math.floor(random.getAsDouble()*100)+10+(value*2))/100;
 		} else {
-			multiplier = (Math.floor(Math.random()*100)-(value*2))/100;
+			multiplier = (Math.floor(random.getAsDouble()*100)-(value*2))/100;
 		}
 		if(multiplier > 1.0) multiplier = 1.0;
 		if(multiplier < 0.0) multiplier = 0.0;

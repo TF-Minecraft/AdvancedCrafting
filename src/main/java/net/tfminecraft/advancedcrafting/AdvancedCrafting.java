@@ -146,6 +146,8 @@ public class AdvancedCrafting extends JavaPlugin{
 		if(!subFolder.exists()) subFolder.mkdir();
 		subFolder = new File(getDataFolder(), "colour-schemes");
 		if(!subFolder.exists()) subFolder.mkdir();
+		subFolder = new File(getDataFolder(), "model-schemes");
+		if(!subFolder.exists()) subFolder.mkdir();
 		subFolder = new File(getDataFolder(), "recipes");
 		if(!subFolder.exists()) subFolder.mkdir();
 		subFolder = new File(getDataFolder(), "data");

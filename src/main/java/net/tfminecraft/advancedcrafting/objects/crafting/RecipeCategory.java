@@ -16,10 +16,7 @@ public class RecipeCategory {
 	public RecipeCategory(String key, ConfigurationSection config) {
 		this.id = key;
 		this.name = StringFormatter.formatHex(config.getString("name"));
-		if(config.contains("permission")) {
-			this.permission = config.getString("permission");
-		}
-		this.permission = "none";
+		this.permission = config.getString("permission", "none");
 	}
 
 	public String getId() {

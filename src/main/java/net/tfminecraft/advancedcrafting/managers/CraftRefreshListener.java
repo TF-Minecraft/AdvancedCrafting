@@ -99,14 +99,13 @@ public class CraftRefreshListener implements Listener {
 	}
 
 	private void setArmorPiece(Player player, ArmorType type, ItemStack item) {
-		switch (type) {
-			case HELMET -> player.getInventory().setHelmet(item);
-			case CHESTPLATE -> player.getInventory().setChestplate(item);
-			case LEGGINGS -> player.getInventory().setLeggings(item);
-			case BOOTS -> player.getInventory().setBoots(item);
-			default -> {
-			}
-		}
+		java.util.function.Consumer<ItemStack> writer = switch (type) {
+			case HELMET -> player.getInventory()::setHelmet;
+			case CHESTPLATE -> player.getInventory()::setChestplate;
+			case LEGGINGS -> player.getInventory()::setLeggings;
+			case BOOTS -> player.getInventory()::setBoots;
+		};
+		writer.accept(item);
 	}
 
 	@FunctionalInterface

@@ -132,12 +132,12 @@ public class CraftingManager implements Listener{
 
 	public void setAdminCraftPending(Player player, double qualityPercent) {
 		long expiresAt = System.currentTimeMillis() + 30_000L;
-		adminCraftPending.put(player.getUniqueId(), new AdminCraftPending(qualityPercent, expiresAt));
+		AdminCraftPending pending = new AdminCraftPending(qualityPercent, expiresAt);
+		adminCraftPending.put(player.getUniqueId(), pending);
 		new BukkitRunnable() {
 			@Override
 			public void run() {
-				AdminCraftPending pending = adminCraftPending.remove(player.getUniqueId());
-				if (pending != null && player.isOnline()) {
+				if (adminCraftPending.remove(player.getUniqueId(), pending) && player.isOnline()) {
 					player.sendMessage("§cAdmin craft timed out. Run §f/ac craft <percent>§c again.");
 				}
 			}
@@ -215,17 +215,7 @@ public class CraftingManager implements Listener{
 				inv.categoryView(p);
 				return;
 			}
-			if(Cache.brandingTool != null) {
-				if(i == null) return;
-				if(i.getType().equals(Material.AIR)) return;
-				if(api.getChecker().checkItemWithPath(i, Cache.brandingTool) && !station.hasRecipe()) {
-					currentStation.put(p, station);
-					InventoryManager inv = new InventoryManager();
-					inv.categoryView(p);
-					return;
-				}
-			}
-			if(i == null) return;
+
 			if(i.getType().equals(Material.AIR)) return;
 			StationFeedback f = station.addMaterial(p, i);
 			switch (f) {
@@ -317,7 +307,7 @@ public class CraftingManager implements Listener{
 			e.setCancelled(true);
 		}
 		if (!hasStation(b.getLocation())) return;
-		if (i == null || i.getType().equals(Material.AIR)) return;
+		if (i.getType().equals(Material.AIR)) return;
 
 		CraftingStation station = get(b.getLocation());
 
@@ -439,6 +429,7 @@ public class CraftingManager implements Listener{
 	
 	@EventHandler(priority = EventPriority.HIGH)
 	public void breakStation(BlockBreakEvent e) {
+		if (e.isCancelled()) return;
 		Block b = e.getBlock();
 		Player p = e.getPlayer();
 		if (p != null

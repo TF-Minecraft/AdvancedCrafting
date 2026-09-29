@@ -34,10 +34,7 @@ public final class MajorityTierResolver {
 		if (!max.isEmpty()) {
 			return max;
 		}
-		for (String key : materials.keySet()) {
-			return key;
-		}
-		return "";
+		return materials.keySet().iterator().next();
 	}
 
 	public static int resolveTier(CraftingRecipe recipe, Map<String, Integer> materials) {

@@ -39,3 +39,23 @@ Copyright (c) 2026 TF-Minecraft contributors.
 TF-Minecraft-authored material in this repository is licensed under the
 [Artistic License 2.0](LICENSE). Third-party dependencies and bundled material
 retain their own licenses.
+
+## Tests and coverage
+
+Use Java 21 and Maven 3.9. Install the pinned plugin dependencies with the
+repository's existing `.github/scripts/prepare-release.sh` workflow, then run:
+
+```sh
+mvn -B --no-transfer-progress clean verify -DskipTests=false -Dmaven.test.skip=false
+```
+
+The JUnit 5 suite uses MockBukkit for server state and Mockito at external plugin
+boundaries. JaCoCo measures every production class; no production packages,
+classes, or methods are excluded. `verify` requires **100% instruction, branch,
+and line coverage**, and fails when any counter falls below that threshold.
+The HTML report is `target/site/jacoco/index.html`; XML/CSV are alongside it.
+Build and release CI upload the coverage report as an artifact, including failed
+runs when a report was generated.
+
+Coverage proves the exercised Java behavior. It does not replace a live Paper
+server integration check with the pinned ItemsAdder/MMOItems/TLibs versions.

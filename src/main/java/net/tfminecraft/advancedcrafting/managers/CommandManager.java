@@ -137,6 +137,10 @@ public class CommandManager implements Listener, CommandExecutor, TabCompleter {
 				p.sendMessage("§cInvalid quality percent. Usage: /ac craft <percent>");
 				return true;
 			}
+			if (!Double.isFinite(percent)) {
+				p.sendMessage("§cInvalid quality percent. Usage: /ac craft <percent>");
+				return true;
+			}
 			if (percent < 0) {
 				percent = 0;
 			}
