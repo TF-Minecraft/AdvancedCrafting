@@ -15,6 +15,7 @@ class ScrapInputsTest extends CoverageSupport {
   void inputsRoundTripQuantitiesAndLegacyScrapReturnsOnlyItsBase() {
     var scrap = new ItemStack(Material.IRON_NUGGET);
     assertTrue(ScrapProvenance.readInputs(null).isEmpty());
+    assertTrue(ScrapProvenance.readInputs(org.mockito.Mockito.mock(ItemStack.class)).isEmpty());
     assertTrue(ScrapProvenance.readInputs(scrap).isEmpty());
     scrap.setItemMeta(scrap.getItemMeta());
     var meta = scrap.getItemMeta();
