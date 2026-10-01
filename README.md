@@ -59,3 +59,5 @@ runs when a report was generated.
 
 Coverage proves the exercised Java behavior. It does not replace a live Paper
 server integration check with the pinned ItemsAdder/MMOItems/TLibs versions.
+
+Failed alloy forges record consumed ingredient quantities on scrap for Recycler recovery. Older scrap retains only its recorded base; missing catalyst history cannot be recovered.

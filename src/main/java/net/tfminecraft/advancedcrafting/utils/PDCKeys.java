@@ -28,6 +28,10 @@ public final class PDCKeys {
 		return new NamespacedKey(AdvancedCrafting.plugin, "ac_scrap_base");
 	}
 
+	public static NamespacedKey scrapInputs() {
+		return new NamespacedKey(AdvancedCrafting.plugin, "ac_scrap_inputs");
+	}
+
 	public static NamespacedKey ingredientId() {
 		return new NamespacedKey(AdvancedCrafting.plugin, "ac_ingredient_id");
 	}

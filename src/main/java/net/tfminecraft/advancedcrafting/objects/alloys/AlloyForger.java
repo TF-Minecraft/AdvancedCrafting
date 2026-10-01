@@ -96,6 +96,11 @@ public class AlloyForger {
 			ItemManager itemManager = MMOItems.plugin.getItems();
 			ItemStack template = itemManager.getMMOItem(MMOItems.plugin.getTypes().get(scrapType),scrapId).newBuilder().build();
 			if(station.getBaseItem() != null) ScrapProvenance.applyTo(template, station.getBaseItem().getId());
+			var consumed = new java.util.LinkedHashMap<String, Integer>();
+			for (Ingredient ingredient : station.getIngredients()) {
+				consumed.merge(ingredient.getId(), 1, Integer::sum);
+			}
+			ScrapProvenance.applyInputs(template, consumed);
 			loc.getWorld().dropItem(loc, template);
 			return null;
 		}
