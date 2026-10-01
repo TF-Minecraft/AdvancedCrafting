@@ -78,6 +78,8 @@ class ForgerCoverageTest extends CoverageSupport {
     try (var dbs = mockConstruction(AlloyDatabase.class)) {
       assertNull(forger(station, 0).forge(p));
       verify(dbs.constructed().getFirst()).saveRecipe(station, "scrap");
+      var dropped = loc.getWorld().getEntitiesByClass(org.bukkit.entity.Item.class).iterator().next().getItemStack();
+      assertEquals(Map.of("iron", 1, "copper", 1), ScrapProvenance.readInputs(dropped));
     }
     try (var dbs =
         mockConstruction(
