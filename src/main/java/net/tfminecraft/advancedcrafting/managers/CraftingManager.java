@@ -220,15 +220,15 @@ public class CraftingManager implements Listener{
 			StationFeedback f = station.addMaterial(p, i);
 			switch (f) {
 				case NOT_INGREDIENT:
-					p.sendMessage("§cThis item cannot be used for crafting");
+					p.sendMessage("§cThat is not a material you can work");
 					p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1f, 1f);
 					break;
 				case WRONG_TYPE:
-					p.sendMessage("§cThis item type is not needed for the recipe");
+					p.sendMessage("§cThis recipe does not call for that material");
 					p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1f, 1f);
 					break;
 				case CAPACITY:
-					p.sendMessage("§cYou already have the needed amount of this type");
+					p.sendMessage("§cThe piece already has enough of that material");
 					p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 0.5f);
 					break;
 				case NO_PERMS:
@@ -354,7 +354,7 @@ public class CraftingManager implements Listener{
 				p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1f, 1f);
 				break;
 			case WRONG_TYPE:
-				p.sendMessage("§cThis item cannot be used for crafting hits");
+				p.sendMessage("§cYou cannot work the piece with that tool");
 				p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1f, 1f);
 				break;
 			case NONE:

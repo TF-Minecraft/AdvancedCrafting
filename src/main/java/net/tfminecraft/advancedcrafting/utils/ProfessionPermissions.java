@@ -123,14 +123,14 @@ public final class ProfessionPermissions {
 	}
 
 	public static String missingIngredientPermissionMessage(String permissionKey) {
-		return "§cYou need the " + getDisplayName(permissionKey) + " permission to use this material.";
+		return "§cYou are not skilled enough in " + getDisplayName(permissionKey) + " to work this material.";
 	}
 
 	public static String missingNamespaceMessage(String namespace) {
-		return "§cYou need at least one of the " + getDisplayName(namespace) + " permissions.";
+		return "§cYou are not skilled enough in " + getDisplayName(namespace) + " to make this.";
 	}
 
 	public static String missingExactTierMessage(String namespace, int tier) {
-		return "§cYou need the " + getDisplayName(namespace) + " tier " + tier + " permission to use this material.";
+		return "§cYour " + getDisplayName(namespace) + " training does not extend to tier " + tier + " materials.";
 	}
 }
