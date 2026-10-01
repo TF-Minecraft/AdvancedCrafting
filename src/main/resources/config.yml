@@ -83,11 +83,11 @@ permission-namespaces:
   ingredient:
     display: "#e6a817Ingredient"
   iron_smith:
-    display: "#e6a817Iron_Smith"
+    display: "#e6a817Iron Smithing"
   steel_smith:
-    display: "#e6a817Steel_Smith"
+    display: "#e6a817Steel Smithing"
   abyssalite_smith:
-    display: "#e6a817Abyssalite_Smith"
+    display: "#e6a817Abyssalite Smithing"
   mythril_smith:
-    display: "#e6a817Mythril_Smith"
+    display: "#e6a817Mythril Smithing"
 

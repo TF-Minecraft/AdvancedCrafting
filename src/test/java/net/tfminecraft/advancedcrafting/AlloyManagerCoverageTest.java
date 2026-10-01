@@ -83,7 +83,7 @@ class AlloyManagerCoverageTest extends CoverageSupport {
     assertFalse(m.hasStation(b.getLocation()));
     clearCooldown(m);
     m.addIngredient(event(p, b));
-    assertTrue(p.nextMessage().contains("permission"));
+    assertTrue(p.nextMessage().contains("not skilled enough"));
     p.setOp(true);
     clearCooldown(m);
     p.getInventory().setItemInMainHand(base.build());
