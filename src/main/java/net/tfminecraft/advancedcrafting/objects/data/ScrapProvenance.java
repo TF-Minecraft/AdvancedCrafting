@@ -63,8 +63,9 @@ public final class ScrapProvenance {
 		}
 		Map<String, Integer> amounts = new LinkedHashMap<>();
 		for (var key : inputs.getKeys()) {
-			Integer amount = inputs.get(key, PersistentDataType.INTEGER);
-			if (amount != null && amount > 0) amounts.put(key.getKey(), amount);
+			if (!inputs.has(key, PersistentDataType.INTEGER)) continue;
+			int amount = inputs.get(key, PersistentDataType.INTEGER);
+			if (amount > 0) amounts.put(key.getKey(), amount);
 		}
 		return amounts;
 	}
