@@ -171,7 +171,7 @@ class CommandCoverageTest extends CoverageSupport {
     AlloyManager.addAlloy(alloy);
     Map<List<String>, List<String>> cases = new LinkedHashMap<>();
     cases.put(List.of("sync", ""), List.of("recipes"));
-    cases.put(List.of("give", ""), List.of("alloy"));
+    cases.put(List.of("give", ""), List.of("alloy", "equipment"));
     cases.put(List.of("alloy", ""), List.of("info"));
     cases.put(List.of("craft", "1"), List.of("100"));
     cases.put(List.of("other", ""), List.of());

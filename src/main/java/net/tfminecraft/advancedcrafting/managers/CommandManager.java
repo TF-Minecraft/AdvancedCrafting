@@ -29,6 +29,7 @@ import net.tfminecraft.advancedcrafting.utils.CraftStatRefresher;
 import net.tfminecraft.advancedcrafting.utils.CraftStatRefresher.RefreshResult;
 
 public class CommandManager implements Listener, CommandExecutor, TabCompleter {
+	private final EquipmentGiveCommand equipmentGive = new EquipmentGiveCommand();
 	public String cmd1 = "ac";
 	public String cmd2 = "alloy";
 
@@ -51,6 +52,9 @@ public class CommandManager implements Listener, CommandExecutor, TabCompleter {
 	}
 
 	private boolean handleAcCommand(CommandSender sender, String[] args) {
+		if (args.length >= 2 && args[0].equalsIgnoreCase("give") && args[1].equalsIgnoreCase("equipment")) {
+			return equipmentGive.execute(sender, args);
+		}
 		if (args.length >= 1 && args[0].equalsIgnoreCase("reload")) {
 			if (!AdminPermissions.require(sender)) {
 				return true;
@@ -167,7 +171,19 @@ public class CommandManager implements Listener, CommandExecutor, TabCompleter {
 	}
 
 	private List<String> onAcTabComplete(CommandSender sender, String[] args) {
+		if (args.length >= 2 && args[0].equalsIgnoreCase("give")) {
+			if (args.length == 2) {
+				List<String> options = new ArrayList<>();
+				if (sender.hasPermission(AdminPermissions.PERMISSION)) options.add("alloy");
+				if (equipmentGive.hasPermission(sender)) options.add("equipment");
+				return filterPrefix(args[1], options);
+			}
+			if (args[1].equalsIgnoreCase("equipment")) return equipmentGive.complete(sender, args);
+		}
 		if (!sender.hasPermission(AdminPermissions.PERMISSION)) {
+			if (args.length <= 1 && equipmentGive.hasPermission(sender)) {
+				return filterPrefix(args.length == 0 ? "" : args[0], "give");
+			}
 			return List.of();
 		}
 		if (args.length == 0) {
@@ -180,9 +196,6 @@ public class CommandManager implements Listener, CommandExecutor, TabCompleter {
 			String sub = args[0].toLowerCase(Locale.ROOT);
 			if (sub.equals("sync")) {
 				return filterPrefix(args[1], "recipes");
-			}
-			if (sub.equals("give")) {
-				return filterPrefix(args[1], "alloy");
 			}
 			if (sub.equals("alloy")) {
 				return filterPrefix(args[1], "info");

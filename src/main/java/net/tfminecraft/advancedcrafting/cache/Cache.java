@@ -14,6 +14,7 @@ public class Cache {
 	public static String craftingStation;
 	public static String alloyStation;
 	public static String ingredientStation;
+	public static String giveEquipmentPermission = "advancedcrafting.admin";
 
 	public static double alloyForgeBaseSuccess = 2.0;
 	public static double alloyForgeBonusPerSqrtValue = 4.0;

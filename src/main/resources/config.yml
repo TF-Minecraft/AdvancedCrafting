@@ -1,6 +1,10 @@
 scrap-path: crafting.scrap
 branding-tool: m.tools.skin_branding_tool
 
+# Staff-only finished equipment command. Missing/blank values use advancedcrafting.admin.
+# Grant a custom node only to staff; it does not grant the other admin commands.
+give-equipment-permission: advancedcrafting.admin
+
 # TLibs block path for each station (iaf(...) for ItemsAdder furniture).
 crafting-station: v(ANVIL)
 alloy-station: iaf(tfmc:alloy_forge)
