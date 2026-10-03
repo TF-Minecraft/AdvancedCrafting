@@ -32,14 +32,6 @@ Originally authored by **Drefvelin**.
 
 Technical documentation is maintained in [TF-Minecraft/Docs](https://github.com/TF-Minecraft/Docs).
 
-## License
-
-Copyright (c) 2026 TF-Minecraft contributors.
-
-TF-Minecraft-authored material in this repository is licensed under the
-[Artistic License 2.0](LICENSE). Third-party dependencies and bundled material
-retain their own licenses.
-
 ## Tests and coverage
 
 Use Java 21 and Maven 3.9. Install the pinned plugin dependencies with the
@@ -60,4 +52,10 @@ runs when a report was generated.
 Coverage proves the exercised Java behavior. It does not replace a live Paper
 server integration check with the pinned ItemsAdder/MMOItems/TLibs versions.
 
-Failed alloy forges record consumed ingredient quantities on scrap for Recycler recovery. Older scrap retains only its recorded base; missing catalyst history cannot be recovered.
+## License
+
+Copyright (c) 2026 TF-Minecraft contributors.
+
+TF-Minecraft-authored material in this repository is licensed under the
+[Artistic License 2.0](LICENSE). Third-party dependencies and bundled material
+retain their own licenses.
