@@ -385,6 +385,21 @@ public class CraftingStation {
 	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
 	@SuppressWarnings("deprecation")
 	private StationFeedback createItem(Player p, Double forcedQualityPercent) {
+		return createItem(p, forcedQualityPercent, true);
+	}
+
+	/** Builds staff equipment without consuming inventory, dropping an item, paying XP or firing progression events. */
+	public ItemStack buildCompletedItem(Player p, double qualityPercent) {
+		stats = CraftStatCalculator.compute(recipe, currentMaterials);
+		StationFeedback feedback = createItem(p, qualityPercent, false);
+		if (feedback != StationFeedback.SUCCESS) {
+			throw new IllegalStateException("Cannot build equipment: " + feedback);
+		}
+		return result;
+	}
+
+	@SuppressWarnings("deprecation")
+	private StationFeedback createItem(Player p, Double forcedQualityPercent, boolean deliver) {
 		if (!checkItems(p)) {
 			return StationFeedback.LACKING_ITEMS;
 		}
@@ -496,8 +511,11 @@ public class CraftingStation {
 		if (majorityTier > 0) {
 			CraftTierLore.applyTierLine(finalItem, majorityTier);
 		}
-		Location dropLoc = loc.clone().add(0, 1, 0);
-		dropLoc.getWorld().dropItem(dropLoc, finalItem);
+		this.result = finalItem;
+		if (deliver) {
+			Location dropLoc = loc.clone().add(0, 1, 0);
+			dropLoc.getWorld().dropItem(dropLoc, finalItem);
+		}
 		if (forcedQualityPercent == null) {
 			CraftLifecycle.fireItemCrafted(p, recipe.getId(), recipe.getCategoryId());
 		}

@@ -29,6 +29,10 @@ public class ConfigLoader implements LoaderInterface{
         }
 		
 		Cache.scrap = config.getString("scrap-path");
+		Cache.giveEquipmentPermission = config.getString("give-equipment-permission", "advancedcrafting.admin").trim();
+		if (Cache.giveEquipmentPermission.isEmpty()) {
+			Cache.giveEquipmentPermission = "advancedcrafting.admin";
+		}
 		
 		Cache.craftingStation = config.getString("crafting-station", "v(ANVIL)");
 		Cache.alloyStation = config.getString("alloy-station", "v(BLAST_FURNACE)");
