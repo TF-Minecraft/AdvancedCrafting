@@ -18,6 +18,14 @@ public class StatData {
 		
 	}
 	
+	public static StatData copyOf(StatData source) {
+		StatData copy = new StatData();
+		for (StatModifier m : source.getModifiers()) {
+			copy.addModifier(m);
+		}
+		return copy;
+	}
+
 	public boolean hasModifiers() {
 		if(modifiers.size() > 0) return true;
 		return false;

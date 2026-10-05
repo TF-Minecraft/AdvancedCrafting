@@ -1,6 +1,11 @@
 package net.tfminecraft.advancedcrafting.database;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
@@ -19,6 +24,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import net.tfminecraft.advancedcrafting.AdvancedCrafting;
+import net.tfminecraft.advancedcrafting.cache.Cache;
+import net.tfminecraft.advancedcrafting.loaders.IngredientLoader;
 import net.tfminecraft.advancedcrafting.loaders.HitLoader;
 import net.tfminecraft.advancedcrafting.loaders.SchemeLoader;
 import net.tfminecraft.advancedcrafting.loaders.TypeLoader;
@@ -26,6 +33,7 @@ import net.tfminecraft.advancedcrafting.managers.AlloyManager;
 import net.tfminecraft.advancedcrafting.objects.alloys.Alloy;
 import net.tfminecraft.advancedcrafting.objects.alloys.AlloyStation;
 import net.tfminecraft.advancedcrafting.objects.crafting.hits.CraftingHit;
+import net.tfminecraft.advancedcrafting.objects.ingredients.Ingredient;
 import net.tfminecraft.advancedcrafting.objects.data.AlloyData;
 import net.tfminecraft.advancedcrafting.objects.data.AlloyRecipe;
 import net.tfminecraft.advancedcrafting.objects.data.StatData;
@@ -33,15 +41,24 @@ import net.tfminecraft.advancedcrafting.objects.ingredients.IngredientType;
 import net.tfminecraft.advancedcrafting.objects.schemes.ColourScheme;
 import net.tfminecraft.advancedcrafting.objects.schemes.ModelScheme;
 import net.tfminecraft.advancedcrafting.objects.stats.StatModifier;
+import net.tfminecraft.advancedcrafting.utils.AlloyRebaser;
 import net.tfminecraft.advancedcrafting.utils.IngredientLore;
 import net.tfminecraft.advancedcrafting.utils.RevisionTracker;
 
 public class AlloyDatabase {
+	private static final String BACKUP_STAMP = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
 	private JSONObject json;
 	private final JSONParser parser = new JSONParser();
 
 	private File alloysFolder() {
 		return new File(AdvancedCrafting.plugin.getDataFolder(), "data/alloys");
+	}
+
+	/** Closes the file again; an open reader keeps Windows from deleting or replacing it. */
+	private JSONObject read(File file) throws Exception {
+		try (InputStreamReader reader = new InputStreamReader(new FileInputStream(file), "UTF-8")) {
+			return (JSONObject) parser.parse(reader);
+		}
 	}
 
 	public Alloy loadAlloy(String result) {
@@ -50,7 +67,7 @@ public class AlloyDatabase {
 			return null;
 		}
 		try {
-			json = (JSONObject) parser.parse(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+			json = read(file);
 			return finishAlloy(parseAlloyFromJson(json));
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -67,12 +84,54 @@ public class AlloyDatabase {
 		for (final File file : files) {
 			if (!file.isDirectory()) {
 				try {
-					json = (JSONObject) parser.parse(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-					AlloyManager.addAlloy(finishAlloy(parseAlloyFromJson(json)));
+					json = read(file);
+					Alloy alloy = parseAlloyFromJson(json);
+					followBase(file, alloy);
+					AlloyManager.addAlloy(finishAlloy(alloy));
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
 			}
+		}
+	}
+
+	/**
+	 * Startup only: moves the alloy's stats by how much its base ingredient changed since it was
+	 * forged, then records the live base. The file is backed up before it is rewritten.
+	 */
+	void followBase(File file, Alloy alloy) {
+		AlloyData data = alloy.getData();
+		AlloyRecipe recipe = data.getRecipe();
+		if (recipe == null) {
+			return;
+		}
+		Ingredient base = IngredientLoader.getByString(recipe.getBaseId());
+		if (base == null) {
+			return;
+		}
+		StatData live = base.getIngredientData().getStatData();
+		StatData snapshot = AlloyRebaser.snapshotFor(data.getBaseStats(), recipe.getBaseId(), live, file.lastModified());
+		StatData moved = AlloyRebaser.rebase(data.getStatData(), snapshot, live, Cache.maxFactor);
+		if (moved == null && data.getBaseStats() != null) {
+			return;
+		}
+		backup(file);
+		if (moved != null) {
+			AdvancedCrafting.plugin.getLogger().info("AC: alloy " + alloy.getId() + " follows " + recipe.getBaseId() + ": "
+					+ AlloyRebaser.describe(data.getStatData(), moved));
+			data.setStatData(moved);
+		}
+		data.setBaseStats(StatData.copyOf(live));
+		saveAlloy(alloy);
+	}
+
+	private void backup(File file) {
+		File folder = new File(AdvancedCrafting.plugin.getDataFolder(), "data/alloy-backups/" + BACKUP_STAMP);
+		folder.mkdirs();
+		try {
+			Files.copy(file.toPath(), new File(folder, file.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException ex) {
+			AdvancedCrafting.plugin.getLogger().warning("AC: could not back up " + file.getName() + ": " + ex.getMessage());
 		}
 	}
 
@@ -126,7 +185,7 @@ public class AlloyDatabase {
 			pw.flush();
 			pw.close();
 			HashMap<String, Object> defaults = new HashMap<>();
-			json = (JSONObject) parser.parse(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+			json = read(file);
 			defaults.put("id", a.getId().toLowerCase());
 			defaults.put("name", a.getName());
 			defaults.put("model", a.getData().getModel());
@@ -150,6 +209,9 @@ public class AlloyDatabase {
 				i++;
 			}
 			defaults.put("stats", statArray);
+			if (a.getData().getBaseStats() != null) {
+				defaults.put("baseStats", toArray(a.getData().getBaseStats()));
+			}
 			JSONArray hitArray = new JSONArray();
 			for (CraftingHit h : a.getData().getHits().keySet()) {
 				String hit = h.getId() + "." + a.getData().getHits().get(h);
@@ -166,6 +228,26 @@ public class AlloyDatabase {
 	}
 
 	@SuppressWarnings("unchecked")
+	private static JSONArray toArray(StatData stats) {
+		JSONArray array = new JSONArray();
+		for (StatModifier m : stats.getModifiers()) {
+			array.add(m.getType() + "(" + m.getAmount() + ")");
+		}
+		return array;
+	}
+
+	private static StatData parseStats(JSONArray array) {
+		StatData stats = new StatData();
+		for (Object entry : array) {
+			String s = entry.toString();
+			String st = s.split("\\(")[0];
+			double amount = Double.parseDouble(s.split("\\(")[1].replace(")", ""));
+			stats.addModifier(new StatModifier(st, amount));
+		}
+		return stats;
+	}
+
+	@SuppressWarnings("unchecked")
 	private Alloy parseAlloyFromJson(JSONObject json) throws Exception {
 		String id = ((String) json.get("id")).toLowerCase();
 		String name = (String) json.get("name");
@@ -174,18 +256,9 @@ public class AlloyDatabase {
 		ColourScheme colourScheme = SchemeLoader.getColourSchemeByString((String) json.get("colour scheme"));
 		IngredientType type = TypeLoader.getIngredientTypeByString((String) json.get("type"));
 		ModelScheme scheme = SchemeLoader.getModelSchemeByString((String) json.get("scheme"));
-		StatData stats = new StatData();
-		int i = 0;
-		JSONArray statArray = (JSONArray) json.get("stats");
-		while (i < statArray.size()) {
-			String s = statArray.get(i).toString();
-			String st = s.split("\\(")[0];
-			double amount = Double.parseDouble(s.split("\\(")[1].replace(")", ""));
-			stats.addModifier(new StatModifier(st, amount));
-			i++;
-		}
+		StatData stats = parseStats((JSONArray) json.get("stats"));
 		HashMap<CraftingHit, Integer> hits = new HashMap<>();
-		i = 0;
+		int i = 0;
 		JSONArray hitArray = (JSONArray) json.get("hits");
 		while (i < hitArray.size()) {
 			String s = hitArray.get(i).toString();
@@ -202,8 +275,11 @@ public class AlloyDatabase {
 		if (statMergeBucketId == null || statMergeBucketId.isBlank()) {
 			statMergeBucketId = type != null ? type.getId() : null;
 		}
-		return new Alloy(id, name,
-				new AlloyData(colourScheme, model, type, scheme, stats, hits, xp, recipe, tier, statMergeBucketId));
+		AlloyData data = new AlloyData(colourScheme, model, type, scheme, stats, hits, xp, recipe, tier, statMergeBucketId);
+		if (json.get("baseStats") instanceof JSONArray recorded) {
+			data.setBaseStats(parseStats(recorded));
+		}
+		return new Alloy(id, name, data);
 	}
 
 	@SuppressWarnings("unchecked")

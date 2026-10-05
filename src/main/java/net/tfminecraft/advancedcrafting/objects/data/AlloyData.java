@@ -26,6 +26,8 @@ public class AlloyData {
 	private AlloyRecipe recipe;
 	private int tier;
 	private String statMergeBucketId;
+	/** The base ingredient's stats when this alloy was forged; null for alloys forged before this was recorded. */
+	private StatData baseStats;
 
 	public AlloyData(Ingredient base, StatData stats, HashMap<CraftingHit, Integer> hits, String xp) {
 		colourScheme = base.getIngredientData().getScheme().getColourScheme();
@@ -37,6 +39,7 @@ public class AlloyData {
 		this.xp = xp;
 		this.tier = base.getIngredientData().hasTier() ? base.getIngredientData().getTier() : 1;
 		this.statMergeBucketId = base.getIngredientData().getStatMergeBucketId();
+		this.baseStats = StatData.copyOf(base.getIngredientData().getStatData());
 	}
 
 	public AlloyData(ColourScheme colourScheme, int model, IngredientType type, ModelScheme scheme,
@@ -76,6 +79,18 @@ public class AlloyData {
 
 	public ModelScheme getModelScheme() {
 		return modelScheme;
+	}
+
+	public void setStatData(StatData stats) {
+		this.stats = stats;
+	}
+
+	public StatData getBaseStats() {
+		return baseStats;
+	}
+
+	public void setBaseStats(StatData baseStats) {
+		this.baseStats = baseStats;
 	}
 
 	public StatData getStatData() {
