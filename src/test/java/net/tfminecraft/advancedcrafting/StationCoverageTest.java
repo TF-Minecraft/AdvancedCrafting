@@ -95,6 +95,33 @@ class StationCoverageTest extends CoverageSupport {
   }
 
   @Test
+  void statusLinesListEveryConfiguredHitWithItsCount() throws Exception {
+    var p = server.addPlayer();
+    HitLoader.map.put("tap", new CraftingHit("tap", yaml("name: Tap\ntype: hammer\ntool: v.stick")));
+    var station = new CraftingStation(loc());
+    station.setRecipe(recipe("recipe: ['metal.2']"));
+    var item = ingredient("iron", "hits: ['strike.2']").build();
+    p.getInventory().setItemInMainHand(item);
+    assertEquals(StationFeedback.SUCCESS, station.addMaterial(p, item));
+    station.getHits().get(HitLoader.map.get("strike")).setCurrent(3);
+    // A reload swaps in new hit objects; counts must still match by id.
+    HitLoader.map.put(
+        "strike", new CraftingHit("strike", yaml("name: Strike\ntype: hammer\ntool: v.iron_axe")));
+    // Unknown types or hits from a stale config are skipped, not printed as "null".
+    station.getTypes().put(null, new IntCounter());
+    station.getHits().put(null, new IntCounter());
+    assertEquals(
+        List.of(
+            "§7Recipe: Sword",
+            "Metal§7: §e1/2",
+            "Strike§7: §e3",
+            "Tap§7: §e0",
+            "§7Left-click branding to finish",
+            "§cSHIFT + LEFT CLICK with the branding tool to cancel the project!"),
+        station.getStatusLines());
+  }
+
+  @Test
   void restoredStationsAggregateMaterialAndHitCounts() throws Exception {
     var loc = loc();
     var iron = ingredient("iron", "hits: ['strike.2']");
