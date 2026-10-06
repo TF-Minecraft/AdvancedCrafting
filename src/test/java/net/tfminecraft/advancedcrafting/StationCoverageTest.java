@@ -107,6 +107,9 @@ class StationCoverageTest extends CoverageSupport {
     // A reload swaps in new hit objects; counts must still match by id.
     HitLoader.map.put(
         "strike", new CraftingHit("strike", yaml("name: Strike\ntype: hammer\ntool: v.iron_axe")));
+    // Unknown types or hits from a stale config are skipped, not printed as "null".
+    station.getTypes().put(null, new IntCounter());
+    station.getHits().put(null, new IntCounter());
     assertEquals(
         List.of(
             "§7Recipe: Sword",

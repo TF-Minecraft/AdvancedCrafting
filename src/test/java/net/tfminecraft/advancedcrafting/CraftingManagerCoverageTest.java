@@ -150,6 +150,11 @@ class CraftingManagerCoverageTest extends CoverageSupport {
     verify(s, never()).addMaterial(any(), any());
     verify(p).sendMessage("§7Recipe: Sword");
     verify(p).sendMessage("Strike§7: §e3");
+    when(items.getChecker().checkItemWithPath(any(), eq(Cache.brandingTool))).thenReturn(false);
+    when(s.addMaterial(eq(p), any())).thenReturn(StationFeedback.NOT_INGREDIENT);
+    map(m, "cooldown").clear();
+    m.openStation(event(p, b, Action.RIGHT_CLICK_BLOCK));
+    verify(s).addMaterial(eq(p), any());
     Cache.brandingTool = null;
   }
 
