@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -16,7 +17,8 @@ import net.tfminecraft.advancedcrafting.objects.crafting.hits.CraftingHit;
 
 public class HitLoader implements LoaderInterface{
 
-	public static HashMap<String, CraftingHit> map = new HashMap<>();
+	// Keeps config order so the branding status lists hits as written.
+	public static HashMap<String, CraftingHit> map = new LinkedHashMap<>();
 	
 	public static HashMap<String, CraftingHit> get(){
 		return map;

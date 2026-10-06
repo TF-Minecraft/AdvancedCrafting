@@ -217,6 +217,12 @@ public class CraftingManager implements Listener{
 			}
 
 			if(i.getType().equals(Material.AIR)) return;
+			if (Cache.brandingTool != null && api.getChecker().checkItemWithPath(i, Cache.brandingTool)) {
+				for (String line : station.getStatusLines()) {
+					p.sendMessage(line);
+				}
+				return;
+			}
 			StationFeedback f = station.addMaterial(p, i);
 			switch (f) {
 				case NOT_INGREDIENT:

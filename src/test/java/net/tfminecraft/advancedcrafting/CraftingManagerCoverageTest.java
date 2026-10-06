@@ -135,6 +135,25 @@ class CraftingManagerCoverageTest extends CoverageSupport {
   }
 
   @Test
+  void rightClickWithBrandingShowsStatusInsteadOfAddingIt() throws Exception {
+    var p = player();
+    var b = block();
+    blocks(b);
+    var m = new CraftingManager();
+    var s = station(m, b);
+    when(s.hasRecipe()).thenReturn(true);
+    when(s.getStatusLines()).thenReturn(List.of("§7Recipe: Sword", "Strike§7: §e3"));
+    p.getInventory().setItemInMainHand(new ItemStack(Material.STICK));
+    Cache.brandingTool = "v.stick";
+    when(items.getChecker().checkItemWithPath(any(), eq(Cache.brandingTool))).thenReturn(true);
+    m.openStation(event(p, b, Action.RIGHT_CLICK_BLOCK));
+    verify(s, never()).addMaterial(any(), any());
+    verify(p).sendMessage("§7Recipe: Sword");
+    verify(p).sendMessage("Strike§7: §e3");
+    Cache.brandingTool = null;
+  }
+
+  @Test
   void brandingCancelsFinishesOrReportsIncompleteCraftAndToolsRouteHits() throws Exception {
     var p = player();
     var b = block();
