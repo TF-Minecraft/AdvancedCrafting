@@ -32,11 +32,14 @@ public class HitLoader implements LoaderInterface{
         	config.load(configFile);
         } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();
+            return;
         }
         Set<String> set = config.getKeys(false);
 
 		List<String> list = new ArrayList<String>(set);
-		
+		// Rebuilt on reload so the order follows the file and removed hits disappear.
+		map.clear();
+
 		for(String key : list) {
 			CraftingHit o = new CraftingHit(key, config.getConfigurationSection(key));
 			map.put(key, o);

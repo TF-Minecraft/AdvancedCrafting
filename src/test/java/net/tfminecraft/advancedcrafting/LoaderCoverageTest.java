@@ -41,6 +41,17 @@ class LoaderCoverageTest extends CoverageSupport {
     assertNotNull(HitLoader.getByTool("V.STICK"));
     assertNull(HitLoader.getByString("missing"));
     assertNull(HitLoader.getByTool("missing"));
+    // A reload follows the file's new order and drops removed hits; a failed load keeps the last map.
+    new HitLoader()
+        .load(
+            config(
+                "tools.yml",
+                "sew:\n  name: Sew\n  type: bend\n  tool: v.string\n"
+                    + "tap:\n  name: Tap\n  type: bend\n  tool: v.stick"));
+    assertEquals(List.of("sew", "tap"), new ArrayList<>(HitLoader.get().keySet()));
+    new HitLoader().load(temp.resolve("absent-tools.yml").toFile());
+    assertEquals(List.of("sew", "tap"), new ArrayList<>(HitLoader.get().keySet()));
+    new HitLoader().load(config("tools.yml", "bend:\n  name: Bend\n  type: bend\n  tool: v.stick"));
     new QualityLoader()
         .load(
             config(
