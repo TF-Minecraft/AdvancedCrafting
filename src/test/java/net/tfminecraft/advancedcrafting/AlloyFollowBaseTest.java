@@ -1,6 +1,7 @@
 package net.tfminecraft.advancedcrafting;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.nio.file.*;
@@ -240,6 +241,70 @@ class AlloyFollowBaseTest extends CoverageSupport {
   }
 
   @Test
+  void failedRewriteKeepsTheOldStatsAndRestoresTheFile() throws Exception {
+    store();
+    ingredient("steel", "stats:\n  - weapon_damage(5.0)");
+    Cache.maxFactor = 1.2;
+    Cache.alloyLegacyBaseStats.put("steel", stats("weapon_damage(12.0)"));
+    Cache.alloyLegacyForgedBefore = CUTOFF;
+    File file = alloyFile("brittle", "steel", "\"weapon_damage(12.0)\"", null, CUTOFF - 5);
+    String original = Files.readString(file.toPath());
+    var db = spy(new AlloyDatabase());
+    doAnswer(
+            i -> {
+              Files.writeString(file.toPath(), "{broken");
+              return false;
+            })
+        .when(db)
+        .saveAlloy(any());
+    db.loadAlloys();
+    var data = AlloyManager.getAlloyById("brittle").getData();
+    assertEquals(12.0, amount(data.getStatData(), "weapon_damage"));
+    assertNull(data.getBaseStats());
+    assertEquals(original, Files.readString(file.toPath()));
+  }
+
+  @Test
+  void failedRewriteWithoutABackupLeavesTheBrokenFileAndKeepsTheOldStats() throws Exception {
+    store();
+    ingredient("steel", "stats:\n  - weapon_damage(5.0)");
+    Cache.maxFactor = 1.2;
+    Cache.alloyLegacyBaseStats.put("steel", stats("weapon_damage(12.0)"));
+    Cache.alloyLegacyForgedBefore = CUTOFF;
+    File file = alloyFile("lost", "steel", "\"weapon_damage(12.0)\"", null, CUTOFF - 5);
+    var db = spy(new AlloyDatabase());
+    doAnswer(
+            i -> {
+              Files.delete(temp.resolve("data/alloy-backups/" + stamp() + "/lost.json"));
+              return false;
+            })
+        .when(db)
+        .saveAlloy(any());
+    db.loadAlloys();
+    assertEquals(
+        12.0, amount(AlloyManager.getAlloyById("lost").getData().getStatData(), "weapon_damage"));
+    assertTrue(file.exists());
+  }
+
+  @Test
+  void saveReportsAFailedWrite() throws Exception {
+    store();
+    var data =
+        new AlloyData(
+            SchemeLoader.colours.get("default"),
+            2,
+            null,
+            SchemeLoader.models.get("default"),
+            stats("armor(1.0)"),
+            new HashMap<>(),
+            null,
+            null,
+            1,
+            null);
+    assertFalse(new AlloyDatabase().saveAlloy(new Alloy("typeless", "typeless", data)));
+  }
+
+  @Test
   void alloysWithoutARecordAreSavedWithoutOne() throws Exception {
     store();
     var data =
@@ -254,7 +319,7 @@ class AlloyFollowBaseTest extends CoverageSupport {
             null,
             1,
             null);
-    new AlloyDatabase().saveAlloy(new Alloy("plain", "plain", data));
+    assertTrue(new AlloyDatabase().saveAlloy(new Alloy("plain", "plain", data)));
     assertFalse(Files.readString(temp.resolve("data/alloys/plain.json")).contains("baseStats"));
     assertNull(new AlloyDatabase().loadAlloy("plain").getData().getBaseStats());
   }

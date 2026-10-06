@@ -118,13 +118,34 @@ public class AlloyDatabase {
 		if (!backup(file)) {
 			return;
 		}
+		StatData oldStats = data.getStatData();
+		StatData oldBase = data.getBaseStats();
 		if (moved != null) {
-			AdvancedCrafting.plugin.getLogger().info("AC: alloy " + alloy.getId() + " follows " + recipe.getBaseId() + ": "
-					+ AlloyRebaser.describe(data.getStatData(), moved));
 			data.setStatData(moved);
 		}
 		data.setBaseStats(StatData.copyOf(live));
-		saveAlloy(alloy);
+		if (!saveAlloy(alloy)) {
+			data.setStatData(oldStats);
+			data.setBaseStats(oldBase);
+			restore(file);
+			return;
+		}
+		if (moved != null) {
+			AdvancedCrafting.plugin.getLogger().info("AC: alloy " + alloy.getId() + " follows " + recipe.getBaseId() + ": "
+					+ AlloyRebaser.describe(oldStats, moved));
+		}
+	}
+
+	/** Puts the backed-up file back after a failed rewrite, so the file matches the alloy kept in memory. */
+	private void restore(File file) {
+		File copy = new File(AdvancedCrafting.plugin.getDataFolder(), "data/alloy-backups/" + BACKUP_STAMP + "/" + file.getName());
+		try {
+			Files.copy(copy.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			AdvancedCrafting.plugin.getLogger().warning("AC: could not rewrite " + file.getName() + "; restored it unchanged.");
+		} catch (IOException ex) {
+			AdvancedCrafting.plugin.getLogger().severe("AC: could not rewrite or restore " + file.getName()
+					+ "; the original is in " + copy.getPath() + ": " + ex.getMessage());
+		}
 	}
 
 	/** False when the copy failed; the alloy is then left exactly as it is. */
@@ -170,8 +191,9 @@ public class AlloyDatabase {
 		}
 	}
 
+	/** False when the file could not be written. */
 	@SuppressWarnings("unchecked")
-	public void saveAlloy(Alloy a) {
+	public boolean saveAlloy(Alloy a) {
 		String hash = RevisionTracker.sha256(a.getData().buildRevisionContent());
 		int revision = AdvancedCrafting.getRevisionTracker().resolveAlloy(a.getId(), hash);
 		a.setRevision(revision);
@@ -224,12 +246,14 @@ public class AlloyDatabase {
 				hitArray.add(hit);
 			}
 			defaults.put("hits", hitArray);
-			save(file, defaults);
+			boolean saved = save(file, defaults);
 			if (recipe != null) {
 				AdvancedCrafting.getAlloyRecipeStore().upsert(recipe, a.getId());
 			}
+			return saved;
 		} catch (Throwable ex) {
 			ex.printStackTrace();
+			return false;
 		}
 	}
 
