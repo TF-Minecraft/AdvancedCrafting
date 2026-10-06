@@ -140,7 +140,7 @@ public class AlloyDatabase {
 	private void restore(File file) {
 		File copy = new File(AdvancedCrafting.plugin.getDataFolder(), "data/alloy-backups/" + BACKUP_STAMP + "/" + file.getName());
 		try {
-			Files.copy(copy.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(copy.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
 			AdvancedCrafting.plugin.getLogger().warning("AC: could not rewrite " + file.getName() + "; restored it unchanged.");
 		} catch (IOException ex) {
 			AdvancedCrafting.plugin.getLogger().severe("AC: could not rewrite or restore " + file.getName()
@@ -153,7 +153,8 @@ public class AlloyDatabase {
 		File folder = new File(AdvancedCrafting.plugin.getDataFolder(), "data/alloy-backups/" + BACKUP_STAMP);
 		folder.mkdirs();
 		try {
-			Files.copy(file.toPath(), new File(folder, file.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(file.toPath(), new File(folder, file.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING,
+					StandardCopyOption.COPY_ATTRIBUTES);
 			return true;
 		} catch (IOException ex) {
 			AdvancedCrafting.plugin.getLogger().warning("AC: could not back up " + file.getName()
@@ -375,10 +376,9 @@ public class AlloyDatabase {
 			Gson g = new GsonBuilder().setPrettyPrinting().create();
 			String prettyJsonString = g.toJson(treeMap);
 
-			FileWriter fw = new FileWriter(file);
-			fw.write(prettyJsonString);
-			fw.flush();
-			fw.close();
+			try (FileWriter fw = new FileWriter(file)) {
+				fw.write(prettyJsonString);
+			}
 
 			return true;
 		} catch (Exception ex) {

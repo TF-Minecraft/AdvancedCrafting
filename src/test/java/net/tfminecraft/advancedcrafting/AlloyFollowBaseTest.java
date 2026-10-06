@@ -262,6 +262,11 @@ class AlloyFollowBaseTest extends CoverageSupport {
     assertEquals(12.0, amount(data.getStatData(), "weapon_damage"));
     assertNull(data.getBaseStats());
     assertEquals(original, Files.readString(file.toPath()));
+    // The legacy cutoff reads the file time, so backup and restore both keep it.
+    assertEquals(CUTOFF - 5, file.lastModified());
+    assertEquals(
+        CUTOFF - 5,
+        temp.resolve("data/alloy-backups/" + stamp() + "/brittle.json").toFile().lastModified());
   }
 
   @Test
