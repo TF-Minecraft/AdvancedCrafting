@@ -12,7 +12,9 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import net.tfminecraft.tlibs.interfaces.LoaderInterface;
 import net.tfminecraft.tlibs.objects.api.subapi.StringFormatter;
+import net.tfminecraft.advancedcrafting.AdvancedCrafting;
 import net.tfminecraft.advancedcrafting.cache.Cache;
+import net.tfminecraft.advancedcrafting.objects.data.StatData;
 import net.tfminecraft.advancedcrafting.objects.data.PermissionNamespace;
 import net.tfminecraft.advancedcrafting.objects.ingredients.IngredientType;
 import net.tfminecraft.advancedcrafting.utils.StatToString;
@@ -59,6 +61,15 @@ public class ConfigLoader implements LoaderInterface{
 		Cache.brandingTool = config.getString("branding-tool", null);
 
 		Cache.maxFactor = config.getDouble("max-factor", 1.5);
+
+		Cache.alloyLegacyBaseStats.clear();
+		Cache.alloyLegacyForgedBefore = parseInstant(config.getString("alloy-legacy-base.forged-before", ""));
+		if (config.isConfigurationSection("alloy-legacy-base.stats")) {
+			for (String ingredientId : config.getConfigurationSection("alloy-legacy-base.stats").getKeys(false)) {
+				Cache.alloyLegacyBaseStats.put(ingredientId.toLowerCase(),
+						new StatData(config.getStringList("alloy-legacy-base.stats." + ingredientId)));
+			}
+		}
 
 		Cache.hitOvershootWarnPercent = config.getDouble("hit-overshoot-warn-percent", 30.0);
 		String overshootMessage = config.getString("hit-overshoot-warn-message");
@@ -137,6 +148,19 @@ public class ConfigLoader implements LoaderInterface{
 			}
 		} catch (NumberFormatException ex) {
 			// skip malformed entries
+		}
+	}
+
+	/** ISO-8601 time to epoch millis; blank or invalid gives 0, which turns the setting off. */
+	public static long parseInstant(String text) {
+		if (text == null || text.isBlank()) {
+			return 0L;
+		}
+		try {
+			return java.time.Instant.parse(text.trim()).toEpochMilli();
+		} catch (java.time.format.DateTimeParseException ex) {
+			AdvancedCrafting.plugin.getLogger().warning("AC: alloy-legacy-base.forged-before is not an ISO-8601 time: " + text);
+			return 0L;
 		}
 	}
 

@@ -29,6 +29,10 @@ public class Cache {
 	public static HashMap<IngredientType, List<IngredientType>> combinations = new HashMap<>();
 
 	public static double maxFactor;
+	/** Base stats that alloys forged before {@link #alloyLegacyForgedBefore} were made with, per base ingredient. */
+	public static Map<String, net.tfminecraft.advancedcrafting.objects.data.StatData> alloyLegacyBaseStats = new HashMap<>();
+	/** Epoch millis; 0 turns the legacy base stats off. */
+	public static long alloyLegacyForgedBefore;
 
 	public static double hitOvershootWarnPercent = 30.0;
 	public static String hitOvershootWarnMessage = "§cYour over-reliance on %hit% ruins the result further";

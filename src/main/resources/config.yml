@@ -30,6 +30,16 @@ alloy-forge:
 
 max-factor: 1.2
 
+# Alloys follow later changes to their base ingredient's stats on startup: each alloy keeps its own
+# difference from the base and only the base's share moves (alloy files are backed up to
+# data/alloy-backups first). New alloys record their base. Alloys forged before that was recorded
+# use these base values when their file is older than forged-before (ISO-8601, blank = off).
+alloy-legacy-base:
+  forged-before: ""
+  stats: {}
+#   steel_ingot:
+#     - weapon_damage(12.0)
+
 # Warn when a tool is this many percent over its requirement (16 vs 12 = 33).
 # Set to 0 or below to disable. Existing live configs keep working via loader defaults.
 hit-overshoot-warn-percent: 30.0
