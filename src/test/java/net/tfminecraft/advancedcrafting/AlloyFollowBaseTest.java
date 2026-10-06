@@ -206,16 +206,37 @@ class AlloyFollowBaseTest extends CoverageSupport {
   }
 
   @Test
-  void failedBackupIsLoggedAndTheAlloyStillFollowsItsBase() throws Exception {
+  void failedBackupLeavesTheAlloyUnchanged() throws Exception {
     store();
     ingredient("steel", "stats:\n  - weapon_damage(5.0)");
     Cache.maxFactor = 1.2;
     Cache.alloyLegacyBaseStats.put("steel", stats("weapon_damage(12.0)"));
     Cache.alloyLegacyForgedBefore = CUTOFF;
-    alloyFile("blocked", "steel", "\"weapon_damage(12.0)\"", null, CUTOFF - 5);
+    File blocked = alloyFile("blocked", "steel", "\"weapon_damage(12.0)\"", null, CUTOFF - 5);
     Files.createDirectories(temp.resolve("data/alloy-backups/" + stamp() + "/blocked.json/inner"));
     new AlloyDatabase().loadAlloys();
-    assertEquals(5.0, amount(AlloyManager.getAlloyById("blocked").getData().getStatData(), "weapon_damage"));
+    var data = AlloyManager.getAlloyById("blocked").getData();
+    assertEquals(12.0, amount(data.getStatData(), "weapon_damage"));
+    assertNull(data.getBaseStats());
+    assertEquals(CUTOFF - 5, blocked.lastModified());
+    assertFalse(Files.readString(blocked.toPath()).contains("baseStats"));
+  }
+
+  @Test
+  void repeatedBaseStatEntriesStaySeparateSoAnUnchangedBaseIsLeftAlone() throws Exception {
+    store();
+    var base = ingredient("doubled", "stats:\n  - damage(5.0)\n  - damage(2.0)");
+    var copy = StatData.copyOf(base.getIngredientData().getStatData());
+    assertEquals(2, copy.getModifiers().size());
+    assertNotSame(base.getIngredientData().getStatData().getModifiers().getFirst(), copy.getModifiers().getFirst());
+    File file =
+        alloyFile("twin", "doubled", "\"damage(6.0)\",\"damage(1.0)\"", "\"damage(5.0)\",\"damage(2.0)\"", CUTOFF - 5);
+    new AlloyDatabase().loadAlloys();
+    assertEquals(CUTOFF - 5, file.lastModified());
+    var data = AlloyManager.getAlloyById("twin").getData();
+    assertEquals(2, data.getBaseStats().getModifiers().size());
+    assertEquals(1, data.getStatData().getModifiers().size());
+    assertEquals(7.0, amount(data.getStatData(), "damage"));
   }
 
   @Test

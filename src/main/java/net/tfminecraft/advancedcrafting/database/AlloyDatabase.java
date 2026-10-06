@@ -115,7 +115,9 @@ public class AlloyDatabase {
 		if (moved == null && data.getBaseStats() != null) {
 			return;
 		}
-		backup(file);
+		if (!backup(file)) {
+			return;
+		}
 		if (moved != null) {
 			AdvancedCrafting.plugin.getLogger().info("AC: alloy " + alloy.getId() + " follows " + recipe.getBaseId() + ": "
 					+ AlloyRebaser.describe(data.getStatData(), moved));
@@ -125,13 +127,17 @@ public class AlloyDatabase {
 		saveAlloy(alloy);
 	}
 
-	private void backup(File file) {
+	/** False when the copy failed; the alloy is then left exactly as it is. */
+	private boolean backup(File file) {
 		File folder = new File(AdvancedCrafting.plugin.getDataFolder(), "data/alloy-backups/" + BACKUP_STAMP);
 		folder.mkdirs();
 		try {
 			Files.copy(file.toPath(), new File(folder, file.getName()).toPath(), StandardCopyOption.REPLACE_EXISTING);
+			return true;
 		} catch (IOException ex) {
-			AdvancedCrafting.plugin.getLogger().warning("AC: could not back up " + file.getName() + ": " + ex.getMessage());
+			AdvancedCrafting.plugin.getLogger().warning("AC: could not back up " + file.getName()
+					+ ", leaving it unchanged: " + ex.getMessage());
+			return false;
 		}
 	}
 
@@ -236,13 +242,18 @@ public class AlloyDatabase {
 		return array;
 	}
 
-	private static StatData parseStats(JSONArray array) {
+	/** {@code merge} adds repeated stat types together (alloy stats); otherwise each entry stays separate. */
+	private static StatData parseStats(JSONArray array, boolean merge) {
 		StatData stats = new StatData();
 		for (Object entry : array) {
 			String s = entry.toString();
 			String st = s.split("\\(")[0];
 			double amount = Double.parseDouble(s.split("\\(")[1].replace(")", ""));
-			stats.addModifier(new StatModifier(st, amount));
+			if (merge) {
+				stats.addModifier(new StatModifier(st, amount));
+			} else {
+				stats.getModifiers().add(new StatModifier(st, amount));
+			}
 		}
 		return stats;
 	}
@@ -256,7 +267,7 @@ public class AlloyDatabase {
 		ColourScheme colourScheme = SchemeLoader.getColourSchemeByString((String) json.get("colour scheme"));
 		IngredientType type = TypeLoader.getIngredientTypeByString((String) json.get("type"));
 		ModelScheme scheme = SchemeLoader.getModelSchemeByString((String) json.get("scheme"));
-		StatData stats = parseStats((JSONArray) json.get("stats"));
+		StatData stats = parseStats((JSONArray) json.get("stats"), true);
 		HashMap<CraftingHit, Integer> hits = new HashMap<>();
 		int i = 0;
 		JSONArray hitArray = (JSONArray) json.get("hits");
@@ -277,7 +288,7 @@ public class AlloyDatabase {
 		}
 		AlloyData data = new AlloyData(colourScheme, model, type, scheme, stats, hits, xp, recipe, tier, statMergeBucketId);
 		if (json.get("baseStats") instanceof JSONArray recorded) {
-			data.setBaseStats(parseStats(recorded));
+			data.setBaseStats(parseStats(recorded, false));
 		}
 		return new Alloy(id, name, data);
 	}

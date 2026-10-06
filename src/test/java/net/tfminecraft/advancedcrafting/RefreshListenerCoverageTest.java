@@ -191,6 +191,7 @@ class RefreshListenerCoverageTest extends CoverageSupport {
     assertTrue(CraftRefreshListener.isWorldStorage(mock(DoubleChest.class)));
     assertTrue(CraftRefreshListener.isWorldStorage(mock(StorageMinecart.class)));
     assertFalse(CraftRefreshListener.isWorldStorage(mock(InventoryHolder.class)));
+    assertFalse(CraftRefreshListener.isWorldStorage(mock(Player.class)));
     assertFalse(CraftRefreshListener.isWorldStorage(null));
   }
 }

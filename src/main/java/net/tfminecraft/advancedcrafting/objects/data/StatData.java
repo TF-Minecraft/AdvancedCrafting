@@ -18,10 +18,11 @@ public class StatData {
 		
 	}
 	
+	/** Entry-for-entry copy; repeated stat types stay separate, as in the source. */
 	public static StatData copyOf(StatData source) {
 		StatData copy = new StatData();
 		for (StatModifier m : source.getModifiers()) {
-			copy.addModifier(m);
+			copy.modifiers.add(m.copy());
 		}
 		return copy;
 	}
