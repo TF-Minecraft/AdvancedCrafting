@@ -53,6 +53,7 @@ import net.tfminecraft.advancedcrafting.utils.CraftStatCalculator;
 import net.tfminecraft.advancedcrafting.utils.CraftTierLore;
 import net.tfminecraft.advancedcrafting.utils.MMOStatApplicator;
 import net.tfminecraft.advancedcrafting.utils.MajorityTierResolver;
+import net.tfminecraft.advancedcrafting.utils.ModelSchemeResolver;
 import net.tfminecraft.advancedcrafting.utils.ProfessionPermissions;
 import net.tfminecraft.advancedcrafting.lifecycle.CraftLifecycle;
 
@@ -506,20 +507,7 @@ public class CraftingStation {
 		mmo.setData(ItemStats.LORE, lore);
 		ItemStack finalItem = mmo.newBuilder().build();
 		if(scheme != null) {
-			// A recipe-specific model on the main material wins over the secondary model ingredient.
-			if(scheme.getModel(recipe.getId()) == null && !recipe.getModelType().equalsIgnoreCase("none")) {
-				for(String s : currentMaterials.keySet()) {
-					String modeltype = s.split("\\.")[0];
-					String modelId = s.split("\\.")[1];
-					if(modeltype.equalsIgnoreCase("ingredient")) {
-						Ingredient ing = IngredientLoader.getByString(modelId);
-						if(ing.getIngredientData().getType().getId().equalsIgnoreCase(recipe.getModelType())) scheme = ing.getIngredientData().getModelScheme();
-					} else if(modeltype.equalsIgnoreCase("alloy")) {
-						Alloy a = AlloyManager.getAlloyById(modelId);
-						if(a.getData().getType().getId().equalsIgnoreCase(recipe.getModelType())) scheme = a.getData().getModelScheme();
-					}
-				}
-			}
+			scheme = ModelSchemeResolver.forModel(recipe, scheme, currentMaterials);
 			finalItem = applyModel(finalItem, scheme);
 		}
 		CraftProvenance provenance = CraftProvenance.from(recipe, currentMaterials, q);

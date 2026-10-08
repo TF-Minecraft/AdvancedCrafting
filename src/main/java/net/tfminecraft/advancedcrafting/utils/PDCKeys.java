@@ -24,6 +24,11 @@ public final class PDCKeys {
 		return new NamespacedKey(AdvancedCrafting.plugin, "ac_craft_stat_template_revision");
 	}
 
+	/** Model scheme the crafted item wears (iron, steel, ...); alloys carry their base's. Read by ArmourShop. */
+	public static NamespacedKey craftModelScheme() {
+		return new NamespacedKey(AdvancedCrafting.plugin, "ac_craft_model_scheme");
+	}
+
 	public static NamespacedKey scrapBase() {
 		return new NamespacedKey(AdvancedCrafting.plugin, "ac_scrap_base");
 	}

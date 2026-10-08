@@ -404,12 +404,11 @@ class StationCoverageTest extends CoverageSupport {
                 specific
                     ? Material.DIAMOND_SWORD
                     : modelType.equals("none") ? Material.IRON_SWORD : Material.GOLDEN_SWORD;
+            var craftRecipe = recipe("recipe: ['metal.1', 'paper.1']\nmodel-type: " + modelType);
+            RecipeLoader.map.put(craftRecipe.getId(), craftRecipe);
             var station =
                 new CraftingStation(
-                    loc(),
-                    recipe("recipe: ['metal.1', 'paper.1']\nmodel-type: " + modelType),
-                    new HashMap<>(Map.of(key, 1, secondary, 1)),
-                    new HashMap<>());
+                    loc(), craftRecipe, new HashMap<>(Map.of(key, 1, secondary, 1)), new HashMap<>());
             station.getCurrentMaterials().put("unknown.removed", 1);
             try (var nbt = mockStatic(NBTItem.class);
                 var models = mockStatic(LegacyModelData.class);
@@ -425,6 +424,13 @@ class StationCoverageTest extends CoverageSupport {
               var result = station.buildCompletedItem(p, 50.);
               assertEquals(expectedMaterial, result.getType());
               models.verify(() -> LegacyModelData.set(any(), eq(expectedModel)));
+              // The tag names the scheme whose look the item got; alloys carry their base's.
+              assertEquals(
+                  expectedModel == 3 ? "cloth-look" : "metal-look",
+                  result
+                      .getItemMeta()
+                      .getPersistentDataContainer()
+                      .get(PDCKeys.craftModelScheme(), PersistentDataType.STRING));
             }
           }
     }

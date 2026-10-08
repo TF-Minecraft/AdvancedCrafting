@@ -18,7 +18,9 @@ import net.tfminecraft.advancedcrafting.objects.alloys.Alloy;
 import net.tfminecraft.advancedcrafting.objects.crafting.CraftingRecipe;
 import net.tfminecraft.advancedcrafting.objects.crafting.Quality;
 import net.tfminecraft.advancedcrafting.objects.ingredients.Ingredient;
+import net.tfminecraft.advancedcrafting.objects.schemes.ModelScheme;
 import net.tfminecraft.advancedcrafting.objects.stats.StatTemplate;
+import net.tfminecraft.advancedcrafting.utils.ModelSchemeResolver;
 import net.tfminecraft.advancedcrafting.utils.PDCKeys;
 
 public class CraftProvenance {
@@ -101,6 +103,11 @@ public class CraftProvenance {
 		meta.getPersistentDataContainer().set(PDCKeys.craftInputs(), PersistentDataType.STRING, GSON.toJson(inputs));
 		meta.getPersistentDataContainer().set(PDCKeys.craftStatTemplateRevision(), PersistentDataType.INTEGER,
 				statTemplateRevision);
+		ModelScheme scheme = ModelSchemeResolver.resolve(RecipeLoader.getByString(recipeId), inputs);
+		if (scheme != null) {
+			meta.getPersistentDataContainer().set(PDCKeys.craftModelScheme(), PersistentDataType.STRING,
+					scheme.getId());
+		}
 		item.setItemMeta(meta);
 	}
 
