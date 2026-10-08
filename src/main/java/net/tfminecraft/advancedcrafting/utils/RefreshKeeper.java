@@ -60,6 +60,9 @@ public final class RefreshKeeper {
 		}
 		oldMeta.getPersistentDataContainer().copyTo(meta.getPersistentDataContainer(), false);
 		kept.setItemMeta(meta);
+		if (IaAutoUpdate.isExposed(kept)) {
+			IaAutoUpdate.protect(kept);
+		}
 		return kept;
 	}
 }

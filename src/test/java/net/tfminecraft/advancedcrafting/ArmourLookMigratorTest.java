@@ -28,14 +28,35 @@ class ArmourLookMigratorTest extends CoverageSupport {
   static final NamespacedKey COMPOUND = new NamespacedKey("test", "itemsadder");
   /** Stands in for the custom model data component, which MockBukkit does not implement. */
   static final NamespacedKey MODEL = new NamespacedKey("test", "model");
+  /** Stands in for itemsadder.override_auto_update. */
+  static final NamespacedKey PROTECTED = new NamespacedKey("test", "protected");
 
   MockedStatic<NBTItem> nbts;
   MockedStatic<LegacyModelData> models;
+  MockedStatic<IaAutoUpdate> autoUpdate;
   CraftingRecipe light;
   CraftingRecipe infantry;
 
   @BeforeEach
   void world() throws Exception {
+    autoUpdate = mockStatic(IaAutoUpdate.class);
+    autoUpdate
+        .when(() -> IaAutoUpdate.isExposed(any(ItemStack.class)))
+        .thenAnswer(
+            call -> {
+              var pdc = ((ItemStack) call.getArgument(0)).getItemMeta().getPersistentDataContainer();
+              return (pdc.has(IA) || pdc.has(COMPOUND)) && !pdc.has(PROTECTED);
+            });
+    autoUpdate
+        .when(() -> IaAutoUpdate.protect(any(ItemStack.class)))
+        .thenAnswer(
+            call -> {
+              ItemStack item = call.getArgument(0);
+              var meta = item.getItemMeta();
+              meta.getPersistentDataContainer().set(PROTECTED, PersistentDataType.BYTE, (byte) 1);
+              item.setItemMeta(meta);
+              return null;
+            });
     models = mockStatic(LegacyModelData.class);
     models
         .when(() -> LegacyModelData.set(any(ItemMeta.class), any()))
@@ -111,6 +132,7 @@ class ArmourLookMigratorTest extends CoverageSupport {
   void closeNbt() {
     nbts.close();
     models.close();
+    autoUpdate.close();
   }
 
   CraftingRecipe armour(String id) throws Exception {
@@ -166,6 +188,7 @@ class ArmourLookMigratorTest extends CoverageSupport {
     assertEquals("v.chainmail_helmet.0", tag(migrated, PDCKeys.previousModel()));
     assertEquals("iron", tag(migrated, PDCKeys.craftModelScheme()));
     assertEquals("light_helmet", CraftProvenance.readFrom(migrated).getRecipeId());
+    assertTrue(migrated.getItemMeta().getPersistentDataContainer().has(PROTECTED));
 
     // Migrated pieces are left alone from then on.
     assertSame(migrated, ArmourLookMigrator.migrate(migrated));
@@ -190,13 +213,23 @@ class ArmourLookMigratorTest extends CoverageSupport {
     assertEquals(Material.LEATHER_HELMET, tagged.getType());
     assertNull(tag(tagged, PDCKeys.previousModel()));
     assertEquals("iron", tag(tagged, PDCKeys.craftModelScheme()));
+    assertTrue(tagged.getItemMeta().getPersistentDataContainer().has(PROTECTED));
     assertSame(tagged, ArmourLookMigrator.migrate(tagged));
+    // A tagged skin that ItemsAdder could still rebuild is protected on its own.
+    var exposed = tagged.clone();
+    var exposedMeta = exposed.getItemMeta();
+    exposedMeta.getPersistentDataContainer().remove(PROTECTED);
+    exposed.setItemMeta(exposedMeta);
+    var protectedCopy = ArmourLookMigrator.migrate(exposed);
+    assertNotSame(exposed, protectedCopy);
+    assertTrue(protectedCopy.getItemMeta().getPersistentDataContainer().has(PROTECTED));
     verify(items.getArmorMerger(), never()).merge(any(ItemStack.class), any(), anyString());
 
     // A vanilla skin of another model, a vanilla material carrying an ItemsAdder compound, and a
     // stale ia tag on the old material all stay as they are.
     var otherModel = ArmourLookMigrator.migrate(crafted("light_helmet", "iron", Material.CHAINMAIL_HELMET, 3));
     assertEquals(Material.CHAINMAIL_HELMET, otherModel.getType());
+    assertFalse(otherModel.getItemMeta().getPersistentDataContainer().has(PROTECTED));
     var compoundItem = crafted("light_helmet", "iron", Material.CHAINMAIL_HELMET, null);
     var meta = compoundItem.getItemMeta();
     meta.getPersistentDataContainer().set(COMPOUND, PersistentDataType.STRING, "x");

@@ -21,7 +21,8 @@ import net.tfminecraft.advancedcrafting.util.LegacyModelData;
  * Brings crafted pieces made before the per-recipe models up to date. A piece that still wears the old default
  * look of its recipe (its metal's type model, or a configured legacy model) gets the recipe's current model
  * through the same merge skins use, so its MMOItems data stays. Any other look is a skin and is kept. Every
- * recorded craft also gets its model scheme tag, which ArmourShop's metal skin lines read.
+ * recorded craft also gets its model scheme tag, which ArmourShop's metal skin lines read, and pieces with an
+ * ItemsAdder look are opted out of ItemsAdder's auto_update (see {@link IaAutoUpdate}).
  */
 public final class ArmourLookMigrator {
 	private ArmourLookMigrator() {
@@ -60,6 +61,12 @@ public final class ArmourLookMigrator {
 			ItemMeta meta = result.getItemMeta();
 			meta.getPersistentDataContainer().set(PDCKeys.craftModelScheme(), PersistentDataType.STRING, scheme.getId());
 			result.setItemMeta(meta);
+		}
+		if (IaAutoUpdate.isExposed(result)) {
+			if (result == item) {
+				result = item.clone();
+			}
+			IaAutoUpdate.protect(result);
 		}
 		return result;
 	}

@@ -9,6 +9,7 @@ import net.Indyuce.mmoitems.api.item.mmoitem.MMOItem;
 import net.Indyuce.mmoitems.stat.data.DoubleData;
 import net.kyori.adventure.text.Component;
 import net.tfminecraft.advancedcrafting.util.LegacyModelData;
+import net.tfminecraft.advancedcrafting.utils.IaAutoUpdate;
 import net.tfminecraft.advancedcrafting.utils.RefreshKeeper;
 import net.tfminecraft.tlibs.objects.api.subapi.ItemSkinPreserver;
 import org.bukkit.Color;
@@ -28,9 +29,14 @@ class RefreshKeeperTest extends CoverageSupport {
 
   MockedStatic<ItemSkinPreserver> skins;
   MockedStatic<LegacyModelData> models;
+  MockedStatic<IaAutoUpdate> autoUpdate;
 
   @BeforeEach
   void mocks() {
+    autoUpdate = mockStatic(IaAutoUpdate.class);
+    autoUpdate
+        .when(() -> IaAutoUpdate.isExposed(any(ItemStack.class)))
+        .thenAnswer(call -> ((ItemStack) call.getArgument(0)).getType() == Material.LEATHER_HELMET);
     skins = mockStatic(ItemSkinPreserver.class);
     skins
         .when(() -> ItemSkinPreserver.apply(any(ItemStack.class), any(ItemStack.class)))
@@ -62,6 +68,7 @@ class RefreshKeeperTest extends CoverageSupport {
   void close() {
     skins.close();
     models.close();
+    autoUpdate.close();
   }
 
   static NBTItem wear(Integer current, Integer max) {
@@ -127,12 +134,14 @@ class RefreshKeeperTest extends CoverageSupport {
         "new",
         kept.getPersistentDataContainer().get(PlainKeys.QUALITY, PersistentDataType.STRING),
         "the rebuilt item's own data wins");
+    autoUpdate.verify(() -> IaAutoUpdate.protect(result));
 
     // A plain item without a model or name keeps what the rebuild made.
     var plain = new ItemStack(Material.IRON_SWORD);
     var plainResult = RefreshKeeper.keepAppearance(plain, new ItemStack(Material.IRON_SWORD));
     assertFalse(LegacyModelData.has(plainResult.getItemMeta()));
     assertFalse(plainResult.getItemMeta().hasDisplayName());
+    autoUpdate.verify(() -> IaAutoUpdate.protect(plainResult), never());
   }
 
   @Test

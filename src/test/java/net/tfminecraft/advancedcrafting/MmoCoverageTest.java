@@ -73,6 +73,7 @@ class MmoCoverageTest extends CoverageSupport {
     try (var nbts = mockStatic(NBTItem.class);
         var skins = mockStatic(net.tfminecraft.tlibs.objects.api.subapi.ItemSkinPreserver.class);
         var models = mockStatic(net.tfminecraft.advancedcrafting.util.LegacyModelData.class);
+        var autoUpdate = mockStatic(IaAutoUpdate.class);
         var mmos =
             mockConstruction(
                 LiveMMOItem.class,

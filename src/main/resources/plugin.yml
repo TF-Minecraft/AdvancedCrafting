@@ -5,6 +5,7 @@ version: ${project.version}
 author: Drefvelin
 
 depend: [TLibs, MMOCore, MMOItems, MythicLib]
+softdepend: [NBTAPI]
 
 commands:
   ac:
