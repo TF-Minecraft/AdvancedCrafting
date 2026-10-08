@@ -71,12 +71,20 @@ class MmoCoverageTest extends CoverageSupport {
     var rebuilt = new ItemStack(Material.IRON_SWORD);
     var nbt = mock(NBTItem.class);
     try (var nbts = mockStatic(NBTItem.class);
+        var skins = mockStatic(net.tfminecraft.tlibs.objects.api.subapi.ItemSkinPreserver.class);
+        var models = mockStatic(net.tfminecraft.advancedcrafting.util.LegacyModelData.class);
         var mmos =
             mockConstruction(
                 LiveMMOItem.class,
                 withSettings().defaultAnswer(RETURNS_DEEP_STUBS),
                 (mock, ctx) -> when(mock.newBuilder().build()).thenReturn(rebuilt))) {
       nbts.when(() -> NBTItem.get(any(ItemStack.class))).thenReturn(nbt);
+      skins
+          .when(
+              () ->
+                  net.tfminecraft.tlibs.objects.api.subapi.ItemSkinPreserver.apply(
+                      any(ItemStack.class), any(ItemStack.class)))
+          .thenAnswer(call -> call.getArgument(1));
       var result = CraftStatRefresher.refreshIfOutdated(item);
       assertTrue(result.isChanged());
       assertNull(result.getError());
