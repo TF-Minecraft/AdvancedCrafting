@@ -39,6 +39,11 @@ public class Cache {
 
 	public static boolean debugStatRefresh;
 
+	/** Crafted pieces still wearing an old default look get their recipe's current model. */
+	public static boolean armourLookMigration;
+	/** Old default looks per recipe id, for recipes whose old look did not come from their metal's type model. */
+	public static Map<String, List<String>> legacyModels = new HashMap<>();
+
 	public static boolean showIngredientStats = true;
 
 	/** Divisors applied to bucket-averaged stats before template factors (e.g. movement_speed: 100). */

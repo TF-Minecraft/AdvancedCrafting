@@ -32,12 +32,12 @@ public final class AcItemRefresher {
 		}
 		CraftStatRefresher.RefreshResult crafted = CraftStatRefresher.refreshIfOutdated(item);
 		if (crafted.isChanged()) {
-			return crafted.getItem();
+			return ArmourLookMigrator.migrate(crafted.getItem());
 		}
 		AcItemLoreRefresher.RefreshResult lore = AcItemLoreRefresher.refreshIfOutdated(item);
 		if (lore.isChanged()) {
-			return lore.getItem();
+			return ArmourLookMigrator.migrate(lore.getItem());
 		}
-		return item;
+		return ArmourLookMigrator.migrate(item);
 	}
 }

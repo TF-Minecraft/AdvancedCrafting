@@ -29,6 +29,11 @@ public final class PDCKeys {
 		return new NamespacedKey(AdvancedCrafting.plugin, "ac_craft_model_scheme");
 	}
 
+	/** The old default look a crafted piece wore before the look migration replaced it. */
+	public static NamespacedKey previousModel() {
+		return new NamespacedKey(AdvancedCrafting.plugin, "ac_previous_model");
+	}
+
 	public static NamespacedKey scrapBase() {
 		return new NamespacedKey(AdvancedCrafting.plugin, "ac_scrap_base");
 	}
