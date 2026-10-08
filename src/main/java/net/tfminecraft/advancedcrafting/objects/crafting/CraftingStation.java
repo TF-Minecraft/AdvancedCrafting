@@ -247,22 +247,16 @@ public class CraftingStation {
 		return StationFeedback.SUCCESS;
 	}
 	
-	/** Lines the branding tool shows on right-click: recipe, materials, and the current count of every configured hit. */
+	/**
+	 * Lines the branding tool shows on right-click: the recipe and the material groups still to fill.
+	 * Players have to find the hits themselves, so per-hit counts stay out of it.
+	 */
 	public List<String> getStatusLines() {
 		List<String> lines = new ArrayList<>();
 		lines.add("§7Recipe: " + recipe.getCleanedName());
 		for (Map.Entry<IngredientType, IntCounter> e : types.entrySet()) {
 			if (e.getKey() == null) continue;
 			lines.add(e.getKey().getName() + "§7: §e" + e.getValue().getCurrent() + "/" + e.getValue().getNeeded());
-		}
-		// Counted by id: a reload replaces the hit objects this station was keyed with.
-		Map<String, Integer> done = new HashMap<>();
-		for (Map.Entry<CraftingHit, IntCounter> e : hits.entrySet()) {
-			if (e.getKey() == null) continue;
-			done.merge(e.getKey().getId(), e.getValue().getCurrent(), Integer::sum);
-		}
-		for (CraftingHit hit : HitLoader.get().values()) {
-			lines.add(hit.getName() + "§7: §e" + done.getOrDefault(hit.getId(), 0));
 		}
 		lines.add("§7Left-click branding to finish");
 		lines.add("§cSHIFT + LEFT CLICK with the branding tool to cancel the project!");

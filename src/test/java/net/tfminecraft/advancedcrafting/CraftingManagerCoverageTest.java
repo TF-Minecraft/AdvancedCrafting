@@ -142,14 +142,14 @@ class CraftingManagerCoverageTest extends CoverageSupport {
     var m = new CraftingManager();
     var s = station(m, b);
     when(s.hasRecipe()).thenReturn(true);
-    when(s.getStatusLines()).thenReturn(List.of("§7Recipe: Sword", "Strike§7: §e3"));
+    when(s.getStatusLines()).thenReturn(List.of("§7Recipe: Sword", "Metal§7: §e1/2"));
     p.getInventory().setItemInMainHand(new ItemStack(Material.STICK));
     Cache.brandingTool = "v.stick";
     when(items.getChecker().checkItemWithPath(any(), eq(Cache.brandingTool))).thenReturn(true);
     m.openStation(event(p, b, Action.RIGHT_CLICK_BLOCK));
     verify(s, never()).addMaterial(any(), any());
     verify(p).sendMessage("§7Recipe: Sword");
-    verify(p).sendMessage("Strike§7: §e3");
+    verify(p).sendMessage("Metal§7: §e1/2");
     when(items.getChecker().checkItemWithPath(any(), eq(Cache.brandingTool))).thenReturn(false);
     when(s.addMaterial(eq(p), any())).thenReturn(StationFeedback.NOT_INGREDIENT);
     map(m, "cooldown").clear();
