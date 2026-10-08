@@ -328,6 +328,20 @@ class StationCoverageTest extends CoverageSupport {
               new Class[] {ItemStack.class, ModelScheme.class},
               original,
               ia));
+      var perRecipe =
+          new ModelScheme(
+              "per-recipe", yaml("models: ['smith(v.golden_sword.7)', 'sword(v.iron_sword.9)']"));
+      var weighted = new ItemStack(Material.STONE_SWORD);
+      assertSame(
+          weighted,
+          invoke(
+              station,
+              "applyModel",
+              new Class[] {ItemStack.class, ModelScheme.class},
+              weighted,
+              perRecipe));
+      assertEquals(Material.IRON_SWORD, weighted.getType());
+      models.verify(() -> LegacyModelData.set(any(), eq(9)));
       for (String path : List.of("models: ['smith(other.item)']", "models: []"))
         assertSame(
             original,

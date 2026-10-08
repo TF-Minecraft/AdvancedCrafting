@@ -541,7 +541,11 @@ public class CraftingStation {
 	// This path mutates the existing ItemStack; replacing it would change aliases held by callers.
 	@SuppressWarnings("deprecation")
 	private ItemStack applyModel(ItemStack i, ModelScheme scheme) {
-		String path = scheme.getModel(recipe.getType());
+		// A model named after the recipe (e.g. heavy_helmet) wins over the shared type (helmet).
+		String path = scheme.getModel(recipe.getId());
+		if(path == null) {
+			path = scheme.getModel(recipe.getType());
+		}
 		if(path == null) {
 			Bukkit.getLogger().warning("AC: No model in the scheme "+scheme.getId()+" for the recipe type "+recipe.getType());
 			return i;
