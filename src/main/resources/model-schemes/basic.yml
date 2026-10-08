@@ -30,6 +30,14 @@ iron:
         - heavy_chestplate(ia.tfmc_armor:iron_heavy_chestplate)
         - heavy_leggings(ia.tfmc_armor:iron_heavy_leggings)
         - heavy_boots(ia.tfmc_armor:iron_heavy_boots)
+        - infantry_helmet(ia.tfmc_armor:base_metal_iron_infantry_helmet)
+        - infantry_chestplate(ia.tfmc_armor:base_metal_iron_infantry_chestplate)
+        - infantry_leggings(ia.tfmc_armor:base_metal_iron_infantry_leggings)
+        - infantry_boots(ia.tfmc_armor:base_metal_iron_infantry_boots)
+        - mage_helmet(ia.tfmc_armor:base_metal_iron_mage_helmet)
+        - mage_chestplate(ia.tfmc_armor:base_metal_iron_mage_chestplate)
+        - mage_leggings(ia.tfmc_armor:base_metal_iron_mage_leggings)
+        - mage_boots(ia.tfmc_armor:base_metal_iron_mage_boots)
 
 steel:
     models:
@@ -60,6 +68,14 @@ steel:
         - heavy_chestplate(ia.tfmc_armor:steel_heavy_chestplate)
         - heavy_leggings(ia.tfmc_armor:steel_heavy_leggings)
         - heavy_boots(ia.tfmc_armor:steel_heavy_boots)
+        - infantry_helmet(ia.tfmc_armor:base_metal_steel_infantry_helmet)
+        - infantry_chestplate(ia.tfmc_armor:base_metal_steel_infantry_chestplate)
+        - infantry_leggings(ia.tfmc_armor:base_metal_steel_infantry_leggings)
+        - infantry_boots(ia.tfmc_armor:base_metal_steel_infantry_boots)
+        - mage_helmet(ia.tfmc_armor:base_metal_steel_mage_helmet)
+        - mage_chestplate(ia.tfmc_armor:base_metal_steel_mage_chestplate)
+        - mage_leggings(ia.tfmc_armor:base_metal_steel_mage_leggings)
+        - mage_boots(ia.tfmc_armor:base_metal_steel_mage_boots)
 
 bronze:
     models:
@@ -90,6 +106,14 @@ bronze:
         - heavy_chestplate(ia.tfmc_armor:bronze_heavy_chestplate)
         - heavy_leggings(ia.tfmc_armor:bronze_heavy_leggings)
         - heavy_boots(ia.tfmc_armor:bronze_heavy_boots)
+        - infantry_helmet(ia.tfmc_armor:base_metal_bronze_infantry_helmet)
+        - infantry_chestplate(ia.tfmc_armor:base_metal_bronze_infantry_chestplate)
+        - infantry_leggings(ia.tfmc_armor:base_metal_bronze_infantry_leggings)
+        - infantry_boots(ia.tfmc_armor:base_metal_bronze_infantry_boots)
+        - mage_helmet(ia.tfmc_armor:base_metal_bronze_mage_helmet)
+        - mage_chestplate(ia.tfmc_armor:base_metal_bronze_mage_chestplate)
+        - mage_leggings(ia.tfmc_armor:base_metal_bronze_mage_leggings)
+        - mage_boots(ia.tfmc_armor:base_metal_bronze_mage_boots)
 
 abyssalite:
     models:
@@ -120,6 +144,14 @@ abyssalite:
         - heavy_chestplate(ia.tfmc_armor:abyssalite_heavy_chestplate)
         - heavy_leggings(ia.tfmc_armor:abyssalite_heavy_leggings)
         - heavy_boots(ia.tfmc_armor:abyssalite_heavy_boots)
+        - infantry_helmet(ia.tfmc_armor:base_metal_abyssalite_infantry_helmet)
+        - infantry_chestplate(ia.tfmc_armor:base_metal_abyssalite_infantry_chestplate)
+        - infantry_leggings(ia.tfmc_armor:base_metal_abyssalite_infantry_leggings)
+        - infantry_boots(ia.tfmc_armor:base_metal_abyssalite_infantry_boots)
+        - mage_helmet(ia.tfmc_armor:base_metal_abyssalite_mage_helmet)
+        - mage_chestplate(ia.tfmc_armor:base_metal_abyssalite_mage_chestplate)
+        - mage_leggings(ia.tfmc_armor:base_metal_abyssalite_mage_leggings)
+        - mage_boots(ia.tfmc_armor:base_metal_abyssalite_mage_boots)
 
 mythril:
     models:
@@ -150,6 +182,14 @@ mythril:
         - heavy_chestplate(ia.tfmc_armor:mythril_heavy_chestplate)
         - heavy_leggings(ia.tfmc_armor:mythril_heavy_leggings)
         - heavy_boots(ia.tfmc_armor:mythril_heavy_boots)
+        - infantry_helmet(ia.tfmc_armor:base_metal_mythril_infantry_helmet)
+        - infantry_chestplate(ia.tfmc_armor:base_metal_mythril_infantry_chestplate)
+        - infantry_leggings(ia.tfmc_armor:base_metal_mythril_infantry_leggings)
+        - infantry_boots(ia.tfmc_armor:base_metal_mythril_infantry_boots)
+        - mage_helmet(ia.tfmc_armor:base_metal_mythril_mage_helmet)
+        - mage_chestplate(ia.tfmc_armor:base_metal_mythril_mage_chestplate)
+        - mage_leggings(ia.tfmc_armor:base_metal_mythril_mage_leggings)
+        - mage_boots(ia.tfmc_armor:base_metal_mythril_mage_boots)
 
 infantry:
     models:

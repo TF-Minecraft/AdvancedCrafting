@@ -355,6 +355,48 @@ class StationCoverageTest extends CoverageSupport {
   }
 
   @Test
+  void mainMaterialRecipeModelWinsAndSecondaryIngredientRemainsFallback() throws Exception {
+    var p = server.addPlayer();
+    QualityLoader.map.put("fine", new Quality("fine", yaml("name: Fine\namount: 0\nvalue: 0")));
+    TypeLoader.map.put("paper", new net.tfminecraft.advancedcrafting.objects.ingredients.IngredientType("paper", yaml("name: Paper")));
+    for (boolean specific : List.of(true, false)) {
+      SchemeLoader.models.put("metal-look", new ModelScheme("metal-look", yaml(
+          "models: ['smith(v.iron_sword.1)'" + (specific ? ", 'sword(v.diamond_sword.2)'" : "") + "]")));
+      SchemeLoader.models.put("cloth-look", new ModelScheme("cloth-look", yaml("models: ['smith(v.golden_sword.3)']")));
+      var metal = ingredient("metal-" + specific, "model-scheme: metal-look");
+      var cloth = ingredient("cloth-" + specific, "type: paper\nmodel-scheme: cloth-look");
+      var alloy = new Alloy("metal-" + specific, "Metal", new AlloyData(
+          metal, new net.tfminecraft.advancedcrafting.objects.data.StatData(), new HashMap<>(), null));
+      AlloyManager.addAlloy(alloy);
+      var clothAlloy = new Alloy("cloth-" + specific, "Cloth", new AlloyData(
+          cloth, new net.tfminecraft.advancedcrafting.objects.data.StatData(), new HashMap<>(), null));
+      AlloyManager.addAlloy(clothAlloy);
+      for (String key : List.of("ingredient." + metal.getId(), "alloy." + alloy.getId()))
+      for (String secondary : List.of("ingredient." + cloth.getId(), "alloy." + clothAlloy.getId()))
+      for (String modelType : List.of("paper", "none")) {
+        int expectedModel = specific ? 2 : modelType.equals("none") ? 1 : 3;
+        Material expectedMaterial = specific ? Material.DIAMOND_SWORD
+            : modelType.equals("none") ? Material.IRON_SWORD : Material.GOLDEN_SWORD;
+        var station = new CraftingStation(loc(), recipe("recipe: ['metal.1', 'paper.1']\nmodel-type: " + modelType),
+            new HashMap<>(Map.of(key, 1, secondary, 1)), new HashMap<>());
+        station.getCurrentMaterials().put("unknown.removed", 1);
+        try (var nbt = mockStatic(NBTItem.class);
+            var models = mockStatic(LegacyModelData.class);
+            var mmos = mockConstruction(LiveMMOItem.class, withSettings().defaultAnswer(RETURNS_DEEP_STUBS),
+                (mmo, ctx) -> {
+                  when(mmo.getData(ItemStats.NAME)).thenReturn(new StringData("Old"));
+                  when(mmo.computeStatHistory(ItemStats.NAME)).thenReturn(null);
+                  when(mmo.newBuilder().build()).thenReturn(new ItemStack(Material.IRON_SWORD));
+                })) {
+          var result = station.buildCompletedItem(p, 50.);
+          assertEquals(expectedMaterial, result.getType());
+          models.verify(() -> LegacyModelData.set(any(), eq(expectedModel)));
+        }
+      }
+    }
+  }
+
+  @Test
   void experienceAggregatesOnlyExistingPositiveValidDefinitions() throws Exception {
     var p = server.addPlayer();
     var station = new CraftingStation(loc());

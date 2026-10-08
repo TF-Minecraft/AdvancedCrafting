@@ -506,7 +506,8 @@ public class CraftingStation {
 		mmo.setData(ItemStats.LORE, lore);
 		ItemStack finalItem = mmo.newBuilder().build();
 		if(scheme != null) {
-			if(!recipe.getModelType().equalsIgnoreCase("none")) {
+			// A recipe-specific model on the main material wins over the secondary model ingredient.
+			if(scheme.getModel(recipe.getId()) == null && !recipe.getModelType().equalsIgnoreCase("none")) {
 				for(String s : currentMaterials.keySet()) {
 					String modeltype = s.split("\\.")[0];
 					String modelId = s.split("\\.")[1];
