@@ -20,19 +20,28 @@ public final class IaAutoUpdate {
 
 	/** Whether the item wears an ItemsAdder look that ItemsAdder may still rebuild. */
 	public static boolean isExposed(ItemStack item) {
-		return NBT.get(item, nbt -> {
-			if (!nbt.hasTag(COMPOUND)) {
-				return false;
-			}
-			ReadableNBT compound = nbt.getCompound(COMPOUND);
-			return compound != null && !Boolean.TRUE.equals(compound.getBoolean(OVERRIDE));
-		});
+		try {
+			return NBT.get(item, nbt -> {
+				if (!nbt.hasTag(COMPOUND)) {
+					return false;
+				}
+				ReadableNBT compound = nbt.getCompound(COMPOUND);
+				return compound != null && !Boolean.TRUE.equals(compound.getBoolean(OVERRIDE));
+			});
+		} catch (LinkageError missingNbtApi) {
+			// NBTAPI is a soft dependency; without it there is no opt-out to set.
+			return false;
+		}
 	}
 
 	/** Opts the item out of ItemsAdder's auto_update. */
 	public static void protect(ItemStack item) {
-		NBT.modify(item, nbt -> {
-			nbt.getOrCreateCompound(COMPOUND).setBoolean(OVERRIDE, true);
-		});
+		try {
+			NBT.modify(item, nbt -> {
+				nbt.getOrCreateCompound(COMPOUND).setBoolean(OVERRIDE, true);
+			});
+		} catch (LinkageError missingNbtApi) {
+			// NBTAPI is a soft dependency; without it the item simply stays as it is.
+		}
 	}
 }

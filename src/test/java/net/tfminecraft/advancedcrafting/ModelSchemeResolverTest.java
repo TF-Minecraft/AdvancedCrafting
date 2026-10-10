@@ -67,6 +67,16 @@ class ModelSchemeResolverTest extends CoverageSupport {
             in("ingredient", "", 1),
             in("misc", "x", 1)));
     assertNull(scheme(noModel, in("ingredient", "gone", 1)));
+    // A model-type material whose scheme has no model for the recipe (an unknown scheme falls back to an
+    // empty default) or no scheme at all keeps the main scheme.
+    SchemeLoader.models.put("default", new ModelScheme("default", yaml("models: []")));
+    var blank = ingredient("blank", "type: paper\nmodel-scheme: missing");
+    alloy("blankalloy", blank);
+    assertEquals("iron", scheme(byPaper, in("ingredient", "iron", 3), in("ingredient", "blank", 1)));
+    assertEquals("iron", scheme(byPaper, in("ingredient", "iron", 3), in("alloy", "blankalloy", 1)));
+    SchemeLoader.models.remove("default");
+    ingredient("schemeless", "type: paper\nmodel-scheme: missing");
+    assertEquals("iron", scheme(byPaper, in("ingredient", "iron", 3), in("ingredient", "schemeless", 1)));
     // Malformed inputs are skipped.
     assertEquals(
         "iron",

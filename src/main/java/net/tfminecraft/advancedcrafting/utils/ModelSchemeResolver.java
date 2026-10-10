@@ -37,14 +37,21 @@ public final class ModelSchemeResolver {
 		return forModel(recipe, main, materials);
 	}
 
-	/** A recipe-specific model on the main material wins over the secondary model ingredient. */
+	/**
+	 * A recipe-specific model on the main material wins over the secondary model ingredient. A model-type
+	 * material only takes over when its scheme has a model for the recipe, so one without a scheme (or with an
+	 * empty one) never leaves the item without a look.
+	 */
 	public static ModelScheme forModel(CraftingRecipe recipe, ModelScheme scheme, Map<String, Integer> materials) {
 		if (scheme == null || scheme.getModel(recipe.getId()) != null
 				|| recipe.getModelType().equalsIgnoreCase("none")) {
 			return scheme;
 		}
 		for (String key : materials.keySet()) {
-			scheme = schemeOf(key, recipe.getModelType(), scheme);
+			ModelScheme candidate = schemeOf(key, recipe.getModelType(), null);
+			if (candidate != null && ModelApplier.modelFor(candidate, recipe) != null) {
+				scheme = candidate;
+			}
 		}
 		return scheme;
 	}

@@ -63,4 +63,15 @@ class IaAutoUpdateTest extends CoverageSupport {
     }
     verify(compound).setBoolean("override_auto_update", true);
   }
+
+  @Test
+  void withoutNbtApiNothingIsExposedOrChanged() {
+    var item = mock(ItemStack.class);
+    try (var nbts = mockStatic(NBT.class)) {
+      nbts.when(() -> NBT.get(eq(item), any(Function.class))).thenThrow(new NoClassDefFoundError("NBT"));
+      nbts.when(() -> NBT.modify(eq(item), any(Consumer.class))).thenThrow(new NoClassDefFoundError("NBT"));
+      assertFalse(IaAutoUpdate.isExposed(item));
+      assertDoesNotThrow(() -> IaAutoUpdate.protect(item));
+    }
+  }
 }
