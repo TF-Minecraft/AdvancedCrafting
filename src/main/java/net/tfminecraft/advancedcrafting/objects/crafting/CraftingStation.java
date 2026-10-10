@@ -47,6 +47,7 @@ import net.tfminecraft.advancedcrafting.objects.schemes.ModelScheme;
 import net.tfminecraft.advancedcrafting.objects.stats.StatModifier;
 import net.tfminecraft.advancedcrafting.utils.CraftStatCalculator;
 import net.tfminecraft.advancedcrafting.utils.CraftTierLore;
+import net.tfminecraft.advancedcrafting.utils.D20Roll;
 import net.tfminecraft.advancedcrafting.utils.MMOStatApplicator;
 import net.tfminecraft.advancedcrafting.utils.MajorityTierResolver;
 import net.tfminecraft.advancedcrafting.utils.ModelApplier;
@@ -354,22 +355,12 @@ public class CraftingStation {
 		return complete;
 	}
 	
-	private boolean checkHits(Player p) {
-		boolean complete = true;
-		for(HitType t : hitTypes.keySet()) {
-			IntCounter c = hitTypes.get(t);
-			if(!c.isEqual()) {
-				complete = false;
-				p.sendMessage("§cYou only have "+c.getCurrent()+" out of "+c.getNeeded() + " " +t.getName()+ "§c hits.");
-			}
-		}
-		return complete;
-	}
-	
 	private Quality getQuality(double d) {
 		return QualityLoader.getByAmount(d);
 	}
 	private double calculatePercentage() {
+		// A piece whose materials need no hits has nothing to get wrong.
+		if (hits.isEmpty()) return 100;
 		int counter = 0;
 		double amount = 0.0;
 		for(CraftingHit h : hits.keySet()) {
@@ -380,29 +371,6 @@ public class CraftingStation {
 			if(d > 100.0) amount = amount+(200.0-d);
 		}
 		return Math.round((amount/counter));
-	}
-
-	private void warnOvershootHits(Player p) {
-		if (Cache.hitOvershootWarnPercent <= 0) {
-			return;
-		}
-		String template = Cache.hitOvershootWarnMessage;
-		if (template == null || template.isBlank()) {
-			return;
-		}
-		for (CraftingHit hit : hits.keySet()) {
-			IntCounter counter = hits.get(hit);
-			int needed = counter.getNeeded();
-			int current = counter.getCurrent();
-			if (needed <= 0 || current <= needed) {
-				continue;
-			}
-			double overshoot = ((double) (current - needed) / needed) * 100.0;
-			if (overshoot < Cache.hitOvershootWarnPercent) {
-				continue;
-			}
-			p.sendMessage(template.replace("%hit%", hit.getName()));
-		}
 	}
 
 	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
@@ -425,9 +393,6 @@ public class CraftingStation {
 	private StationFeedback createItem(Player p, Double forcedQualityPercent, boolean deliver) {
 		if (!checkItems(p)) {
 			return StationFeedback.LACKING_ITEMS;
-		}
-		if (forcedQualityPercent == null && !checkHits(p)) {
-			return StationFeedback.LACKING_HITS;
 		}
 		ItemAPI api = TLibs.getItemAPI();
 		result = api.getCreator().getItemFromPath("m."+recipe.getTemplate());
@@ -492,11 +457,18 @@ public class CraftingStation {
         }
 		double percentage = forcedQualityPercent != null ? forcedQualityPercent : calculatePercentage();
 		Quality q = getQuality(percentage);
-		p.sendMessage("Quality: "+q.getName());
-		p.sendMessage("Hit Percenage: §e"+percentage+"%");
+		p.sendMessage("Hit Percentage: §e"+percentage+"%");
 		if (forcedQualityPercent == null) {
-			warnOvershootHits(p);
+			// Perfect hits alone are not a Masterwork: the craft roll must also meet the DC. Stats still come
+			// only from the materials, so every Masterwork has the best stats its materials give.
+			D20Roll roll = D20Roll.roll(p);
+			p.sendMessage("Craft roll: " + roll.describe());
+			if (percentage >= 100 && !roll.meets(D20Roll.masterworkDc)) {
+				Quality below = QualityLoader.below(q);
+				if (below != null) q = below;
+			}
 		}
+		p.sendMessage("Quality: "+q.getName());
 		List<String> sockets = new ArrayList<String>();
 		SocketGroup socketGroup = SocketGroupLoader.getByString(recipe.getSocketGroupId());
 		if(socketGroup == null) {
@@ -549,7 +521,6 @@ public class CraftingStation {
 		CraftingHit hit = HitLoader.getByTool(nbt.getType()+"."+nbt.getString("MMOITEMS_ITEM_ID"));
 		if(hit == null) return StationFeedback.WRONG_TYPE;
 		if(!hitTypes.containsKey(hit.getType())) return StationFeedback.NONE;
-		if(hitTypes.get(hit.getType()).isEqual()) return StationFeedback.CAPACITY;
 		addHit(p, hit);
 		return StationFeedback.SUCCESS;
 		

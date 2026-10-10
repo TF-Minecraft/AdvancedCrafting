@@ -31,8 +31,12 @@ abstract class CoverageSupport {
   AdvancedCrafting plugin;
   Map<java.lang.reflect.Field, Object> cacheBefore = new HashMap<>();
 
+  java.util.function.IntSupplier dieBefore;
+
   @BeforeEach
   void setup() throws Exception {
+    dieBefore = net.tfminecraft.advancedcrafting.utils.D20Roll.die;
+    net.tfminecraft.advancedcrafting.utils.D20Roll.load(null);
     for (var field : Cache.class.getFields()) {
       Object value = field.get(null);
       cacheBefore.put(field, value instanceof Map ? new HashMap<>((Map<?, ?>) value) : value);
@@ -99,6 +103,8 @@ abstract class CoverageSupport {
     tlibs.close();
     AdvancedCrafting.plugin = null;
     for (var entry : cacheBefore.entrySet()) entry.getKey().set(null, entry.getValue());
+    net.tfminecraft.advancedcrafting.utils.D20Roll.die = dieBefore;
+    net.tfminecraft.advancedcrafting.utils.D20Roll.load(null);
   }
 
   static YamlConfiguration yaml(String text) throws Exception {

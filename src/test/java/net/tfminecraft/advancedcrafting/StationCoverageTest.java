@@ -172,7 +172,7 @@ class StationCoverageTest extends CoverageSupport {
   }
 
   @Test
-  void hitSelectionUsesRegisteredMmoToolsAndSharedTypeCapacity() throws Exception {
+  void hitSelectionUsesRegisteredMmoToolsAndAcceptsAnyNumberOfHits() throws Exception {
     var p = server.addPlayer();
     var iron = ingredient("iron", "hits: ['strike.2']");
     var station = new CraftingStation(loc());
@@ -200,15 +200,20 @@ class StationCoverageTest extends CoverageSupport {
       assertEquals(StationFeedback.SUCCESS, station.hit(p, tool));
       when(data.getString("MMOITEMS_ITEM_ID")).thenReturn("iron_axe");
       assertEquals(StationFeedback.SUCCESS, station.hit(p, tool));
-      assertEquals(StationFeedback.CAPACITY, station.hit(p, tool));
+      // A full hit type still takes more hits; overworking only lowers the hit percent.
+      assertEquals(StationFeedback.SUCCESS, station.hit(p, tool));
+      assertEquals(StationFeedback.SUCCESS, station.hit(p, tool));
+      assertEquals(3, station.getHits().get(HitLoader.map.get("strike")).getCurrent());
       assertEquals(1, station.getHits().get(extra).getCurrent());
     }
   }
 
   @Test
-  void qualityReflectsUnderAndOverWorkAndWarningsUseConfiguredThreshold() throws Exception {
-    var p = server.addPlayer();
+  void qualityReflectsUnderAndOverWork() throws Exception {
     var station = new CraftingStation(loc());
+    // No hits needed at all: nothing to get wrong.
+    assertEquals(
+        100, ((Number) invoke(station, "calculatePercentage", new Class[] {})).doubleValue());
     var counter = new IntCounter();
     counter.setNeeded(4);
     station.getHits().put(HitLoader.map.get("strike"), counter);
@@ -219,22 +224,6 @@ class StationCoverageTest extends CoverageSupport {
           expected,
           ((Number) invoke(station, "calculatePercentage", new Class[] {})).doubleValue());
     }
-    Cache.hitOvershootWarnPercent = 0;
-    invoke(station, "warnOvershootHits", new Class[] {Player.class}, p);
-    Cache.hitOvershootWarnPercent = 30;
-    Cache.hitOvershootWarnMessage = null;
-    invoke(station, "warnOvershootHits", new Class[] {Player.class}, p);
-    Cache.hitOvershootWarnMessage = " ";
-    invoke(station, "warnOvershootHits", new Class[] {Player.class}, p);
-    Cache.hitOvershootWarnMessage = "Too many %hit%";
-    counter.setNeeded(0);
-    invoke(station, "warnOvershootHits", new Class[] {Player.class}, p);
-    counter.setNeeded(4);
-    for (int n : List.of(2, 5, 6)) {
-      counter.setCurrent(n);
-      invoke(station, "warnOvershootHits", new Class[] {Player.class}, p);
-    }
-    assertTrue(p.nextMessage().contains("Strike"));
   }
 
   @Test
@@ -246,7 +235,6 @@ class StationCoverageTest extends CoverageSupport {
     assertEquals(StationFeedback.LACKING_ITEMS, station.craft(p));
     p.getInventory().setItemInMainHand(iron.build());
     station.addMaterial(p, iron.build());
-    assertEquals(StationFeedback.LACKING_HITS, station.craft(p));
     QualityLoader.map.put("fine", new Quality("fine", yaml("name: Fine\namount: 0\nvalue: 0")));
     try (var nbt = mockStatic(NBTItem.class);
         var models = mockStatic(LegacyModelData.class);
@@ -269,6 +257,67 @@ class StationCoverageTest extends CoverageSupport {
       ((Map<?, IntCounter>) ht.get(station)).values().forEach(c -> c.setCurrent(c.getNeeded()));
       assertEquals(StationFeedback.SUCCESS, station.craft(p));
       assertFalse(station.getLoc().getWorld().getEntities().isEmpty());
+    }
+  }
+
+  @Test
+  void masterworkNeedsPerfectHitsAndACraftRollAtTheDc() throws Exception {
+    var p = server.addPlayer();
+    var iron = ingredient("iron", "hits: ['strike.1']");
+    var station = new CraftingStation(loc());
+    station.setRecipe(recipe("recipe: ['metal.1']"));
+    p.getInventory().setItemInMainHand(iron.build());
+    station.addMaterial(p, iron.build());
+    QualityLoader.map.put("crude", new Quality("crude", yaml("name: Rusted\namount: 0\nvalue: 1")));
+    QualityLoader.map.put("epic", new Quality("epic", yaml("name: Gleaming\namount: 90\nvalue: 4")));
+    QualityLoader.map.put(
+        "legendary", new Quality("legendary", yaml("name: Masterwork\namount: 100\nvalue: 5")));
+    try (var nbt = mockStatic(NBTItem.class);
+        var models = mockStatic(LegacyModelData.class);
+        var mmos =
+            mockConstruction(
+                LiveMMOItem.class,
+                withSettings().defaultAnswer(RETURNS_DEEP_STUBS),
+                (mmo, ctx) -> {
+                  when(mmo.getData(ItemStats.NAME)).thenReturn(new StringData("Old"));
+                  when(mmo.computeStatHistory(ItemStats.NAME)).thenReturn(null);
+                  when(mmo.newBuilder().build()).thenReturn(new ItemStack(Material.IRON_SWORD));
+                })) {
+      // Finish and return the chat lines the crafter got.
+      java.util.function.IntFunction<List<String>> finish =
+          natural -> {
+            D20Roll.die = () -> natural;
+            assertEquals(StationFeedback.SUCCESS, station.craft(p));
+            List<String> lines = new ArrayList<>();
+            for (String line = p.nextMessage(); line != null; line = p.nextMessage()) lines.add(line);
+            return lines;
+          };
+      // No hits yet: finishing is allowed and gives the lowest tier.
+      assertEquals(
+          List.of("Hit Percentage: §e0.0%", "Craft roll: §e10 §7(+0) = §e10", "Quality: Rusted"),
+          finish.apply(10));
+      station.getHits().get(HitLoader.map.get("strike")).setCurrent(1);
+      assertEquals(
+          List.of("Hit Percentage: §e100.0%", "Craft roll: §6Natural 20!", "Quality: Masterwork"),
+          finish.apply(20));
+      // A total at the DC without a natural 20 also makes it.
+      D20Roll.masterworkDc = 12;
+      assertTrue(finish.apply(12).contains("Quality: Masterwork"));
+      D20Roll.masterworkDc = 20;
+      // Perfect hits that miss the DC become the tier below.
+      assertEquals(
+          List.of("Hit Percentage: §e100.0%", "Craft roll: §cNatural 1!", "Quality: Gleaming"),
+          finish.apply(1));
+      assertTrue(finish.apply(19).contains("Quality: Gleaming"));
+      // With no tier below, perfect hits keep their tier.
+      assertNull(QualityLoader.below(null));
+      QualityLoader.map.remove("epic");
+      QualityLoader.map.remove("crude");
+      assertTrue(finish.apply(1).contains("Quality: Masterwork"));
+      // Staff-built pieces with a set quality never roll.
+      station.craft(p, 100.);
+      assertEquals("Hit Percentage: §e100.0%", p.nextMessage());
+      assertEquals("Quality: Masterwork", p.nextMessage());
     }
   }
 

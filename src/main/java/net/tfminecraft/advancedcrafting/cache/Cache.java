@@ -34,8 +34,6 @@ public class Cache {
 	/** Epoch millis; 0 turns the legacy base stats off. */
 	public static long alloyLegacyForgedBefore;
 
-	public static double hitOvershootWarnPercent = 30.0;
-	public static String hitOvershootWarnMessage = "§cYour over-reliance on %hit% ruins the result further";
 
 	public static boolean debugStatRefresh;
 

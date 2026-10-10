@@ -175,7 +175,6 @@ class CraftingManagerCoverageTest extends CoverageSupport {
     when(s.hasRecipe()).thenReturn(true);
     for (StationFeedback fb :
         List.of(
-            StationFeedback.LACKING_HITS,
             StationFeedback.LACKING_ITEMS,
             StationFeedback.NONE,
             StationFeedback.SUCCESS)) {
@@ -199,7 +198,6 @@ class CraftingManagerCoverageTest extends CoverageSupport {
               StationFeedback.LACKING_ITEMS,
               StationFeedback.WRONG_TYPE,
               StationFeedback.NONE,
-              StationFeedback.CAPACITY,
               StationFeedback.SUCCESS)) {
         when(s.hit(eq(p), any())).thenReturn(fb);
         m.applyHit(event(p, b, Action.LEFT_CLICK_BLOCK));
@@ -207,7 +205,7 @@ class CraftingManagerCoverageTest extends CoverageSupport {
       when(nbt.hasType()).thenReturn(true);
       when(nbt.getType()).thenReturn("v");
       when(nbt.getString("MMOITEMS_ITEM_ID")).thenReturn("iron_axe");
-      when(s.hit(eq(p), any())).thenReturn(StationFeedback.CAPACITY);
+      when(s.hit(eq(p), any())).thenReturn(StationFeedback.NONE);
       var e = event(p, b, Action.LEFT_CLICK_BLOCK);
       m.applyHit(e);
       assertTrue(e.isCancelled());
