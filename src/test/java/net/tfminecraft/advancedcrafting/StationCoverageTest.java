@@ -249,12 +249,11 @@ class StationCoverageTest extends CoverageSupport {
                 });
         var bukkit = mockStatic(Bukkit.class, CALLS_REAL_METHODS)) {
       bukkit.when(() -> Bukkit.dispatchCommand(any(), anyString())).thenReturn(true);
-      // XP is the set 2 times the Hits %: a staff craft at 50% pays half.
+      // XP is the set 2 times the Hits %. A staff craft's set quality does not pay for work not done,
+      // and no hits pays nothing, unless xp-min-percent sets a floor.
       assertEquals(StationFeedback.SUCCESS, station.craft(p, 50.));
-      bukkit.verify(() -> Bukkit.dispatchCommand(any(), contains("smith 1.0")));
-      // No hits pays nothing, unless xp-min-percent sets a floor.
       assertEquals(StationFeedback.SUCCESS, station.craft(p));
-      bukkit.verify(() -> Bukkit.dispatchCommand(any(), contains("smith 0.0")), never());
+      bukkit.verify(() -> Bukkit.dispatchCommand(any(), contains("smith")), never());
       Cache.craftXpMinPercent = 25;
       assertEquals(StationFeedback.SUCCESS, station.craft(p));
       bukkit.verify(() -> Bukkit.dispatchCommand(any(), contains("smith 0.5")));

@@ -284,9 +284,9 @@ public class CraftingStation {
 		StationFeedback f = createItem(p, forcedQualityPercent);
 		// Failed attempts keep the station's materials, so paying XP before the checks let every retry pay again.
 		if (f == StationFeedback.SUCCESS) {
-			// XP follows the work: the set XP times the Hits % (a staff craft's set quality), at least xp-min-percent.
-			double percent = forcedQualityPercent != null ? forcedQualityPercent : calculatePercentage();
-			giveXP(p, Math.max(Cache.craftXpMinPercent, Math.min(100, percent)));
+			// XP follows the work actually done: the set XP times the Hits %, at least xp-min-percent.
+			// A staff craft's set quality changes the piece, not the XP.
+			giveXP(p, Math.max(Cache.craftXpMinPercent, Math.min(100, calculatePercentage())));
 		}
 		return f;
 	}
