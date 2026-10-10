@@ -305,6 +305,7 @@ class ArmourLookMigratorTest extends CoverageSupport {
 
     assertTrue((boolean) wears.invoke(null, plain, "v.chainmail_helmet.0"));
     assertFalse((boolean) wears.invoke(null, plain, "v.chainmail_helmet"));
+    assertFalse((boolean) wears.invoke(null, plain, "v.chainmail_helmet.x"), "a malformed model never matches");
     assertFalse((boolean) wears.invoke(null, plain, "m.helmets.light_custom_helmet"));
     assertFalse((boolean) wears.invoke(null, plain, "ia.tfmc_armor:iron_light_helmet"));
     assertEquals("v.chainmail_helmet.0", describe.invoke(null, plain));

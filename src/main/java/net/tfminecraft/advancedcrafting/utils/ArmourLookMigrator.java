@@ -97,7 +97,12 @@ public final class ArmourLookMigrator {
 				|| !item.getType().name().equalsIgnoreCase(parts[1])) {
 			return false;
 		}
-		int model = Integer.parseInt(parts[2]);
+		int model;
+		try {
+			model = Integer.parseInt(parts[2]);
+		} catch (NumberFormatException e) {
+			return false;
+		}
 		ItemMeta meta = item.getItemMeta();
 		int current = LegacyModelData.has(meta) ? LegacyModelData.get(meta) : 0;
 		return current == model;
