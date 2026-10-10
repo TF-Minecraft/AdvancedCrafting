@@ -51,6 +51,23 @@ show-ingredient-stats: true
 # Log stat template / ingredient revision refreshes to console ([AC][StatRefresh]).
 debug-stat-refresh: false
 
+# Crafted pieces still wearing their old default look get their recipe's current model (e.g. light_helmet)
+# when they are refreshed: on join, in opened chests, on click and on equip. The merge keeps all MMOItems
+# data; skinned pieces keep their skin. Every recorded craft also gets its model scheme (metal) tag.
+# The old look is the scheme's type model (helmet, ...), unless legacy-models lists the recipe:
+# <recipe id>(<model>), for looks that came from another ingredient (infantry paper, mage dust).
+armour-look-migration:
+  enabled: false
+  legacy-models:
+    - infantry_helmet(v.carved_pumpkin.1)
+    - infantry_chestplate(v.golden_chestplate.0)
+    - infantry_leggings(v.golden_leggings.0)
+    - infantry_boots(v.golden_boots.0)
+    - mage_helmet(ia.tfmc_armor:iron_mage_helmet)
+    - mage_chestplate(ia.tfmc_armor:iron_mage_chestplate)
+    - mage_leggings(ia.tfmc_armor:iron_mage_leggings)
+    - mage_boots(ia.tfmc_armor:iron_mage_boots)
+
 # Divide bucket-averaged stat values before template factors (movement_speed config uses ~100x larger numbers than MMOItems).
 global-stat-offsets:
   movement_speed: 100

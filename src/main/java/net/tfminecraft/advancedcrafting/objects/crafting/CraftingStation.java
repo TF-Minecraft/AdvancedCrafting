@@ -1,23 +1,19 @@
 package net.tfminecraft.advancedcrafting.objects.crafting;
 
-import net.tfminecraft.advancedcrafting.util.LegacyModelData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import io.lumine.mythic.lib.api.item.NBTItem;
 import net.tfminecraft.tlibs.TLibs;
@@ -53,6 +49,8 @@ import net.tfminecraft.advancedcrafting.utils.CraftStatCalculator;
 import net.tfminecraft.advancedcrafting.utils.CraftTierLore;
 import net.tfminecraft.advancedcrafting.utils.MMOStatApplicator;
 import net.tfminecraft.advancedcrafting.utils.MajorityTierResolver;
+import net.tfminecraft.advancedcrafting.utils.ModelApplier;
+import net.tfminecraft.advancedcrafting.utils.ModelSchemeResolver;
 import net.tfminecraft.advancedcrafting.utils.ProfessionPermissions;
 import net.tfminecraft.advancedcrafting.lifecycle.CraftLifecycle;
 
@@ -506,20 +504,7 @@ public class CraftingStation {
 		mmo.setData(ItemStats.LORE, lore);
 		ItemStack finalItem = mmo.newBuilder().build();
 		if(scheme != null) {
-			// A recipe-specific model on the main material wins over the secondary model ingredient.
-			if(scheme.getModel(recipe.getId()) == null && !recipe.getModelType().equalsIgnoreCase("none")) {
-				for(String s : currentMaterials.keySet()) {
-					String modeltype = s.split("\\.")[0];
-					String modelId = s.split("\\.")[1];
-					if(modeltype.equalsIgnoreCase("ingredient")) {
-						Ingredient ing = IngredientLoader.getByString(modelId);
-						if(ing.getIngredientData().getType().getId().equalsIgnoreCase(recipe.getModelType())) scheme = ing.getIngredientData().getModelScheme();
-					} else if(modeltype.equalsIgnoreCase("alloy")) {
-						Alloy a = AlloyManager.getAlloyById(modelId);
-						if(a.getData().getType().getId().equalsIgnoreCase(recipe.getModelType())) scheme = a.getData().getModelScheme();
-					}
-				}
-			}
+			scheme = ModelSchemeResolver.forModel(recipe, scheme, currentMaterials);
 			finalItem = applyModel(finalItem, scheme);
 		}
 		CraftProvenance provenance = CraftProvenance.from(recipe, currentMaterials, q);
@@ -539,29 +524,13 @@ public class CraftingStation {
 		return StationFeedback.SUCCESS;
 	}
 	
-	// This path mutates the existing ItemStack; replacing it would change aliases held by callers.
-	@SuppressWarnings("deprecation")
 	private ItemStack applyModel(ItemStack i, ModelScheme scheme) {
-		// A model named after the recipe (e.g. heavy_helmet) wins over the shared type (helmet).
-		String path = scheme.getModel(recipe.getId());
-		if(path == null) {
-			path = scheme.getModel(recipe.getType());
-		}
+		String path = ModelApplier.modelFor(scheme, recipe);
 		if(path == null) {
 			Bukkit.getLogger().warning("AC: No model in the scheme "+scheme.getId()+" for the recipe type "+recipe.getType());
 			return i;
 		}
-		String type = path.split("\\.")[0];
-		if(type.equalsIgnoreCase("v")) {
-			i.setType(Material.valueOf(path.split("\\.")[1].toUpperCase()));
-			ItemMeta m = i.getItemMeta();
-			LegacyModelData.set(m, Integer.parseInt(path.split("\\.")[2]));
-			i.setItemMeta(m);
-		} else if(type.equalsIgnoreCase("ia")) {
-			ItemAPI api = TLibs.getItemAPI();
-			i = api.getArmorMerger().merge(i, Optional.empty(), path);
-		}
-		return i;
+		return ModelApplier.apply(i, path);
 	}
 
 	public StationFeedback hit(Player p, ItemStack i) {

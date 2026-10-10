@@ -159,6 +159,32 @@ class RefreshListenerCoverageTest extends CoverageSupport {
   }
 
   @Test
+  void aBrokenItemIsLoggedAndTheSweepCarriesOn() {
+    when(plugin.isEnabled()).thenReturn(true);
+    var p = server.addPlayer();
+    var broken = new ItemStack(Material.IRON_HELMET);
+    var next = new ItemStack(Material.IRON_BOOTS);
+    var refreshed = new ItemStack(Material.LEATHER_BOOTS);
+    p.getInventory().setItem(0, broken);
+    p.getInventory().setItem(1, next);
+    try (var refresher = mockStatic(AcItemRefresher.class)) {
+      refresher.when(() -> AcItemRefresher.isManaged(any())).thenReturn(true);
+      refresher
+          .when(() -> AcItemRefresher.refreshIfOutdated(argThat(i -> i != null && i.getType() == Material.IRON_HELMET)))
+          .thenThrow(new NullPointerException("no MMOItems type"));
+      refresher
+          .when(() -> AcItemRefresher.refreshIfOutdated(argThat(i -> i != null && i.getType() == Material.IRON_BOOTS)))
+          .thenReturn(refreshed);
+      var join = mock(PlayerJoinEvent.class);
+      when(join.getPlayer()).thenReturn(p);
+      new CraftRefreshListener().onJoin(join);
+      server.getScheduler().performOneTick();
+    }
+    assertEquals(Material.IRON_HELMET, p.getInventory().getItem(0).getType());
+    assertEquals(Material.LEATHER_BOOTS, p.getInventory().getItem(1).getType());
+  }
+
+  @Test
   void openSweepOnlyTouchesWorldStorageAfterTheEvent() throws Exception {
     when(plugin.isEnabled()).thenReturn(true);
     var iron = ingredient("iron", "");

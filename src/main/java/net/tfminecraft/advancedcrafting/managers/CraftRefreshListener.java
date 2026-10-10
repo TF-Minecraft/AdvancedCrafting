@@ -126,7 +126,14 @@ public class CraftRefreshListener implements Listener {
 		if (item == null || item.getType().isAir() || !AcItemRefresher.isManaged(item)) {
 			return;
 		}
-		ItemStack refreshed = AcItemRefresher.refreshIfOutdated(item);
+		ItemStack refreshed;
+		try {
+			refreshed = AcItemRefresher.refreshIfOutdated(item);
+		} catch (RuntimeException e) {
+			// One broken item (e.g. a recorded craft whose MMOItems data is gone) must not stop the rest of a sweep.
+			AdvancedCrafting.plugin.getLogger().warning("Could not refresh " + item.getType() + ": " + e);
+			return;
+		}
 		if (refreshed == item) {
 			return;
 		}

@@ -46,10 +46,12 @@ public final class CraftStatRefresher {
 		StatData newStats = CraftStatCalculator.compute(recipe, provenance.getInputs());
 		StatRefreshDebug.logBefore(item, provenance, recipe, newStats);
 
-		LiveMMOItem mmo = new LiveMMOItem(NBTItem.get(item));
+		NBTItem nbt = NBTItem.get(item);
+		LiveMMOItem mmo = new LiveMMOItem(nbt);
 		MMOStatApplicator.applyExternalLayer(mmo, newStats, CraftStatCalculator.collectManagedStatIds(recipe), true);
+		RefreshKeeper.keepWear(nbt, mmo);
 
-		ItemStack rebuilt = mmo.newBuilder().build();
+		ItemStack rebuilt = RefreshKeeper.keepAppearance(item, mmo.newBuilder().build());
 		rebuilt.setAmount(item.getAmount());
 		provenance.syncRevisions();
 		provenance.applyTo(rebuilt);

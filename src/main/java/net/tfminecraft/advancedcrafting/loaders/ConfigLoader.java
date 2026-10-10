@@ -79,6 +79,19 @@ public class ConfigLoader implements LoaderInterface{
 		Cache.hitOvershootWarnMessage = overshootMessage;
 
 		Cache.debugStatRefresh = config.getBoolean("debug-stat-refresh", false);
+
+		Cache.armourLookMigration = config.getBoolean("armour-look-migration.enabled", false);
+		Cache.legacyModels.clear();
+		for (String entry : config.getStringList("armour-look-migration.legacy-models")) {
+			int open = entry.indexOf('(');
+			if (open <= 0 || !entry.endsWith(")")) {
+				AdvancedCrafting.plugin.getLogger().warning("Ignoring armour-look-migration legacy model '" + entry
+						+ "'; expected <recipe>(<model>)");
+				continue;
+			}
+			Cache.legacyModels.computeIfAbsent(entry.substring(0, open).trim().toLowerCase(), key -> new ArrayList<>())
+					.add(entry.substring(open + 1, entry.length() - 1).trim());
+		}
 		Cache.showIngredientStats = config.getBoolean("show-ingredient-stats", true);
 
 		Cache.globalStatOffsets.clear();
