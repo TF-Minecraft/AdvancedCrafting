@@ -506,7 +506,8 @@ public class CraftingStation {
 		mmo.setData(ItemStats.LORE, lore);
 		ItemStack finalItem = mmo.newBuilder().build();
 		if(scheme != null) {
-			if(!recipe.getModelType().equalsIgnoreCase("none")) {
+			// A recipe-specific model on the main material wins over the secondary model ingredient.
+			if(scheme.getModel(recipe.getId()) == null && !recipe.getModelType().equalsIgnoreCase("none")) {
 				for(String s : currentMaterials.keySet()) {
 					String modeltype = s.split("\\.")[0];
 					String modelId = s.split("\\.")[1];
@@ -541,7 +542,11 @@ public class CraftingStation {
 	// This path mutates the existing ItemStack; replacing it would change aliases held by callers.
 	@SuppressWarnings("deprecation")
 	private ItemStack applyModel(ItemStack i, ModelScheme scheme) {
-		String path = scheme.getModel(recipe.getType());
+		// A model named after the recipe (e.g. heavy_helmet) wins over the shared type (helmet).
+		String path = scheme.getModel(recipe.getId());
+		if(path == null) {
+			path = scheme.getModel(recipe.getType());
+		}
 		if(path == null) {
 			Bukkit.getLogger().warning("AC: No model in the scheme "+scheme.getId()+" for the recipe type "+recipe.getType());
 			return i;
