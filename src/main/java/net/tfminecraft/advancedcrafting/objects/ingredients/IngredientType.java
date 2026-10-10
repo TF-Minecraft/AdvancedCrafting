@@ -20,4 +20,15 @@ public class IngredientType {
 	public String getName() {
 		return name;
 	}
+
+	// By id: a reload builds new objects, while alloys and open stations still hold the old ones.
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof IngredientType other && id.equals(other.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
 }
