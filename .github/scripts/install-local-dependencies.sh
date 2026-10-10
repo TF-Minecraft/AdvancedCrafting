@@ -19,4 +19,6 @@ mvn -B --no-transfer-progress org.apache.maven.plugins:maven-install-plugin:3.1.
 mvn -B --no-transfer-progress org.apache.maven.plugins:maven-install-plugin:3.1.4:install-file \
     -Dfile="libs/ItemsAdder-4.0.18.jar" -DgroupId="local" -DartifactId="LoneLibs" \
     -Dversion="4.0.18-tfmc-5a01b37bd744" -Dpackaging=jar -DgeneratePom=true "$@"
-mvn -B --no-transfer-progress org.apache.maven.plugins:maven-install-plugin:3.1.4:install-file \n    -Dfile="libs/NBTAPI-2.16.1.jar" -DgroupId="local" -DartifactId="item-nbt-api-plugin" \n    -Dversion="2.16.1-tfmc-c571502e7686" -Dpackaging=jar -DgeneratePom=true "$@"
+mvn -B --no-transfer-progress org.apache.maven.plugins:maven-install-plugin:3.1.4:install-file \
+    -Dfile="libs/NBTAPI-2.16.1.jar" -DgroupId="local" -DartifactId="item-nbt-api-plugin" \
+    -Dversion="2.16.1-tfmc-c571502e7686" -Dpackaging=jar -DgeneratePom=true "$@"
