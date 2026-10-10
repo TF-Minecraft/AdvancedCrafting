@@ -20,7 +20,11 @@ finished item.
 - **Crafting identity** — retain the recipe, materials, and quality behind a
   crafted item, with support for naming, appearance, and branding.
 - **Profession progression** — connect recipes and materials to profession
-  access and experience rewards.
+  access and experience rewards. Crafting XP scales with how well the piece
+  was worked.
+- **d20 craft roll** — like `/roll`, finishing rolls a d20 plus a modifier from
+  the crafter's base Strength. A Masterwork needs perfect hits and a roll of 20
+  or more; a natural 20 always succeeds and a natural 1 always fails.
 
 ## Credits
 

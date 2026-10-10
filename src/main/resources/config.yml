@@ -40,10 +40,41 @@ alloy-legacy-base:
 #   steel_ingot:
 #     - weapon_damage(12.0)
 
-# Warn when a tool is this many percent over its requirement (16 vs 12 = 33).
-# Set to 0 or below to disable. Existing live configs keep working via loader defaults.
-hit-overshoot-warn-percent: 30.0
-hit-overshoot-warn-message: "§cYour over-reliance on %hit% ruins the result further"
+# Crafting XP is the set XP times the finished piece's Hits % (a perfect piece pays all of it), staff crafts included.
+# A piece never pays less than this percent of it; 0 means a piece finished with no hits pays nothing.
+xp-min-percent: 0
+
+# Forging craft roll, like /roll: a d20 plus a modifier from the player's base attribute (gear does not count).
+# It is rolled on every finish and shown to the crafter. A natural 20 always succeeds and a natural 1 always fails.
+d20:
+  # Base attribute value -> modifier. Same as RPCharacters rolls.yml; values past the ends use the nearest end.
+  attribute-modifiers:
+    0: -5
+    1: -5
+    2: -4
+    3: -4
+    4: -3
+    5: -3
+    6: -2
+    7: -2
+    8: -1
+    9: -1
+    10: 0
+    11: 0
+    12: 1
+    13: 1
+    14: 2
+    15: 2
+    16: 3
+    17: 3
+    18: 4
+    19: 4
+    20: 5
+  attribute: strength
+  # A Masterwork needs 100% hits and a total of at least this. Perfect hits that miss become the tier below.
+  masterwork-dc: 20
+  # Dev testing only: 1-20 makes every roll that natural number. 0 rolls for real.
+  force-natural: 0
 
 # Raw stat lines on ingredient/alloy items. Converter GUI still shows per-template factors.
 show-ingredient-stats: true

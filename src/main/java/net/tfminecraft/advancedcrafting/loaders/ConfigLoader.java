@@ -15,6 +15,7 @@ import net.tfminecraft.tlibs.objects.api.subapi.StringFormatter;
 import net.tfminecraft.advancedcrafting.AdvancedCrafting;
 import net.tfminecraft.advancedcrafting.cache.Cache;
 import net.tfminecraft.advancedcrafting.objects.data.StatData;
+import net.tfminecraft.advancedcrafting.utils.D20Roll;
 import net.tfminecraft.advancedcrafting.objects.data.PermissionNamespace;
 import net.tfminecraft.advancedcrafting.objects.ingredients.IngredientType;
 import net.tfminecraft.advancedcrafting.utils.StatToString;
@@ -71,12 +72,8 @@ public class ConfigLoader implements LoaderInterface{
 			}
 		}
 
-		Cache.hitOvershootWarnPercent = config.getDouble("hit-overshoot-warn-percent", 30.0);
-		String overshootMessage = config.getString("hit-overshoot-warn-message");
-		if (overshootMessage == null || overshootMessage.isBlank()) {
-			overshootMessage = "§cYour over-reliance on %hit% ruins the result further";
-		}
-		Cache.hitOvershootWarnMessage = overshootMessage;
+		D20Roll.load(config.getConfigurationSection("d20"));
+		Cache.craftXpMinPercent = Math.max(0, Math.min(100, config.getDouble("xp-min-percent", 0)));
 
 		Cache.debugStatRefresh = config.getBoolean("debug-stat-refresh", false);
 

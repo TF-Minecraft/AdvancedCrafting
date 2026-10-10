@@ -22,3 +22,6 @@ mvn -B --no-transfer-progress org.apache.maven.plugins:maven-install-plugin:3.1.
 mvn -B --no-transfer-progress org.apache.maven.plugins:maven-install-plugin:3.1.4:install-file \
     -Dfile="libs/NBTAPI-2.16.1.jar" -DgroupId="local" -DartifactId="item-nbt-api-plugin" \
     -Dversion="2.16.1-tfmc-c571502e7686" -Dpackaging=jar -DgeneratePom=true "$@"
+mvn -B --no-transfer-progress org.apache.maven.plugins:maven-install-plugin:3.1.4:install-file \
+    -Dfile="libs/MMOCore-1.13.1-SNAPSHOT.jar" -DgroupId="local" -DartifactId="MMOCore" \
+    -Dversion="1.13.1-SNAPSHOT-tfmc-81d511d08309" -Dpackaging=jar -DgeneratePom=true "$@"

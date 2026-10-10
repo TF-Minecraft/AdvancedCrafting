@@ -346,8 +346,7 @@ public class CraftingManager implements Listener{
 					currentStation.remove(p);
 				} else {
 					p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1f, 1f);
-					p.sendMessage("§c" + (f.equals(StationFeedback.LACKING_HITS) ? "You need to complete all the hits before finishing" :
-							f.equals(StationFeedback.LACKING_ITEMS) ? "You have to add all the items before smithing" : ""));
+					p.sendMessage("§c" + (f.equals(StationFeedback.LACKING_ITEMS) ? "You have to add all the items before smithing" : ""));
 				}
 				return;
 			}
@@ -366,10 +365,6 @@ public class CraftingManager implements Listener{
 			case NONE:
 				p.sendMessage("§cThis tool is not needed for this craft");
 				p.playSound(p.getLocation(), Sound.ENTITY_VILLAGER_NO, 1f, 1f);
-				break;
-			case CAPACITY:
-				p.sendMessage("§cYou dont need more hits with this tool");
-				p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 0.5f);
 				break;
 			default:
 				// Successful hit

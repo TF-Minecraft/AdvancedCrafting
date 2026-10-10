@@ -217,10 +217,13 @@ class LoaderCoverageTest extends CoverageSupport {
     loader.load(
         config(
             "list.yml",
-            "hit-overshoot-warn-message: ' '\n"
-                + "global-stat-offsets: ['', invalid, 'speed(0)', 'attack(100)', 'broken(x)']"));
+            "global-stat-offsets: ['', invalid, 'speed(0)', 'attack(100)', 'broken(x)']\n"
+                + "d20:\n  attribute: dexterity\n  masterwork-dc: 18\n"
+                + "xp-min-percent: 150\n"));
+    assertEquals(100, Cache.craftXpMinPercent);
     assertEquals(Map.of("attack", 100.), Cache.globalStatOffsets);
-    assertTrue(Cache.hitOvershootWarnMessage.contains("%hit%"));
+    assertEquals("dexterity", D20Roll.attribute);
+    assertEquals(18, D20Roll.masterworkDc);
     invoke(loader, "parseGlobalStatOffset", new Class[] {String.class}, (Object) null);
     loader.load(temp.resolve("missing").toFile());
   }

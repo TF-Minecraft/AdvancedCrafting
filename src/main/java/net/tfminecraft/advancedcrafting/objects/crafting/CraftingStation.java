@@ -47,6 +47,7 @@ import net.tfminecraft.advancedcrafting.objects.schemes.ModelScheme;
 import net.tfminecraft.advancedcrafting.objects.stats.StatModifier;
 import net.tfminecraft.advancedcrafting.utils.CraftStatCalculator;
 import net.tfminecraft.advancedcrafting.utils.CraftTierLore;
+import net.tfminecraft.advancedcrafting.utils.D20Roll;
 import net.tfminecraft.advancedcrafting.utils.MMOStatApplicator;
 import net.tfminecraft.advancedcrafting.utils.MajorityTierResolver;
 import net.tfminecraft.advancedcrafting.utils.ModelApplier;
@@ -246,8 +247,8 @@ public class CraftingStation {
 	}
 	
 	/**
-	 * Lines the branding tool shows on right-click: the recipe and the material groups still to fill.
-	 * Players have to find the hits themselves, so per-hit counts stay out of it.
+	 * Lines the branding tool shows on right-click: the recipe, the material groups still to fill and the hits done.
+	 * Players have to find the hits themselves, so every hit is listed with only what was done, never what is needed.
 	 */
 	public List<String> getStatusLines() {
 		List<String> lines = new ArrayList<>();
@@ -256,6 +257,15 @@ public class CraftingStation {
 			if (e.getKey() == null) continue;
 			lines.add(e.getKey().getName() + "§7: §e" + e.getValue().getCurrent() + "/" + e.getValue().getNeeded());
 		}
+		lines.add("§7Hits done:");
+		int total = 0;
+		for (CraftingHit h : HitLoader.get().values()) {
+			IntCounter c = hits.get(h);
+			int done = c == null ? 0 : c.getCurrent();
+			total += done;
+			lines.add(h.getName() + "§7: §e" + done);
+		}
+		lines.add("§7Total: §e" + total);
 		lines.add("§7Left-click branding to finish");
 		lines.add("§cSHIFT + LEFT CLICK with the branding tool to cancel the project!");
 		return lines;
@@ -274,7 +284,9 @@ public class CraftingStation {
 		StationFeedback f = createItem(p, forcedQualityPercent);
 		// Failed attempts keep the station's materials, so paying XP before the checks let every retry pay again.
 		if (f == StationFeedback.SUCCESS) {
-			giveXP(p);
+			// XP follows the work actually done: the set XP times the Hits %, at least xp-min-percent.
+			// A staff craft's set quality changes the piece, not the XP.
+			giveXP(p, Math.max(Cache.craftXpMinPercent, Math.min(100, calculatePercentage())));
 		}
 		return f;
 	}
@@ -282,7 +294,7 @@ public class CraftingStation {
 	// skill(amount), e.g. crafter(2.0)
 	private static final Pattern XP_FORMAT = Pattern.compile("([A-Za-z0-9_-]+)\\((\\d+(?:\\.\\d+)?)\\)");
 
-	private void giveXP(Player p) {
+	private void giveXP(Player p, double percent) {
 		// Map of skill name -> total XP to give
 		Map<String, Double> xpBySkill = new HashMap<>();
 
@@ -326,7 +338,8 @@ public class CraftingStation {
 		ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
 		for (Map.Entry<String, Double> entry : xpBySkill.entrySet()) {
 			String skill = entry.getKey();
-			double xp = Math.round(entry.getValue() * 100) / 100.0; // round to 2 decimals
+			double xp = Math.round(entry.getValue() * percent) / 100.0; // scaled, rounded to 2 decimals
+			if (xp <= 0) continue;
 			String command = "mmocore admin exp give " + p.getName() + " " + skill + " " + xp;
 			Bukkit.dispatchCommand(console, command);
 		}
@@ -345,22 +358,12 @@ public class CraftingStation {
 		return complete;
 	}
 	
-	private boolean checkHits(Player p) {
-		boolean complete = true;
-		for(HitType t : hitTypes.keySet()) {
-			IntCounter c = hitTypes.get(t);
-			if(!c.isEqual()) {
-				complete = false;
-				p.sendMessage("§cYou only have "+c.getCurrent()+" out of "+c.getNeeded() + " " +t.getName()+ "§c hits.");
-			}
-		}
-		return complete;
-	}
-	
 	private Quality getQuality(double d) {
 		return QualityLoader.getByAmount(d);
 	}
 	private double calculatePercentage() {
+		// A piece whose materials need no hits has nothing to get wrong.
+		if (hits.isEmpty()) return 100;
 		int counter = 0;
 		double amount = 0.0;
 		for(CraftingHit h : hits.keySet()) {
@@ -371,29 +374,6 @@ public class CraftingStation {
 			if(d > 100.0) amount = amount+(200.0-d);
 		}
 		return Math.round((amount/counter));
-	}
-
-	private void warnOvershootHits(Player p) {
-		if (Cache.hitOvershootWarnPercent <= 0) {
-			return;
-		}
-		String template = Cache.hitOvershootWarnMessage;
-		if (template == null || template.isBlank()) {
-			return;
-		}
-		for (CraftingHit hit : hits.keySet()) {
-			IntCounter counter = hits.get(hit);
-			int needed = counter.getNeeded();
-			int current = counter.getCurrent();
-			if (needed <= 0 || current <= needed) {
-				continue;
-			}
-			double overshoot = ((double) (current - needed) / needed) * 100.0;
-			if (overshoot < Cache.hitOvershootWarnPercent) {
-				continue;
-			}
-			p.sendMessage(template.replace("%hit%", hit.getName()));
-		}
 	}
 
 	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
@@ -416,9 +396,6 @@ public class CraftingStation {
 	private StationFeedback createItem(Player p, Double forcedQualityPercent, boolean deliver) {
 		if (!checkItems(p)) {
 			return StationFeedback.LACKING_ITEMS;
-		}
-		if (forcedQualityPercent == null && !checkHits(p)) {
-			return StationFeedback.LACKING_HITS;
 		}
 		ItemAPI api = TLibs.getItemAPI();
 		result = api.getCreator().getItemFromPath("m."+recipe.getTemplate());
@@ -483,11 +460,18 @@ public class CraftingStation {
         }
 		double percentage = forcedQualityPercent != null ? forcedQualityPercent : calculatePercentage();
 		Quality q = getQuality(percentage);
-		p.sendMessage("Quality: "+q.getName());
-		p.sendMessage("Hit Percenage: §e"+percentage+"%");
+		p.sendMessage("Hit Percentage: §e"+percentage+"%");
 		if (forcedQualityPercent == null) {
-			warnOvershootHits(p);
+			// Perfect hits alone are not a Masterwork: the craft roll must also meet the DC. Stats still come
+			// only from the materials, so every Masterwork has the best stats its materials give.
+			D20Roll roll = D20Roll.roll(p);
+			p.sendMessage("Craft roll: " + roll.describe());
+			if (percentage >= 100 && !roll.meets(D20Roll.masterworkDc)) {
+				Quality below = QualityLoader.below(q);
+				if (below != null) q = below;
+			}
 		}
+		p.sendMessage("Quality: "+q.getName());
 		List<String> sockets = new ArrayList<String>();
 		SocketGroup socketGroup = SocketGroupLoader.getByString(recipe.getSocketGroupId());
 		if(socketGroup == null) {
@@ -540,7 +524,6 @@ public class CraftingStation {
 		CraftingHit hit = HitLoader.getByTool(nbt.getType()+"."+nbt.getString("MMOITEMS_ITEM_ID"));
 		if(hit == null) return StationFeedback.WRONG_TYPE;
 		if(!hitTypes.containsKey(hit.getType())) return StationFeedback.NONE;
-		if(hitTypes.get(hit.getType()).isEqual()) return StationFeedback.CAPACITY;
 		addHit(p, hit);
 		return StationFeedback.SUCCESS;
 		
