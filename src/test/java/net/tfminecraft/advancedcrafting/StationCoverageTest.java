@@ -95,7 +95,7 @@ class StationCoverageTest extends CoverageSupport {
   }
 
   @Test
-  void statusLinesShowMaterialsButNoHitCounts() throws Exception {
+  void statusLinesShowMaterialsAndHitsDoneButNoNeededHits() throws Exception {
     var p = server.addPlayer();
     var station = new CraftingStation(loc());
     station.setRecipe(recipe("recipe: ['metal.2']"));
@@ -105,11 +105,17 @@ class StationCoverageTest extends CoverageSupport {
     station.getHits().get(HitLoader.map.get("strike")).setCurrent(3);
     // Unknown types from a stale config are skipped, not printed as "null".
     station.getTypes().put(null, new IntCounter());
-    // Players have to find the hits themselves, so no hit counts are listed.
+    // A tool the recipe does not use is listed too, so the list does not reveal which hits are needed.
+    HitLoader.map.put("sew", new CraftingHit("sew", yaml("name: Sew\ntype: artisan\ntool: v.shears")));
+    // Every hit shows only the hits done; needed counts stay hidden.
     assertEquals(
         List.of(
             "§7Recipe: Sword",
             "Metal§7: §e1/2",
+            "§7Hits done:",
+            "Strike§7: §e3",
+            "Sew§7: §e0",
+            "§7Total: §e3",
             "§7Left-click branding to finish",
             "§cSHIFT + LEFT CLICK with the branding tool to cancel the project!"),
         station.getStatusLines());
