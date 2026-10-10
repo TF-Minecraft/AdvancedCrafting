@@ -218,7 +218,9 @@ class LoaderCoverageTest extends CoverageSupport {
         config(
             "list.yml",
             "global-stat-offsets: ['', invalid, 'speed(0)', 'attack(100)', 'broken(x)']\n"
-                + "d20:\n  attribute: dexterity\n  masterwork-dc: 18\n"));
+                + "d20:\n  attribute: dexterity\n  masterwork-dc: 18\n"
+                + "xp-min-percent: 150\n"));
+    assertEquals(100, Cache.craftXpMinPercent);
     assertEquals(Map.of("attack", 100.), Cache.globalStatOffsets);
     assertEquals("dexterity", D20Roll.attribute);
     assertEquals(18, D20Roll.masterworkDc);

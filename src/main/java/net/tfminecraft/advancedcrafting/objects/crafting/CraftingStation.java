@@ -284,7 +284,9 @@ public class CraftingStation {
 		StationFeedback f = createItem(p, forcedQualityPercent);
 		// Failed attempts keep the station's materials, so paying XP before the checks let every retry pay again.
 		if (f == StationFeedback.SUCCESS) {
-			giveXP(p);
+			// XP follows the work: the set XP times the Hits % (a staff craft's set quality), at least xp-min-percent.
+			double percent = forcedQualityPercent != null ? forcedQualityPercent : calculatePercentage();
+			giveXP(p, Math.max(Cache.craftXpMinPercent, Math.min(100, percent)));
 		}
 		return f;
 	}
@@ -292,7 +294,7 @@ public class CraftingStation {
 	// skill(amount), e.g. crafter(2.0)
 	private static final Pattern XP_FORMAT = Pattern.compile("([A-Za-z0-9_-]+)\\((\\d+(?:\\.\\d+)?)\\)");
 
-	private void giveXP(Player p) {
+	private void giveXP(Player p, double percent) {
 		// Map of skill name -> total XP to give
 		Map<String, Double> xpBySkill = new HashMap<>();
 
@@ -336,7 +338,8 @@ public class CraftingStation {
 		ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
 		for (Map.Entry<String, Double> entry : xpBySkill.entrySet()) {
 			String skill = entry.getKey();
-			double xp = Math.round(entry.getValue() * 100) / 100.0; // round to 2 decimals
+			double xp = Math.round(entry.getValue() * percent) / 100.0; // scaled, rounded to 2 decimals
+			if (xp <= 0) continue;
 			String command = "mmocore admin exp give " + p.getName() + " " + skill + " " + xp;
 			Bukkit.dispatchCommand(console, command);
 		}

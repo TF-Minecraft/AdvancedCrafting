@@ -73,6 +73,7 @@ public class ConfigLoader implements LoaderInterface{
 		}
 
 		D20Roll.load(config.getConfigurationSection("d20"));
+		Cache.craftXpMinPercent = Math.max(0, Math.min(100, config.getDouble("xp-min-percent", 0)));
 
 		Cache.debugStatRefresh = config.getBoolean("debug-stat-refresh", false);
 

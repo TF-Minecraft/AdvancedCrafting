@@ -249,13 +249,22 @@ class StationCoverageTest extends CoverageSupport {
                 });
         var bukkit = mockStatic(Bukkit.class, CALLS_REAL_METHODS)) {
       bukkit.when(() -> Bukkit.dispatchCommand(any(), anyString())).thenReturn(true);
+      // XP is the set 2 times the Hits %: a staff craft at 50% pays half.
       assertEquals(StationFeedback.SUCCESS, station.craft(p, 50.));
-      bukkit.verify(() -> Bukkit.dispatchCommand(any(), contains("smith 2.0")));
+      bukkit.verify(() -> Bukkit.dispatchCommand(any(), contains("smith 1.0")));
+      // No hits pays nothing, unless xp-min-percent sets a floor.
+      assertEquals(StationFeedback.SUCCESS, station.craft(p));
+      bukkit.verify(() -> Bukkit.dispatchCommand(any(), contains("smith 0.0")), never());
+      Cache.craftXpMinPercent = 25;
+      assertEquals(StationFeedback.SUCCESS, station.craft(p));
+      bukkit.verify(() -> Bukkit.dispatchCommand(any(), contains("smith 0.5")));
+      Cache.craftXpMinPercent = 0;
       station.getHits().get(HitLoader.map.get("strike")).setCurrent(1);
       var ht = CraftingStation.class.getDeclaredField("hitTypes");
       ht.setAccessible(true);
       ((Map<?, IntCounter>) ht.get(station)).values().forEach(c -> c.setCurrent(c.getNeeded()));
       assertEquals(StationFeedback.SUCCESS, station.craft(p));
+      bukkit.verify(() -> Bukkit.dispatchCommand(any(), contains("smith 2.0")));
       assertFalse(station.getLoc().getWorld().getEntities().isEmpty());
     }
   }
@@ -543,11 +552,16 @@ class StationCoverageTest extends CoverageSupport {
                 1));
     try (var bukkit = mockStatic(Bukkit.class, CALLS_REAL_METHODS)) {
       bukkit.when(() -> Bukkit.dispatchCommand(any(), anyString())).thenReturn(true);
-      invoke(station, "giveXP", new Class[] {Player.class}, p);
+      invoke(station, "giveXP", new Class[] {Player.class, double.class}, p, 100.0);
       bukkit.verify(
           () ->
               Bukkit.dispatchCommand(
                   any(), eq("mmocore admin exp give " + p.getName() + " smith 6.25")));
+      invoke(station, "giveXP", new Class[] {Player.class, double.class}, p, 50.0);
+      bukkit.verify(
+          () ->
+              Bukkit.dispatchCommand(
+                  any(), eq("mmocore admin exp give " + p.getName() + " smith 3.13")));
     }
   }
 

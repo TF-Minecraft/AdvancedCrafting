@@ -43,6 +43,8 @@ public class Cache {
 	public static Map<String, List<String>> legacyModels = new HashMap<>();
 
 	public static boolean showIngredientStats = true;
+	/** Crafting XP never drops below this percent of the set XP, however poor the Hits %. */
+	public static double craftXpMinPercent = 0;
 
 	/** Divisors applied to bucket-averaged stats before template factors (e.g. movement_speed: 100). */
 	public static Map<String, Double> globalStatOffsets = new HashMap<>();
