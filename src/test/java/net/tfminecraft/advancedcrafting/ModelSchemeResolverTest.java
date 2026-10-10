@@ -67,6 +67,13 @@ class ModelSchemeResolverTest extends CoverageSupport {
             in("ingredient", "", 1),
             in("misc", "x", 1)));
     assertNull(scheme(noModel, in("ingredient", "gone", 1)));
+    // Malformed inputs are skipped.
+    assertEquals(
+        "iron",
+        ModelSchemeResolver.resolve(
+                noModel,
+                Arrays.asList(null, in(null, "iron", 1), in("ingredient", null, 1), in("ingredient", "iron", 3)))
+            .getId());
     assertNull(scheme(noModel, in("alloy", "gone", 1)));
   }
 }

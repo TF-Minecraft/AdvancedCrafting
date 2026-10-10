@@ -107,6 +107,9 @@ public class CraftProvenance {
 		if (scheme != null) {
 			meta.getPersistentDataContainer().set(PDCKeys.craftModelScheme(), PersistentDataType.STRING,
 					scheme.getId());
+		} else {
+			// A recipe or ingredient that no longer resolves must not leave an old metal for ArmourShop to trust.
+			meta.getPersistentDataContainer().remove(PDCKeys.craftModelScheme());
 		}
 		item.setItemMeta(meta);
 	}
@@ -129,7 +132,12 @@ public class CraftProvenance {
 		if (inputsJson != null) {
 			List<CraftInput> parsed = GSON.fromJson(inputsJson, new TypeToken<List<CraftInput>>() {}.getType());
 			if (parsed != null) {
-				inputs = parsed;
+				// Every refresh consumer reads these inputs; a hand-edited or truncated record must not break them.
+				for (CraftInput input : parsed) {
+					if (input != null && input.getKind() != null && input.getId() != null) {
+						inputs.add(input);
+					}
+				}
 			}
 		}
 		Integer templateRevision = meta.getPersistentDataContainer().get(PDCKeys.craftStatTemplateRevision(),

@@ -28,6 +28,9 @@ public final class ModelSchemeResolver {
 		}
 		HashMap<String, Integer> materials = new HashMap<>();
 		for (CraftInput input : inputs) {
+			if (input == null || input.getKind() == null || input.getId() == null) {
+				continue;
+			}
 			materials.put(input.getKind().toLowerCase() + "." + input.getId().toLowerCase(), input.getAmount());
 		}
 		ModelScheme main = schemeOf(MajorityTierResolver.resolveMajorityKey(recipe, materials), null, null);

@@ -223,6 +223,25 @@ class ItemMetadataCoverageTest extends CoverageSupport {
     meta.getPersistentDataContainer().set(PDCKeys.craftInputs(), PersistentDataType.STRING, "null");
     minimal.setItemMeta(meta);
     assertTrue(CraftProvenance.readFrom(minimal).getInputs().isEmpty());
+    // Malformed records (null entries, kinds or ids) are dropped instead of breaking every refresh.
+    meta = minimal.getItemMeta();
+    meta.getPersistentDataContainer()
+        .set(
+            PDCKeys.craftInputs(),
+            PersistentDataType.STRING,
+            "[null,{\"id\":\"iron\",\"n\":1},{\"k\":\"ingredient\",\"n\":1},"
+                + "{\"k\":\"ingredient\",\"id\":\"iron\",\"n\":2,\"r\":1}]");
+    minimal.setItemMeta(meta);
+    var kept = CraftProvenance.readFrom(minimal).getInputs();
+    assertEquals(1, kept.size());
+    assertEquals("iron", kept.get(0).getId());
+    // A record whose recipe no longer resolves loses its old scheme tag.
+    meta = minimal.getItemMeta();
+    meta.getPersistentDataContainer().set(PDCKeys.craftModelScheme(), PersistentDataType.STRING, "old");
+    minimal.setItemMeta(meta);
+    CraftProvenance.readFrom(minimal).applyTo(minimal);
+    assertNull(
+        minimal.getItemMeta().getPersistentDataContainer().get(PDCKeys.craftModelScheme(), PersistentDataType.STRING));
     assertNotNull(new CraftProvenance().getInputs());
   }
 
