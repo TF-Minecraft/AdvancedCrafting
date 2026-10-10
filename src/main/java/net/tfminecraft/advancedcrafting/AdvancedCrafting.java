@@ -186,6 +186,7 @@ public class AdvancedCrafting extends JavaPlugin{
 	
 	public void reload() {
 		loadConfigs();
+		AlloyManager.relinkAlloys();
 		revisionTracker.flush();
 	}
 	// Keep the existing legacy text representation, formatting, and exact-string comparisons.

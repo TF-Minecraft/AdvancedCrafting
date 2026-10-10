@@ -4,8 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import net.tfminecraft.advancedcrafting.loaders.HitLoader;
+import net.tfminecraft.advancedcrafting.loaders.SchemeLoader;
+import net.tfminecraft.advancedcrafting.loaders.TypeLoader;
 import net.tfminecraft.advancedcrafting.objects.crafting.hits.CraftingHit;
 import net.tfminecraft.advancedcrafting.objects.ingredients.Ingredient;
 import net.tfminecraft.advancedcrafting.objects.ingredients.IngredientType;
@@ -119,6 +123,26 @@ public class AlloyData {
 
 	public int getTier() {
 		return tier;
+	}
+
+	/** After a config reload: swaps in the reloaded type, hits and schemes, keeping any that are gone. */
+	public void relink() {
+		type = relinked(type, IngredientType::getId, TypeLoader::getIngredientTypeByString);
+		colourScheme = relinked(colourScheme, ColourScheme::getId, SchemeLoader::getColourSchemeByString);
+		modelScheme = relinked(modelScheme, ModelScheme::getId, SchemeLoader::getModelSchemeByString);
+		HashMap<CraftingHit, Integer> current = new HashMap<>();
+		hits.forEach((hit, amount) -> current.put(relinked(hit, CraftingHit::getId, HitLoader::getByString), amount));
+		// Cleared first: put() would keep the old key, which equals the new one.
+		hits.clear();
+		hits.putAll(current);
+	}
+
+	private static <T> T relinked(T old, Function<T, String> id, Function<String, T> lookup) {
+		if (old == null) {
+			return null;
+		}
+		T fresh = lookup.apply(id.apply(old));
+		return fresh != null ? fresh : old;
 	}
 
 	public String buildRevisionContent() {

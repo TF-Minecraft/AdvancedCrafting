@@ -58,6 +58,12 @@ public class AlloyManager implements Listener{
 	public static void addAlloy(Alloy a) {
 		alloys.put(a.getId(), a);
 	}
+	/** After a config reload, so alloys use the reloaded types, hits and schemes. */
+	public static void relinkAlloys() {
+		for (Alloy a : alloys.values()) {
+			a.getData().relink();
+		}
+	}
 	public boolean hasStation(Location loc) {
 		return stations.containsKey(loc);
 	}
