@@ -246,8 +246,8 @@ public class CraftingStation {
 	}
 	
 	/**
-	 * Lines the branding tool shows on right-click: the recipe and the material groups still to fill.
-	 * Players have to find the hits themselves, so per-hit counts stay out of it.
+	 * Lines the branding tool shows on right-click: the recipe, the material groups still to fill and the hits done.
+	 * Players have to find the hits themselves, so every hit is listed with only what was done, never what is needed.
 	 */
 	public List<String> getStatusLines() {
 		List<String> lines = new ArrayList<>();
@@ -256,6 +256,15 @@ public class CraftingStation {
 			if (e.getKey() == null) continue;
 			lines.add(e.getKey().getName() + "§7: §e" + e.getValue().getCurrent() + "/" + e.getValue().getNeeded());
 		}
+		lines.add("§7Hits done:");
+		int total = 0;
+		for (CraftingHit h : HitLoader.get().values()) {
+			IntCounter c = hits.get(h);
+			int done = c == null ? 0 : c.getCurrent();
+			total += done;
+			lines.add(h.getName() + "§7: §e" + done);
+		}
+		lines.add("§7Total: §e" + total);
 		lines.add("§7Left-click branding to finish");
 		lines.add("§cSHIFT + LEFT CLICK with the branding tool to cancel the project!");
 		return lines;
