@@ -3,7 +3,6 @@ package net.tfminecraft.advancedcrafting.loaders;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -46,15 +45,6 @@ public class QualityLoader implements LoaderInterface{
 		if(map.containsKey(id)) return map.get(id);
 		return null;
 	}
-	/** The tier just below the given one, or null for the lowest or an unknown tier. */
-	public static Quality below(Quality quality) {
-		if (quality == null) return null;
-		return map.values().stream()
-				.filter(candidate -> candidate.getValue() < quality.getValue())
-				.max(Comparator.comparingInt(Quality::getValue))
-				.orElse(null);
-	}
-
 	public static Quality getByAmount(double a) {
 		Quality q = null;
 		int prev = -1;

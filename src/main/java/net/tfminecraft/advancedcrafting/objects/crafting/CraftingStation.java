@@ -48,6 +48,7 @@ import net.tfminecraft.advancedcrafting.objects.stats.StatModifier;
 import net.tfminecraft.advancedcrafting.utils.CraftStatCalculator;
 import net.tfminecraft.advancedcrafting.utils.CraftTierLore;
 import net.tfminecraft.advancedcrafting.utils.D20Roll;
+import net.tfminecraft.advancedcrafting.utils.HitClue;
 import net.tfminecraft.advancedcrafting.utils.MMOStatApplicator;
 import net.tfminecraft.advancedcrafting.utils.MajorityTierResolver;
 import net.tfminecraft.advancedcrafting.utils.ModelApplier;
@@ -461,17 +462,14 @@ public class CraftingStation {
 		double percentage = forcedQualityPercent != null ? forcedQualityPercent : calculatePercentage();
 		Quality q = getQuality(percentage);
 		p.sendMessage("Hit Percentage: §e"+percentage+"%");
-		if (forcedQualityPercent == null) {
-			// Perfect hits alone are not a Masterwork: the craft roll must also meet the DC. Stats still come
-			// only from the materials, so every Masterwork has the best stats its materials give.
+		p.sendMessage("Quality: "+q.getName());
+		if (forcedQualityPercent == null && percentage < 100) {
+			// The craft roll never changes the piece. Meeting the DC earns a hint about the hit closest to right.
 			D20Roll roll = D20Roll.roll(p);
 			p.sendMessage("Craft roll: " + roll.describe());
-			if (percentage >= 100 && !roll.meets(D20Roll.masterworkDc)) {
-				Quality below = QualityLoader.below(q);
-				if (below != null) q = below;
-			}
+			String clue = roll.meets(D20Roll.clueDc) ? HitClue.clueFor(hits) : null;
+			p.sendMessage(clue != null ? clue : HitClue.NO_CLUE);
 		}
-		p.sendMessage("Quality: "+q.getName());
 		List<String> sockets = new ArrayList<String>();
 		SocketGroup socketGroup = SocketGroupLoader.getByString(recipe.getSocketGroupId());
 		if(socketGroup == null) {

@@ -101,17 +101,17 @@ class D20RollTest {
     D20Roll.load(
         config(
             "attribute-modifiers:\n  0: -2\n  10: 1\n  x: 9\n"
-                + "force-natural: 7\nattribute: dexterity\nmasterwork-dc: 22\n"));
+                + "force-natural: 7\nattribute: dexterity\nclue-dc: 9\n"));
     assertEquals(-2, D20Roll.modifier(9));
     assertEquals(1, D20Roll.modifier(20));
     assertEquals("dexterity", D20Roll.attribute);
-    assertEquals(22, D20Roll.masterworkDc);
+    assertEquals(9, D20Roll.clueDc);
     assertEquals(7, D20Roll.die.getAsInt());
     // Out-of-range forced values and a table with no numbers fall back to real rolls and the default table.
     D20Roll.load(config("attribute-modifiers:\n  x: 9\nforce-natural: 25\n"));
     assertEquals(5, D20Roll.modifier(20));
     assertEquals("strength", D20Roll.attribute);
-    assertEquals(20, D20Roll.masterworkDc);
+    assertEquals(12, D20Roll.clueDc);
     for (int i = 0; i < 200; i++) {
       int natural = D20Roll.die.getAsInt();
       assertTrue(natural >= 1 && natural <= 20, String.valueOf(natural));
