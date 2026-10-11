@@ -330,6 +330,16 @@ class StationCoverageTest extends CoverageSupport {
       strike.setNeeded(0);
       strike.setCurrent(0);
       assertEquals(HitClue.NO_CLUE, finish.apply(20).get(3));
+      // 199 of 200 rounds to 100%, but only exact hits make a Masterwork: it reads 99% and rolls.
+      strike.setNeeded(200);
+      strike.setCurrent(199);
+      assertEquals(
+          List.of(
+              "Hit Percentage: §e99.0%",
+              "Quality: Rusted",
+              "Craft roll: §6Natural 20!",
+              HitClue.PREFIX + "you sense it needed a little more Strike work."),
+          finish.apply(20));
       // Perfect hits are always a Masterwork and do not roll, however the die would land.
       strike.setNeeded(1);
       strike.setCurrent(1);

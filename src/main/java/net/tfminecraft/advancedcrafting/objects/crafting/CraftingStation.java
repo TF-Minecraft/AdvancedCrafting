@@ -460,6 +460,9 @@ public class CraftingStation {
             mmo.setStatHistory(ItemStats.NAME, hist);
         }
 		double percentage = forcedQualityPercent != null ? forcedQualityPercent : calculatePercentage();
+		String clue = forcedQualityPercent == null ? HitClue.clueFor(hits) : null;
+		// The Hits % is rounded, so a big piece a hit off can read 100%. Only exact hits make a Masterwork.
+		if (clue != null && percentage >= 100) percentage = 99;
 		Quality q = getQuality(percentage);
 		p.sendMessage("Hit Percentage: §e"+percentage+"%");
 		p.sendMessage("Quality: "+q.getName());
@@ -467,8 +470,7 @@ public class CraftingStation {
 			// The craft roll never changes the piece. Meeting the DC earns a hint about the hit closest to right.
 			D20Roll roll = D20Roll.roll(p);
 			p.sendMessage("Craft roll: " + roll.describe());
-			String clue = roll.meets(D20Roll.clueDc) ? HitClue.clueFor(hits) : null;
-			p.sendMessage(clue != null ? clue : HitClue.NO_CLUE);
+			p.sendMessage(clue != null && roll.meets(D20Roll.clueDc) ? clue : HitClue.NO_CLUE);
 		}
 		List<String> sockets = new ArrayList<String>();
 		SocketGroup socketGroup = SocketGroupLoader.getByString(recipe.getSocketGroupId());
