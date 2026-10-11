@@ -269,7 +269,7 @@ class StationCoverageTest extends CoverageSupport {
   }
 
   @Test
-  void masterworkNeedsPerfectHitsAndACraftRollAtTheDc() throws Exception {
+  void perfectHitsAreAlwaysAMasterworkAndTheCraftRollOnlyEarnsAClue() throws Exception {
     var p = server.addPlayer();
     var iron = ingredient("iron", "hits: ['strike.1']");
     var station = new CraftingStation(loc());
@@ -277,7 +277,6 @@ class StationCoverageTest extends CoverageSupport {
     p.getInventory().setItemInMainHand(iron.build());
     station.addMaterial(p, iron.build());
     QualityLoader.map.put("crude", new Quality("crude", yaml("name: Rusted\namount: 0\nvalue: 1")));
-    QualityLoader.map.put("epic", new Quality("epic", yaml("name: Gleaming\namount: 90\nvalue: 4")));
     QualityLoader.map.put(
         "legendary", new Quality("legendary", yaml("name: Masterwork\namount: 100\nvalue: 5")));
     try (var nbt = mockStatic(NBTItem.class);
@@ -300,32 +299,57 @@ class StationCoverageTest extends CoverageSupport {
             for (String line = p.nextMessage(); line != null; line = p.nextMessage()) lines.add(line);
             return lines;
           };
-      // No hits yet: finishing is allowed and gives the lowest tier.
+      IntCounter strike = station.getHits().get(HitLoader.map.get("strike"));
+      // No hits yet: the lowest tier, and a roll under the DC gives no clue.
       assertEquals(
-          List.of("Hit Percentage: §e0.0%", "Craft roll: §e10 §7(+0) = §e10", "Quality: Rusted"),
-          finish.apply(10));
-      station.getHits().get(HitLoader.map.get("strike")).setCurrent(1);
+          List.of(
+              "Hit Percentage: §e0.0%",
+              "Quality: Rusted",
+              "Craft roll: §e11 §7(+0) = §e11",
+              HitClue.NO_CLUE),
+          finish.apply(11));
+      // A total at the DC names the hit that was off and which way, never the count.
       assertEquals(
-          List.of("Hit Percentage: §e100.0%", "Craft roll: §6Natural 20!", "Quality: Masterwork"),
+          List.of(
+              "Hit Percentage: §e0.0%",
+              "Quality: Rusted",
+              "Craft roll: §e12 §7(+0) = §e12",
+              HitClue.PREFIX + "you sense it needed some Strike work."),
+          finish.apply(12));
+      // Too many hits: a natural 20 always gets the clue, a natural 1 never does.
+      strike.setCurrent(2);
+      assertEquals(
+          HitClue.PREFIX + "you sense it took a little too much Strike work.",
+          finish.apply(20).get(3));
+      assertEquals(HitClue.NO_CLUE, finish.apply(1).get(3));
+      // The DC comes from the config.
+      D20Roll.clueDc = 5;
+      assertEquals(HitClue.PREFIX + "you sense it took a little too much Strike work.", finish.apply(5).get(3));
+      D20Roll.clueDc = 12;
+      // A hit nothing is off for leaves nothing to hint at, even on a pass.
+      strike.setNeeded(0);
+      strike.setCurrent(0);
+      assertEquals(HitClue.NO_CLUE, finish.apply(20).get(3));
+      // 199 of 200 rounds to 100%, but only exact hits make a Masterwork: it reads 99% and rolls.
+      strike.setNeeded(200);
+      strike.setCurrent(199);
+      assertEquals(
+          List.of(
+              "Hit Percentage: §e99.0%",
+              "Quality: Rusted",
+              "Craft roll: §6Natural 20!",
+              HitClue.PREFIX + "you sense it needed a little more Strike work."),
           finish.apply(20));
-      // A total at the DC without a natural 20 also makes it.
-      D20Roll.masterworkDc = 12;
-      assertTrue(finish.apply(12).contains("Quality: Masterwork"));
-      D20Roll.masterworkDc = 20;
-      // Perfect hits that miss the DC become the tier below.
-      assertEquals(
-          List.of("Hit Percentage: §e100.0%", "Craft roll: §cNatural 1!", "Quality: Gleaming"),
-          finish.apply(1));
-      assertTrue(finish.apply(19).contains("Quality: Gleaming"));
-      // With no tier below, perfect hits keep their tier.
-      assertNull(QualityLoader.below(null));
-      QualityLoader.map.remove("epic");
-      QualityLoader.map.remove("crude");
-      assertTrue(finish.apply(1).contains("Quality: Masterwork"));
+      // Perfect hits are always a Masterwork and do not roll, however the die would land.
+      strike.setNeeded(1);
+      strike.setCurrent(1);
+      assertEquals(List.of("Hit Percentage: §e100.0%", "Quality: Masterwork"), finish.apply(1));
       // Staff-built pieces with a set quality never roll.
+      strike.setCurrent(0);
       station.craft(p, 100.);
       assertEquals("Hit Percentage: §e100.0%", p.nextMessage());
       assertEquals("Quality: Masterwork", p.nextMessage());
+      assertNull(p.nextMessage());
     }
   }
 

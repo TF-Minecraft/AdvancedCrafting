@@ -45,7 +45,8 @@ alloy-legacy-base:
 xp-min-percent: 0
 
 # Forging craft roll, like /roll: a d20 plus a modifier from the player's base attribute (gear does not count).
-# It is rolled on every finish and shown to the crafter. A natural 20 always succeeds and a natural 1 always fails.
+# It is rolled when a piece is finished with less than 100% hits and shown to the crafter.
+# A natural 20 always succeeds and a natural 1 always fails.
 d20:
   # Base attribute value -> modifier. Same as RPCharacters rolls.yml; values past the ends use the nearest end.
   attribute-modifiers:
@@ -71,8 +72,9 @@ d20:
     19: 4
     20: 5
   attribute: strength
-  # A Masterwork needs 100% hits and a total of at least this. Perfect hits that miss become the tier below.
-  masterwork-dc: 20
+  # A total of at least this earns a hint about the hit that was closest to right ("it needed a little more
+  # Small Hit work"). The roll never changes the piece; 100% hits is always a Masterwork.
+  clue-dc: 12
   # Dev testing only: 1-20 makes every roll that natural number. 0 rolls for real.
   force-natural: 0
 

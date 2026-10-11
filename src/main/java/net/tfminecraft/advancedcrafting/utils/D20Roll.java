@@ -11,8 +11,9 @@ import org.bukkit.entity.Player;
 import net.Indyuce.mmocore.api.player.PlayerData;
 
 /**
- * The forging craft roll: a d20 plus a modifier from the player's base attribute, like RPCharacters' /roll and
- * GemInfusion's goldsmithing roll. A natural 20 always succeeds and a natural 1 always fails, whatever the modifier.
+ * The forging craft roll, made when an imperfect piece is finished: a d20 plus a modifier from the player's base
+ * attribute, like RPCharacters' /roll. Meeting the DC earns a clue about the hits; the roll never changes the piece.
+ * A natural 20 always succeeds and a natural 1 always fails, whatever the modifier.
  */
 public final class D20Roll {
 
@@ -22,7 +23,7 @@ public final class D20Roll {
 	private static TreeMap<Integer, Integer> modifiers = defaultModifiers();
 	private static int forcedNatural;
 	public static String attribute = "strength";
-	public static int masterworkDc = 20;
+	public static int clueDc = 12;
 
 	private final int natural;
 	private final int modifier;
@@ -94,7 +95,7 @@ public final class D20Roll {
 		modifiers = defaultModifiers();
 		forcedNatural = 0;
 		attribute = "strength";
-		masterworkDc = 20;
+		clueDc = 12;
 		if (section != null) {
 			ConfigurationSection table = section.getConfigurationSection("attribute-modifiers");
 			if (table != null) {
@@ -110,7 +111,7 @@ public final class D20Roll {
 			}
 			forcedNatural = section.getInt("force-natural", 0);
 			attribute = section.getString("attribute", attribute);
-			masterworkDc = section.getInt("masterwork-dc", masterworkDc);
+			clueDc = section.getInt("clue-dc", clueDc);
 		}
 	}
 

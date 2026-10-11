@@ -48,6 +48,7 @@ import net.tfminecraft.advancedcrafting.objects.stats.StatModifier;
 import net.tfminecraft.advancedcrafting.utils.CraftStatCalculator;
 import net.tfminecraft.advancedcrafting.utils.CraftTierLore;
 import net.tfminecraft.advancedcrafting.utils.D20Roll;
+import net.tfminecraft.advancedcrafting.utils.HitClue;
 import net.tfminecraft.advancedcrafting.utils.MMOStatApplicator;
 import net.tfminecraft.advancedcrafting.utils.MajorityTierResolver;
 import net.tfminecraft.advancedcrafting.utils.ModelApplier;
@@ -459,19 +460,18 @@ public class CraftingStation {
             mmo.setStatHistory(ItemStats.NAME, hist);
         }
 		double percentage = forcedQualityPercent != null ? forcedQualityPercent : calculatePercentage();
+		String clue = forcedQualityPercent == null ? HitClue.clueFor(hits) : null;
+		// The Hits % is rounded, so a big piece a hit off can read 100%. Only exact hits make a Masterwork.
+		if (clue != null && percentage >= 100) percentage = 99;
 		Quality q = getQuality(percentage);
 		p.sendMessage("Hit Percentage: §e"+percentage+"%");
-		if (forcedQualityPercent == null) {
-			// Perfect hits alone are not a Masterwork: the craft roll must also meet the DC. Stats still come
-			// only from the materials, so every Masterwork has the best stats its materials give.
+		p.sendMessage("Quality: "+q.getName());
+		if (forcedQualityPercent == null && percentage < 100) {
+			// The craft roll never changes the piece. Meeting the DC earns a hint about the hit closest to right.
 			D20Roll roll = D20Roll.roll(p);
 			p.sendMessage("Craft roll: " + roll.describe());
-			if (percentage >= 100 && !roll.meets(D20Roll.masterworkDc)) {
-				Quality below = QualityLoader.below(q);
-				if (below != null) q = below;
-			}
+			p.sendMessage(clue != null && roll.meets(D20Roll.clueDc) ? clue : HitClue.NO_CLUE);
 		}
-		p.sendMessage("Quality: "+q.getName());
 		List<String> sockets = new ArrayList<String>();
 		SocketGroup socketGroup = SocketGroupLoader.getByString(recipe.getSocketGroupId());
 		if(socketGroup == null) {
