@@ -153,7 +153,7 @@ greataxe:
   base-stats:
     - attack_speed(1.2)
     - blunt_power(3)
-    - movement_speed(0.6)
+    - movement_speed(0.1)
   stats:
     - attack_damage
     - attack_speed
@@ -165,6 +165,11 @@ greataxe:
     - lifesteal
     - movement_speed
     - max_item_damage
+  # Two-handed, so it never has an off-hand shortsword: movement is (0.1 + leather/wool) x 2,
+  # what a battleaxe plus an off-hand shortsword with a 0.2 movement base give with the same
+  # leather and wool.
+  factors:
+    movement_speed: 2.0
 
 light_armor:
   name: "§fLight Armor"
