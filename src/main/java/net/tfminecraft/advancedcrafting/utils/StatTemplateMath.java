@@ -1,6 +1,7 @@
 package net.tfminecraft.advancedcrafting.utils;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -27,26 +28,25 @@ public final class StatTemplateMath {
 		return template.getFactor(statId);
 	}
 
-	public static double applyGlobalOffset(double raw, String statId) {
-		Double offset = Cache.globalStatOffsets.get(statId.toLowerCase());
-		if (offset == null || offset == 0) {
-			return raw;
-		}
-		return round(raw / offset);
-	}
-
+	/**
+	 * Value written to the item. A stat with a global offset (movement_speed: 100) is rounded in
+	 * config units and then divided, so the item keeps the precision the config shows. Rounding
+	 * after the division kept 2 decimals of the divided value, which turned 1.4 into 1.
+	 */
 	public static double applyScaledValue(double raw, String statId, StatTemplate template) {
-		return applyFactor(applyGlobalOffset(raw, statId), getFactor(template, statId));
-	}
-
-	/** Config-scale value for converter preview (reverses global offset division). */
-	public static double applyScaledValueForPreview(double raw, String statId, StatTemplate template) {
-		double scaled = applyScaledValue(raw, statId, template);
+		double scaled = applyScaledValueForPreview(raw, statId, template);
 		Double offset = Cache.globalStatOffsets.get(statId.toLowerCase());
 		if (offset == null || offset == 0) {
 			return scaled;
 		}
-		return round(scaled * offset);
+		return BigDecimal.valueOf(scaled)
+				.divide(BigDecimal.valueOf(offset), MathContext.DECIMAL64)
+				.doubleValue();
+	}
+
+	/** Config-scale value for converter preview: the factor applied, before any global offset. */
+	public static double applyScaledValueForPreview(double raw, String statId, StatTemplate template) {
+		return applyFactor(raw, getFactor(template, statId));
 	}
 
 	public static double applyFactor(double raw, double factor) {
@@ -54,7 +54,7 @@ public final class StatTemplateMath {
 	}
 
 	private static double round(double value) {
-		BigDecimal bd = new BigDecimal(value);
+		BigDecimal bd = BigDecimal.valueOf(value); // decimal digits, so 1.005 rounds half-up to 1.01
 		double abs = Math.abs(value);
 		if (abs >= 0.01 || abs == 0) {
 			return bd.setScale(2, RoundingMode.HALF_UP).doubleValue();
