@@ -54,7 +54,7 @@ public final class StatTemplateMath {
 	}
 
 	private static double round(double value) {
-		BigDecimal bd = new BigDecimal(value);
+		BigDecimal bd = BigDecimal.valueOf(value); // decimal digits, so 1.005 rounds half-up to 1.01
 		double abs = Math.abs(value);
 		if (abs >= 0.01 || abs == 0) {
 			return bd.setScale(2, RoundingMode.HALF_UP).doubleValue();

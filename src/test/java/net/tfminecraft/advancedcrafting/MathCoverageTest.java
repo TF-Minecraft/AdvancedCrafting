@@ -88,6 +88,9 @@ class MathCoverageTest extends CoverageSupport {
     // Below 1.0 the old 3-decimal rounding also lost the second config decimal (0.65 -> 0.7)
     assertEquals(.0065, StatTemplateMath.applyScaledValue(.65, "movement_speed", shield));
     assertEquals(1.4, StatTemplateMath.applyScaledValueForPreview(.7, "movement_speed", axe));
+    // Half-up on the decimal digits: 1.005 is 1.00499... as a binary double
+    assertEquals(1.01, StatTemplateMath.applyFactor(1.005, 1));
+    assertEquals(.0101, StatTemplateMath.applyScaledValue(1.005, "movement_speed", shield));
   }
 
   @Test
