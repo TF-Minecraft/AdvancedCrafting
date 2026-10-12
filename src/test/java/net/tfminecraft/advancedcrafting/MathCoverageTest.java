@@ -52,16 +52,42 @@ class MathCoverageTest extends CoverageSupport {
     assertTrue(StatTemplateMath.formatPercentSuffix(1.001).contains("0%"));
     assertEquals(.005, StatTemplateMath.applyFactor(.01, .5));
     assertEquals(0, StatTemplateMath.applyFactor(0, 3));
-    assertEquals(2, StatTemplateMath.applyGlobalOffset(2, "missing"));
+    assertEquals(2, StatTemplateMath.applyScaledValue(2, "missing", template));
     Cache.globalStatOffsets.put("attack", 0.);
-    assertEquals(2, StatTemplateMath.applyGlobalOffset(2, "attack"));
+    assertEquals(3, StatTemplateMath.applyScaledValue(2, "attack", template));
     assertEquals(3, StatTemplateMath.applyScaledValueForPreview(2, "attack", template));
     Cache.globalStatOffsets.put("attack", 100.);
-    assertEquals(.02, StatTemplateMath.applyGlobalOffset(2, "ATTACK"));
+    assertEquals(.03, StatTemplateMath.applyScaledValue(2, "ATTACK", template));
     assertEquals(3, StatTemplateMath.applyScaledValueForPreview(2, "attack", template));
     assertEquals(0, StatTemplateMath.getFactor(template, "attack") - 1.5);
     assertNotNull(new StatTemplate("invalid", yaml("icon: bad")).getName());
     assertNotNull(new StatTemplate("default", yaml("")).getIcon());
+  }
+
+  @Test
+  void offsetStatsKeepTheirConfigPrecisionOnTheItem() throws Exception {
+    Cache.globalStatOffsets.put("movement_speed", 100.);
+    var axe =
+        new StatTemplate(
+            "greataxe",
+            yaml(
+                "stats: [movement_speed]\n"
+                    + "factors:\n"
+                    + "  movement_speed: 2.0\n"
+                    + "base-stats: ['movement_speed(0.1)']"));
+    var shield =
+        new StatTemplate(
+            "shield", yaml("stats: [movement_speed]\nbase-stats: ['movement_speed(-1.6)']"));
+    var leather = new StatData(List.of("movement_speed(0.6)"));
+    var mod = new StatModifier("movement_speed", 0);
+    // (0.1 + 0.6) x 2 = 1.4 movement; rounding after the division used to store 0.01 (1.0)
+    assertEquals(.014, StatTemplateMath.filterAndApply(leather, axe).getAmount(mod));
+    assertEquals(-.01, StatTemplateMath.filterAndApply(leather, shield).getAmount(mod));
+    var wool = new StatData(List.of("movement_speed(0.3)"));
+    assertEquals(-.013, StatTemplateMath.filterAndApply(wool, shield).getAmount(mod));
+    // Below 1.0 the old 3-decimal rounding also lost the second config decimal (0.65 -> 0.7)
+    assertEquals(.0065, StatTemplateMath.applyScaledValue(.65, "movement_speed", shield));
+    assertEquals(1.4, StatTemplateMath.applyScaledValueForPreview(.7, "movement_speed", axe));
   }
 
   @Test
