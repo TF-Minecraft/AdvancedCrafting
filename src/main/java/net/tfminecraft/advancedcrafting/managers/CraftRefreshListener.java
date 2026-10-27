@@ -21,6 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import net.tfminecraft.tlibs.armour.ArmorEquipEvent;
 import net.tfminecraft.tlibs.armour.ArmorType;
+import net.tfminecraft.tlibs.character.CharacterSessionStartEvent;
 import net.tfminecraft.advancedcrafting.AdvancedCrafting;
 import net.tfminecraft.advancedcrafting.utils.AcItemRefresher;
 
@@ -88,7 +89,16 @@ public class CraftRefreshListener implements Listener {
 	/** After a restart every player rejoins, so this brings their carried items up to date without anyone acting. */
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onJoin(PlayerJoinEvent event) {
-		Player player = event.getPlayer();
+		sweepLater(event.getPlayer());
+	}
+
+	/** A character's inventory is only put on when it is played, after the join sweep has already run. */
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onSessionStart(CharacterSessionStartEvent event) {
+		sweepLater(event.getPlayer());
+	}
+
+	private void sweepLater(Player player) {
 		Bukkit.getScheduler().runTask(AdvancedCrafting.plugin, () -> {
 			if (!player.isOnline()) {
 				return;
