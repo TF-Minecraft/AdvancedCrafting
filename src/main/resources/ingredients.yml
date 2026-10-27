@@ -793,7 +793,7 @@ rare_leather:
     scheme: leather
     model-scheme: default
     stats:
-        - armor_toughness(0.5)
+        - armor_toughness(0.25)
         - critical_strike_chance(10.0)
         - damage_reduction(4.0)
         - movement_speed(0.4)
@@ -810,7 +810,7 @@ epic_leather:
     scheme: leather
     model-scheme: default
     stats:
-        - armor_toughness(0.75)
+        - armor_toughness(0.375)
         - critical_strike_chance(15.0)
         - damage_reduction(8.0)
         - movement_speed(0.5)
@@ -827,7 +827,7 @@ legendary_leather:
     scheme: leather
     model-scheme: default
     stats:
-        - armor_toughness(1.0)
+        - armor_toughness(0.5)
         - critical_strike_chance(20.0)
         - damage_reduction(16.0)
         - movement_speed(0.6)
@@ -861,7 +861,7 @@ rare_feather:
     scheme: feather
     model-scheme: default
     stats:
-        - armor_toughness(0.5)
+        - armor_toughness(0.25)
         - critical_strike_chance(10.0)
         - damage_reduction(4.0)
         - movement_speed(0.4)
@@ -879,7 +879,7 @@ epic_feather:
     scheme: feather
     model-scheme: default
     stats:
-        - armor_toughness(0.75)
+        - armor_toughness(0.375)
         - critical_strike_chance(15.0)
         - damage_reduction(8.0)
         - movement_speed(0.5)
@@ -897,7 +897,7 @@ legendary_feather:
     scheme: feather
     model-scheme: default
     stats:
-        - armor_toughness(1.0)
+        - armor_toughness(0.5)
         - critical_strike_chance(20.0)
         - damage_reduction(16.0)
         - movement_speed(0.6)
@@ -931,7 +931,7 @@ rare_wool:
     scheme: wool
     model-scheme: default
     stats:
-        - armor_toughness(0.5)
+        - armor_toughness(0.25)
         - critical_strike_chance(10.0)
         - damage_reduction(4.0)
         - movement_speed(0.4)
@@ -948,7 +948,7 @@ epic_wool:
     scheme: wool
     model-scheme: default
     stats:
-        - armor_toughness(0.75)
+        - armor_toughness(0.375)
         - critical_strike_chance(15.0)
         - damage_reduction(8.0)
         - movement_speed(0.5)
@@ -965,7 +965,7 @@ legendary_wool:
     scheme: wool
     model-scheme: default
     stats:
-        - armor_toughness(1.0)
+        - armor_toughness(0.5)
         - critical_strike_chance(20.0)
         - damage_reduction(16.0)
         - movement_speed(0.6)
