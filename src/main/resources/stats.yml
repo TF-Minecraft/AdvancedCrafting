@@ -176,7 +176,6 @@ light_armor:
   icon: v.chainmail_helmet
   base-stats:
     - armor(0.5)
-    - armor_toughness(0.5)
     - movement_speed(0.4)
   stats:
     - armor
@@ -192,7 +191,7 @@ medium_armor:
   icon: v.iron_chestplate
   base-stats:
     - armor(1.5)
-    - armor_toughness(1.0)
+    - armor_toughness(0.5)
     - movement_speed(-0.2)
   stats:
     - armor
@@ -208,7 +207,7 @@ heavy_armor:
   icon: v.netherite_chestplate
   base-stats:
     - armor(2.5)
-    - armor_toughness(2.0)
+    - armor_toughness(1.5)
     - movement_speed(-0.4)
   stats:
     - armor
@@ -224,10 +223,10 @@ infantry_armor:
   icon: v.leather_helmet
   base-stats:
     - armor(1.5)
-    - armor_toughness(0.5)
     - movement_speed(0.2)
   stats:
     - armor
+    - armor_toughness
     - max_health
     - physical_damage_reduction
     - projectile_damage_reduction
