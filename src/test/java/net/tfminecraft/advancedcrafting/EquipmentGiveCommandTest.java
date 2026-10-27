@@ -97,7 +97,11 @@ class EquipmentGiveCommandTest extends CoverageSupport {
         }
         run(p, "sword", "ingredient.iron");
         assertTrue(p.nextMessage().contains("No configured ingredient"));
-        run(p, "sword", "ingredient.iron", "Staff", "50", "extra");
+        for (String tier : List.of("extra", "0", "-1", "2.5")) {
+            run(p, "sword", "ingredient.iron", "Staff", "50", tier);
+            assertTrue(p.nextMessage().contains("Filler tier must"));
+        }
+        run(p, "sword", "ingredient.iron", "Staff", "50", "4", "extra");
         assertTrue(p.nextMessage().contains("Usage"));
         assertEquals(0, p.getInventory().all(Material.IRON_SWORD).size());
         RecipeLoader.map.put("no_main", recipe("main-type: wood\nrecipe: ['metal.1']"));
@@ -130,7 +134,9 @@ class EquipmentGiveCommandTest extends CoverageSupport {
         assertEquals(List.of(), complete(p, "give", "equipment", "missing", ""));
         assertEquals(List.of("Target"), complete(p, "give", "equipment", "sword", "", "t"));
         assertEquals(List.of("100"), complete(p, "give", "equipment", "sword", "", "", "1"));
-        assertEquals(List.of(), complete(p, "give", "equipment", "sword", "", "", "", ""));
+        assertEquals(List.of("1", "2", "3", "4"), complete(p, "give", "equipment", "sword", "", "", "", ""));
+        assertEquals(List.of("4"), complete(p, "give", "equipment", "sword", "", "", "", "4"));
+        assertEquals(List.of(), complete(p, "give", "equipment", "sword", "", "", "", "", ""));
         try (var nbt = mockStatic(NBTItem.class);
              var mmos = mockConstruction(LiveMMOItem.class,
                      withSettings().defaultAnswer(RETURNS_DEEP_STUBS), (mmo, ctx) -> {
@@ -150,6 +156,15 @@ class EquipmentGiveCommandTest extends CoverageSupport {
                     provenance.getInputs().stream().collect(java.util.stream.Collectors.toMap(
                             input -> input.getKind() + "." + input.getId(), CraftInput::getAmount)));
             assertTrue(target.getWorld().getEntitiesByClass(Item.class).isEmpty());
+            run(p, "sword", "ingredient.iron", "Staff", "100", "4");
+            assertEquals(Map.of("ingredient.iron", 4, "ingredient.expensive_leather", 2), inputs(p.getInventory().getItem(1)));
+            run(p, "sword", "ingredient.iron", "Staff", "100", "1");
+            assertEquals(Map.of("ingredient.iron", 4, "ingredient.a_leather", 2), inputs(p.getInventory().getItem(2)));
+            TypeLoader.map.put("wool", new IngredientType("wool", yaml("name: Wool")));
+            ingredient("fine_wool", "type: wool\ntier: 3");
+            RecipeLoader.map.put("cloak", recipe("recipe: ['metal.4', 'wool.1']"));
+            run(p, "cloak", "ingredient.iron", "Staff", "100", "2");
+            assertEquals(Map.of("ingredient.iron", 4, "ingredient.fine_wool", 1), inputs(p.getInventory().getItem(3)));
             var console = mock(CommandSender.class);
             when(console.hasPermission(AdminPermissions.PERMISSION)).thenReturn(true);
             run(console, "sword", "alloy.bronze", "Target", "0");
@@ -165,6 +180,11 @@ class EquipmentGiveCommandTest extends CoverageSupport {
             bukkit.verify(() -> Bukkit.dispatchCommand(any(), anyString()), never());
             lifecycle.verifyNoInteractions();
         }
+    }
+
+    static Map<String, Integer> inputs(ItemStack item) {
+        return CraftProvenance.readFrom(item).getInputs().stream().collect(java.util.stream.Collectors.toMap(
+                input -> input.getKind() + "." + input.getId(), CraftInput::getAmount));
     }
 
     @Test

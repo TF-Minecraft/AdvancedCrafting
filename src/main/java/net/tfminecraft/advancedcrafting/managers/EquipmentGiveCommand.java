@@ -31,8 +31,8 @@ final class EquipmentGiveCommand {
             sender.sendMessage("§cNo permission.");
             return true;
         }
-        if (args.length < 4 || args.length > 6) {
-            sender.sendMessage("§cUsage: /ac give equipment <recipe> <ingredient.id|alloy.id> [player] [quality 0-100]");
+        if (args.length < 4 || args.length > 7) {
+            sender.sendMessage("§cUsage: /ac give equipment <recipe> <ingredient.id|alloy.id> [player] [quality 0-100] [filler tier]");
             return true;
         }
         Player target;
@@ -49,7 +49,7 @@ final class EquipmentGiveCommand {
             return true;
         }
         double quality = 100;
-        if (args.length == 6) {
+        if (args.length >= 6) {
             try {
                 quality = Double.parseDouble(args[5]);
             } catch (NumberFormatException ex) {
@@ -58,6 +58,18 @@ final class EquipmentGiveCommand {
             }
             if (!Double.isFinite(quality) || quality < 0 || quality > 100) {
                 sender.sendMessage("§cQuality must be a finite number from 0 to 100.");
+                return true;
+            }
+        }
+        Integer fillerTier = null;
+        if (args.length == 7) {
+            try {
+                fillerTier = Integer.parseInt(args[6]);
+            } catch (NumberFormatException ex) {
+                fillerTier = 0;
+            }
+            if (fillerTier < 1) {
+                sender.sendMessage("§cFiller tier must be a whole number of 1 or more.");
                 return true;
             }
         }
@@ -75,10 +87,7 @@ final class EquipmentGiveCommand {
         for (var entry : recipe.getRecipe().entrySet()) {
             String key = material;
             if (!entry.getKey().equalsIgnoreCase(recipe.getMainType())) {
-                Ingredient filler = IngredientLoader.get().stream()
-                        .filter(i -> i.getIngredientData().getType().getId().equalsIgnoreCase(entry.getKey()))
-                        .min(Comparator.comparingInt((Ingredient i) -> i.getIngredientData().getTier())
-                                .thenComparing(Ingredient::getId)).orElse(null);
+                Ingredient filler = filler(entry.getKey(), fillerTier);
                 if (filler == null) {
                     sender.sendMessage("§cNo configured ingredient for required type: §f" + entry.getKey());
                     return true;
@@ -100,6 +109,23 @@ final class EquipmentGiveCommand {
         }
         sender.sendMessage("§aGave §f" + recipe.getId() + "§a using §f" + material + "§a to §f" + target.getName() + "§a.");
         return true;
+    }
+
+    /**
+     * Lowest-tier ingredient of the type by default. With a filler tier, the highest tier at or below it
+     * (falling back to the lowest when every ingredient of the type is above it).
+     */
+    private Ingredient filler(String type, Integer fillerTier) {
+        List<Ingredient> ofType = IngredientLoader.get().stream()
+                .filter(i -> i.getIngredientData().getType().getId().equalsIgnoreCase(type))
+                .toList();
+        Comparator<Ingredient> byTier = Comparator.comparingInt((Ingredient i) -> i.getIngredientData().getTier());
+        Ingredient lowest = ofType.stream().min(byTier.thenComparing(Ingredient::getId)).orElse(null);
+        if (fillerTier == null) return lowest;
+        return ofType.stream()
+                .filter(i -> i.getIngredientData().getTier() <= fillerTier)
+                .max(byTier.thenComparing(Ingredient::getId, Comparator.reverseOrder()))
+                .orElse(lowest);
     }
 
     private List<String> materialsFor(CraftingRecipe recipe) {
@@ -124,6 +150,7 @@ final class EquipmentGiveCommand {
             }
             case 5 -> options = Bukkit.getOnlinePlayers().stream().map(Player::getName).sorted().toList();
             case 6 -> options = List.of("0", "25", "50", "75", "90", "100");
+            case 7 -> options = List.of("1", "2", "3", "4");
             default -> options = List.of();
         }
         String prefix = args[args.length - 1].toLowerCase(Locale.ROOT);
