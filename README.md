@@ -28,6 +28,13 @@ finished item.
   it, never the count); a natural 20 always succeeds and a natural 1 always
   fails. The roll never changes the piece: 100% hits is always a Masterwork.
 
+## Requirements
+
+Paper 1.21.10 with MMOCore, MMOItems, MythicLib and **TLibs 2.3.0 or newer**
+(builds pin 2.6.1). The item refresh listens for TLibs' character session
+event, so on an older TLibs its listener cannot register. `plugin.yml` cannot
+declare a minimum version, so update TLibs before or together with this plugin.
+
 ## Credits
 
 Originally authored by **Drefvelin**.

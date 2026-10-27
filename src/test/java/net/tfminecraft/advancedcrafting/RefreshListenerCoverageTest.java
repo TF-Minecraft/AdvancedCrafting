@@ -7,6 +7,7 @@ import java.util.*;
 import net.tfminecraft.advancedcrafting.managers.*;
 import net.tfminecraft.advancedcrafting.utils.*;
 import net.tfminecraft.tlibs.armour.*;
+import net.tfminecraft.tlibs.character.CharacterSessionStartEvent;
 import net.tfminecraft.tlibs.event.MMOItemRebuildEvent;
 import org.bukkit.Material;
 import org.bukkit.block.DoubleChest;
@@ -156,6 +157,33 @@ class RefreshListenerCoverageTest extends CoverageSupport {
     new CraftRefreshListener().onJoin(join);
     server.getScheduler().performOneTick();
     verify(gone, never()).getInventory();
+  }
+
+  @Test
+  void characterSessionStartSweepsTheCharacterInventoryOneTickLater() throws Exception {
+    when(plugin.isEnabled()).thenReturn(true);
+    var p = server.addPlayer();
+    var iron = ingredient("iron", "");
+    iron.setRevision(1);
+    var stale = iron.build();
+    iron.setRevision(2);
+    // The character's body is put on after the join sweep, so the join tick finds nothing to refresh.
+    var join = mock(PlayerJoinEvent.class);
+    when(join.getPlayer()).thenReturn(p);
+    var listener = new CraftRefreshListener();
+    listener.onJoin(join);
+    server.getScheduler().performOneTick();
+    p.getInventory().setChestplate(stale.clone());
+    p.getInventory().setItem(5, stale.clone());
+    p.getEnderChest().setItem(1, stale.clone());
+    var start = mock(CharacterSessionStartEvent.class);
+    when(start.getPlayer()).thenReturn(p);
+    listener.onSessionStart(start);
+    assertEquals(1, AcItemTags.getStoredRevision(p.getInventory().getChestplate()));
+    server.getScheduler().performOneTick();
+    assertEquals(2, AcItemTags.getStoredRevision(p.getInventory().getChestplate()));
+    assertEquals(2, AcItemTags.getStoredRevision(p.getInventory().getItem(5)));
+    assertEquals(2, AcItemTags.getStoredRevision(p.getEnderChest().getItem(1)));
   }
 
   @Test
