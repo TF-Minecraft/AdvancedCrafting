@@ -111,6 +111,10 @@ polearm:
     - spell_vampirism
     - lifesteal
     - max_item_damage
+  # Two-handed (2026-11-01): no off-hand, so hits deal 1.5x to keep up with a one-hander
+  # plus shortsword/shield at the slower 1.2 attack speed.
+  factors:
+    attack_damage: 1.5
 
 longsword:
   name: "§fLongsword"
@@ -127,6 +131,10 @@ longsword:
     - lifesteal
     - critical_strike_chance
     - max_item_damage
+  # Two-handed (2026-11-01): no off-hand, so hits deal 1.5x to keep up with a one-hander
+  # plus shortsword/shield at the slower 1.2 attack speed.
+  factors:
+    attack_damage: 1.5
 
 greathammer:
   name: "§fGreathammer"
@@ -146,6 +154,12 @@ greathammer:
     - lifesteal
     - damage_reduction
     - max_item_damage
+  # Two-handed (2026-11-01): no off-hand, so hits deal 1.5x to keep up with a one-hander
+  # plus shortsword/shield at the slower 1.2 attack speed.
+  # Blunt splash = blunt_rating % of the hit (MythicLib base 33 does not add): x0.9 = 45-72%.
+  factors:
+    attack_damage: 1.5
+    blunt_rating: 0.9
 
 greataxe:
   name: "§fGreataxe"
@@ -168,8 +182,13 @@ greataxe:
   # Two-handed, so it never has an off-hand shortsword: movement is (0.1 + leather/wool) x 2,
   # what a battleaxe plus an off-hand shortsword with a 0.2 movement base give with the same
   # leather and wool.
+  # Two-handed (2026-11-01): no off-hand, so hits deal 1.5x to keep up with a one-hander
+  # plus shortsword/shield at the slower 1.2 attack speed.
+  # Blunt splash = blunt_rating % of the hit (MythicLib base 33 does not add): x0.9 = 45-72%.
   factors:
     movement_speed: 2.0
+    attack_damage: 1.5
+    blunt_rating: 0.9
 
 light_armor:
   name: "§fLight Armor"
