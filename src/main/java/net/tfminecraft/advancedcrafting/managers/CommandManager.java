@@ -30,6 +30,7 @@ import net.tfminecraft.advancedcrafting.utils.CraftStatRefresher.RefreshResult;
 
 public class CommandManager implements Listener, CommandExecutor, TabCompleter {
 	private final EquipmentGiveCommand equipmentGive = new EquipmentGiveCommand();
+	private final AlloyRecipeCommand alloyRecipes = new AlloyRecipeCommand();
 	public String cmd1 = "ac";
 	public String cmd2 = "alloy";
 
@@ -38,17 +39,29 @@ public class CommandManager implements Listener, CommandExecutor, TabCompleter {
 		if (cmd.getName().equalsIgnoreCase(cmd1)) {
 			return handleAcCommand(sender, args);
 		}
-		if (sender instanceof Player p) {
-			if (cmd.getName().equalsIgnoreCase(cmd2) && args.length >= 1 && args[0].equalsIgnoreCase("name")) {
+		if (!cmd.getName().equalsIgnoreCase(cmd2) || args.length < 1) {
+			return false;
+		}
+		String sub = args[0].toLowerCase(Locale.ROOT);
+		if (!sub.equals("name") && !sub.equals("recipe") && !sub.equals("recipes")) {
+			return false;
+		}
+		if (!(sender instanceof Player p)) {
+			sender.sendMessage("§cPlayers only.");
+			return true;
+		}
+		switch (sub) {
+			case "recipes" -> alloyRecipes.list(p);
+			case "recipe" -> alloyRecipes.show(p, args);
+			default -> {
 				if (args.length < 2) {
 					p.sendMessage("§cNo name specified, format: /alloy name newname");
-					return false;
+					return true;
 				}
 				AdvancedCrafting.getAlloyManager().nameAlloy(p, args[1]);
-				return true;
 			}
 		}
-		return false;
+		return true;
 	}
 
 	private boolean handleAcCommand(CommandSender sender, String[] args) {
@@ -165,7 +178,7 @@ public class CommandManager implements Listener, CommandExecutor, TabCompleter {
 			return onAcTabComplete(sender, args);
 		}
 		if (cmd.getName().equalsIgnoreCase(cmd2)) {
-			return onAlloyTabComplete(args);
+			return onAlloyTabComplete(sender, args);
 		}
 		return List.of();
 	}
@@ -229,12 +242,15 @@ public class CommandManager implements Listener, CommandExecutor, TabCompleter {
 		return List.of();
 	}
 
-	private List<String> onAlloyTabComplete(String[] args) {
+	private List<String> onAlloyTabComplete(CommandSender sender, String[] args) {
 		if (args.length == 0) {
-			return filterPrefix("", "name");
+			return filterPrefix("", "name", "recipe", "recipes");
 		}
 		if (args.length == 1) {
-			return filterPrefix(args[0], "name");
+			return filterPrefix(args[0], "name", "recipe", "recipes");
+		}
+		if (args.length == 2 && args[0].equalsIgnoreCase("recipe") && sender instanceof Player p) {
+			return filterPrefix(args[1], alloyRecipes.completions(p));
 		}
 		return List.of();
 	}

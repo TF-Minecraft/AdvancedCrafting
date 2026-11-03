@@ -46,6 +46,14 @@ public final class PlayerAlloyForgeTracker {
 		return true;
 	}
 
+	/** The alloy ids this account has forged; a read-only copy. */
+	public Set<String> getForgedIds(UUID playerUuid) {
+		if (playerUuid == null) {
+			return Set.of();
+		}
+		return Set.copyOf(loadForgedIds(playerUuid));
+	}
+
 	private Set<String> loadForgedIds(UUID playerUuid) {
 		Set<String> cached = CACHE.get(playerUuid);
 		if (cached != null) {

@@ -77,7 +77,7 @@ class CommandCoverageTest extends CoverageSupport {
       verify(crafting).setAdminCraftPending(p, 100);
       assertFalse(manager.onCommand(p, cmd("alloy"), "alloy", new String[] {}));
       assertFalse(manager.onCommand(p, cmd("alloy"), "alloy", new String[] {"other"}));
-      assertFalse(manager.onCommand(p, cmd("alloy"), "alloy", new String[] {"name"}));
+      assertTrue(manager.onCommand(p, cmd("alloy"), "alloy", new String[] {"name"}));
       assertTrue(manager.onCommand(p, cmd("alloy"), "alloy", new String[] {"name", "steel"}));
       verify(alloys).nameAlloy(p, "steel");
     }
@@ -191,7 +191,9 @@ class CommandCoverageTest extends CoverageSupport {
           entry.getValue(),
           manager.onTabComplete(p, cmd("ac"), "ac", entry.getKey().toArray(String[]::new)),
           entry.getKey().toString());
-    assertEquals(List.of("name"), manager.onTabComplete(p, cmd("alloy"), "alloy", new String[] {}));
+    assertEquals(
+        List.of("name", "recipe", "recipes"),
+        manager.onTabComplete(p, cmd("alloy"), "alloy", new String[] {}));
     assertEquals(
         List.of("name"), manager.onTabComplete(p, cmd("alloy"), "alloy", new String[] {"n"}));
     assertTrue(

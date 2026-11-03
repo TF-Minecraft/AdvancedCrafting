@@ -23,6 +23,7 @@ import net.tfminecraft.advancedcrafting.objects.data.StatData;
 import net.tfminecraft.advancedcrafting.objects.ingredients.Ingredient;
 import net.tfminecraft.advancedcrafting.objects.stats.StatModifier;
 import net.tfminecraft.advancedcrafting.lifecycle.CraftLifecycle;
+import net.tfminecraft.advancedcrafting.lifecycle.KnownAlloyRecipes;
 
 public class AlloyForger {
 	private static final String GEMSTONE_PATH_PREFIX = "m.gemstones.";
@@ -104,6 +105,7 @@ public class AlloyForger {
 			loc.getWorld().dropItem(loc, template);
 			return null;
 		}
+		KnownAlloyRecipes.learn(p.getUniqueId(), AlloyRecipe.fromStation(station));
 		ItemStack item = loc.getWorld().dropItem(loc, a.build()).getItemStack();
 		if (isNew) {
 			return new NamableAlloy(a, item);
