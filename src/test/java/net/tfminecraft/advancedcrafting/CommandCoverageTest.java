@@ -77,7 +77,7 @@ class CommandCoverageTest extends CoverageSupport {
       verify(crafting).setAdminCraftPending(p, 100);
       assertFalse(manager.onCommand(p, cmd("alloy"), "alloy", new String[] {}));
       assertFalse(manager.onCommand(p, cmd("alloy"), "alloy", new String[] {"other"}));
-      assertFalse(manager.onCommand(p, cmd("alloy"), "alloy", new String[] {"name"}));
+      assertTrue(manager.onCommand(p, cmd("alloy"), "alloy", new String[] {"name"}));
       assertTrue(manager.onCommand(p, cmd("alloy"), "alloy", new String[] {"name", "steel"}));
       verify(alloys).nameAlloy(p, "steel");
     }

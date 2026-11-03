@@ -309,6 +309,8 @@ class AlloyRecipeCommandTest extends CoverageSupport {
     var brokenFile = temp.resolve("known-alloy-recipes/" + broken + ".json");
     Files.writeString(brokenFile, "{not json");
     assertFalse(known.knows(broken, alloy));
+    KnownAlloyRecipes.learn(broken, bronze);
+    assertTrue(known.knows(broken, alloy));
     assertEquals("{not json", Files.readString(brokenFile));
 
     var odd = UUID.randomUUID();
@@ -320,11 +322,28 @@ class AlloyRecipeCommandTest extends CoverageSupport {
     Files.writeString(temp.resolve("known-alloy-recipes/" + notArray + ".json"), "{}");
     assertFalse(known.knows(notArray, alloy));
 
+    // The folder is recreated if it was removed.
     var gone = new KnownAlloyRecipes(temp.resolve("elsewhere").toFile());
     Files.delete(temp.resolve("elsewhere/known-alloy-recipes"));
     KnownAlloyRecipes.init(gone);
     KnownAlloyRecipes.learn(id, bronze);
     assertTrue(gone.knows(id, alloy));
+    assertTrue(Files.exists(temp.resolve("elsewhere/known-alloy-recipes/" + id + ".json")));
     assertSame(gone, KnownAlloyRecipes.get());
+
+    // A save that fails is not kept, so the next forge tries again.
+    var blocked = UUID.randomUUID();
+    var blockedPath = temp.resolve("known-alloy-recipes/" + blocked + ".json");
+    var tempPath = temp.resolve("known-alloy-recipes/" + blocked + ".json.tmp");
+    Files.createDirectories(tempPath.resolve("inside"));
+    KnownAlloyRecipes.init(known);
+    KnownAlloyRecipes.learn(blocked, bronze);
+    assertFalse(known.knows(blocked, alloy));
+    assertFalse(Files.exists(blockedPath));
+    Files.delete(tempPath.resolve("inside"));
+    Files.delete(tempPath);
+    KnownAlloyRecipes.learn(blocked, bronze);
+    assertTrue(known.knows(blocked, alloy));
+    assertEquals("[\"copper_ingot|tin_ingot\"]", Files.readString(blockedPath));
   }
 }

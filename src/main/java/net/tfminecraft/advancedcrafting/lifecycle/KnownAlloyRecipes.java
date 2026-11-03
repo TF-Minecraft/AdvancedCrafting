@@ -4,8 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +36,8 @@ public final class KnownAlloyRecipes {
 
 	private final File folder;
 	private final Map<UUID, Set<String>> cache = new HashMap<>();
+	/** Accounts whose file could not be read; it is never overwritten this session. */
+	private final Set<UUID> unreadable = new HashSet<>();
 
 	public KnownAlloyRecipes(File dataFolder) {
 		this.folder = new File(dataFolder, "known-alloy-recipes");
@@ -66,8 +71,9 @@ public final class KnownAlloyRecipes {
 
 	private void add(UUID playerUuid, String comboKey) {
 		Set<String> known = load(playerUuid);
-		if (known.add(comboKey)) {
-			save(playerUuid, known);
+		if (known.add(comboKey) && !save(playerUuid, known)) {
+			// Not on disk, so the next forge of this combo tries again.
+			known.remove(comboKey);
 		}
 	}
 
@@ -89,8 +95,10 @@ public final class KnownAlloyRecipes {
 					}
 				}
 			} catch (Exception ex) {
-				// Keep the unreadable file untouched; this session just starts from what was read.
-				AdvancedCrafting.plugin.getLogger().warning("AC: could not read " + file.getName() + ": " + ex.getMessage());
+				// Leave the file for staff to repair; this session works from memory only.
+				AdvancedCrafting.plugin.getLogger().warning("AC: could not read " + file.getPath() + ", leaving it unchanged: "
+						+ ex.getMessage());
+				unreadable.add(playerUuid);
 				cache.put(playerUuid, known);
 				return known;
 			}
@@ -116,17 +124,31 @@ public final class KnownAlloyRecipes {
 		return !known.isEmpty();
 	}
 
+	/** Writes a temp file and moves it over the old one, so a crash can't leave half a file. */
 	@SuppressWarnings("unchecked")
-	private void save(UUID playerUuid, Set<String> known) {
+	private boolean save(UUID playerUuid, Set<String> known) {
+		if (unreadable.contains(playerUuid)) {
+			return true;
+		}
 		List<String> sorted = new ArrayList<>(known);
 		sorted.sort(null);
 		JSONArray array = new JSONArray();
 		array.addAll(sorted);
-		try (PrintWriter writer = new PrintWriter(file(playerUuid), StandardCharsets.UTF_8)) {
-			writer.print(array.toJSONString());
+		Path target = file(playerUuid).toPath();
+		Path temp = target.resolveSibling(target.getFileName() + ".tmp");
+		try {
+			Files.createDirectories(folder.toPath());
+			Files.writeString(temp, array.toJSONString(), StandardCharsets.UTF_8);
+			try {
+				Files.move(temp, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+			} catch (AtomicMoveNotSupportedException ex) {
+				Files.move(temp, target, StandardCopyOption.REPLACE_EXISTING);
+			}
+			return true;
 		} catch (IOException ex) {
 			AdvancedCrafting.plugin.getLogger().warning("AC: could not save known alloy recipes for " + playerUuid
 					+ ": " + ex.getMessage());
+			return false;
 		}
 	}
 

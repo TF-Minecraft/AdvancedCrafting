@@ -56,7 +56,7 @@ public class CommandManager implements Listener, CommandExecutor, TabCompleter {
 			default -> {
 				if (args.length < 2) {
 					p.sendMessage("§cNo name specified, format: /alloy name newname");
-					return false;
+					return true;
 				}
 				AdvancedCrafting.getAlloyManager().nameAlloy(p, args[1]);
 			}
