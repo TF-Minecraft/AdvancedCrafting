@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import net.tfminecraft.advancedcrafting.objects.alloys.AlloyStation;
@@ -15,10 +16,10 @@ public class AlloyRecipe {
 	private final List<String> catalystIds;
 
 	public AlloyRecipe(String baseId, List<String> catalystIds) {
-		this.baseId = baseId.toLowerCase();
+		this.baseId = baseId.toLowerCase(Locale.ROOT);
 		List<String> sorted = new ArrayList<>(catalystIds);
 		for (int i = 0; i < sorted.size(); i++) {
-			sorted.set(i, sorted.get(i).toLowerCase());
+			sorted.set(i, sorted.get(i).toLowerCase(Locale.ROOT));
 		}
 		Collections.sort(sorted);
 		this.catalystIds = Collections.unmodifiableList(sorted);
@@ -69,7 +70,7 @@ public class AlloyRecipe {
 		if (comboKey == null || comboKey.isBlank()) {
 			return null;
 		}
-		String normalized = comboKey.toLowerCase();
+		String normalized = comboKey.toLowerCase(Locale.ROOT);
 		int pipe = normalized.indexOf('|');
 		if (pipe < 0) {
 			return new AlloyRecipe(normalized, List.of());
