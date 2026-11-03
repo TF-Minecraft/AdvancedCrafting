@@ -253,6 +253,8 @@ class AlloyRecipeCommandTest extends CoverageSupport {
         List.of("bronze"),
         manager.onTabComplete(p, cmd(), "alloy", new String[] {"recipe", "br"}));
     assertTrue(manager.onTabComplete(p, cmd(), "alloy", new String[] {"recipes", ""}).isEmpty());
+    assertTrue(
+        manager.onTabComplete(p, cmd(), "alloy", new String[] {"recipe", "bronze", ""}).isEmpty());
     var console = mock(CommandSender.class);
     assertTrue(
         manager.onTabComplete(console, cmd(), "alloy", new String[] {"recipe", ""}).isEmpty());
@@ -266,9 +268,15 @@ class AlloyRecipeCommandTest extends CoverageSupport {
     var bronzeAlloy = addAlloy("ferrum_vex", "§6Ferrum Vex", bronze);
     addAlloy("brass", "§eBrass", brass);
     addAlloy("no_recipe", "§7No Recipe", null);
+    var noData = mock(Alloy.class);
+    when(noData.getId()).thenReturn("no_data");
+    AlloyManager.addAlloy(noData);
+    tracker.recordForge(smith, "no_data");
+    assertTrue(tracker.getForgedIds(null).isEmpty());
     tracker.recordForge(smith, "brass");
     tracker.recordForge(smith, "no_recipe");
     tracker.recordForge(smith, "deleted");
+    KnownAlloyRecipes.learn(smith, bronze);
     KnownAlloyRecipes.learn(smith, bronze);
 
     // Seeded from the forge history on first use, then the new forge is added.
@@ -345,5 +353,23 @@ class AlloyRecipeCommandTest extends CoverageSupport {
     KnownAlloyRecipes.learn(blocked, bronze);
     assertTrue(known.knows(blocked, alloy));
     assertEquals("[\"copper_ingot|tin_ingot\"]", Files.readString(blockedPath));
+
+    // A file system without atomic moves still gets the file, with a plain replace.
+    var plainMove = UUID.randomUUID();
+    try (var files = mockStatic(Files.class, CALLS_REAL_METHODS)) {
+      files
+          .when(
+              () ->
+                  Files.move(
+                      any(java.nio.file.Path.class),
+                      any(java.nio.file.Path.class),
+                      eq(java.nio.file.StandardCopyOption.REPLACE_EXISTING),
+                      eq(java.nio.file.StandardCopyOption.ATOMIC_MOVE)))
+          .thenThrow(new java.nio.file.AtomicMoveNotSupportedException("a", "b", "test"));
+      KnownAlloyRecipes.learn(plainMove, bronze);
+    }
+    assertEquals(
+        "[\"copper_ingot|tin_ingot\"]",
+        Files.readString(temp.resolve("known-alloy-recipes/" + plainMove + ".json")));
   }
 }

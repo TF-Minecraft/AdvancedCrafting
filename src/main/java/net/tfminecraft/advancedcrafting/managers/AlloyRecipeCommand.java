@@ -131,10 +131,8 @@ final class AlloyRecipeCommand {
 		Ingredient ingredient = IngredientLoader.getByString(id);
 		if (ingredient != null) {
 			try {
-				ItemStack item = ingredient.build();
-				if (item != null && item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-					return item.getItemMeta().getDisplayName();
-				}
+				// Ingredient.buildTo always gives the item a display name.
+				return ingredient.build().getItemMeta().getDisplayName();
 			} catch (RuntimeException ex) {
 				// The item source (MMOItems, ItemsAdder) may be missing; fall back to the id.
 			}
