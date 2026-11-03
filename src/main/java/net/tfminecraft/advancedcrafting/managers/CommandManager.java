@@ -39,29 +39,29 @@ public class CommandManager implements Listener, CommandExecutor, TabCompleter {
 		if (cmd.getName().equalsIgnoreCase(cmd1)) {
 			return handleAcCommand(sender, args);
 		}
-		if (sender instanceof Player p) {
-			if (cmd.getName().equalsIgnoreCase(cmd2) && args.length >= 1 && args[0].equalsIgnoreCase("name")) {
+		if (!cmd.getName().equalsIgnoreCase(cmd2) || args.length < 1) {
+			return false;
+		}
+		String sub = args[0].toLowerCase(Locale.ROOT);
+		if (!sub.equals("name") && !sub.equals("recipe") && !sub.equals("recipes")) {
+			return false;
+		}
+		if (!(sender instanceof Player p)) {
+			sender.sendMessage("§cPlayers only.");
+			return true;
+		}
+		switch (sub) {
+			case "recipes" -> alloyRecipes.list(p);
+			case "recipe" -> alloyRecipes.show(p, args);
+			default -> {
 				if (args.length < 2) {
 					p.sendMessage("§cNo name specified, format: /alloy name newname");
 					return false;
 				}
 				AdvancedCrafting.getAlloyManager().nameAlloy(p, args[1]);
-				return true;
 			}
-			if (cmd.getName().equalsIgnoreCase(cmd2) && args.length >= 1 && args[0].equalsIgnoreCase("recipes")) {
-				alloyRecipes.list(p);
-				return true;
-			}
-			if (cmd.getName().equalsIgnoreCase(cmd2) && args.length >= 1 && args[0].equalsIgnoreCase("recipe")) {
-				alloyRecipes.show(p, args);
-				return true;
-			}
-		} else if (cmd.getName().equalsIgnoreCase(cmd2) && args.length >= 1
-				&& (args[0].equalsIgnoreCase("recipe") || args[0].equalsIgnoreCase("recipes"))) {
-			sender.sendMessage("§cPlayers only.");
-			return true;
 		}
-		return false;
+		return true;
 	}
 
 	private boolean handleAcCommand(CommandSender sender, String[] args) {

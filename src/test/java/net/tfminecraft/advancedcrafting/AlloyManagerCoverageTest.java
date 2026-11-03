@@ -160,13 +160,20 @@ class AlloyManagerCoverageTest extends CoverageSupport {
       assertFalse(m.hasStation(b.getLocation()));
     }
     var alloy = mock(Alloy.class);
+    when(alloy.getId()).thenReturn("fresh_find");
     var named = new NamableAlloy(alloy, new ItemStack(Material.IRON_INGOT));
     map(m, "stations").put(b.getLocation(), station);
     p.getInventory().setItemInMainHand(new ItemStack(Material.LAVA_BUCKET));
+    var tracker =
+        new net.tfminecraft.advancedcrafting.lifecycle.PlayerAlloyForgeTracker(temp.toFile());
+    net.tfminecraft.advancedcrafting.lifecycle.CraftLifecycle.init(tracker);
     try (var forgers =
         mockConstruction(AlloyForger.class, (mock, ctx) -> when(mock.forge(p)).thenReturn(named))) {
       m.forgeAlloy(event(p, b));
       assertSame(named, map(m, "naming").get(p));
+      assertTrue(tracker.hasForged(p.getUniqueId(), "fresh_find"));
+    } finally {
+      net.tfminecraft.advancedcrafting.lifecycle.CraftLifecycle.init(null);
     }
     when(plugin.isEnabled()).thenReturn(true);
     m.start();

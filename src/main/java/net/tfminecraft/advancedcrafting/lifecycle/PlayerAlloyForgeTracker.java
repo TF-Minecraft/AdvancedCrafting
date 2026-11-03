@@ -64,6 +64,38 @@ public final class PlayerAlloyForgeTracker {
 		return Collections.unmodifiableSet(new TreeSet<>(loadForgedIds(playerUuid)));
 	}
 
+	/**
+	 * Rewrites every player file that lists {@code oldId} to list {@code newId} instead. Runs once
+	 * per newly named alloy; the files are small and only players who have forged alloys have one.
+	 */
+	public void renameAlloy(String oldId, String newId) {
+		if (oldId == null || newId == null || oldId.isBlank() || newId.isBlank()) {
+			return;
+		}
+		String from = oldId.toLowerCase(Locale.ROOT);
+		String to = newId.toLowerCase(Locale.ROOT);
+		if (from.equals(to)) {
+			return;
+		}
+		File[] files = dataFolder.listFiles((dir, name) -> name.endsWith(".json"));
+		if (files == null) {
+			return;
+		}
+		for (File file : files) {
+			UUID playerUuid;
+			try {
+				playerUuid = UUID.fromString(file.getName().substring(0, file.getName().length() - ".json".length()));
+			} catch (IllegalArgumentException ex) {
+				continue;
+			}
+			Set<String> forged = loadForgedIds(playerUuid);
+			if (forged.remove(from)) {
+				forged.add(to);
+				saveForgedIds(playerUuid, forged);
+			}
+		}
+	}
+
 	private Set<String> loadForgedIds(UUID playerUuid) {
 		Set<String> cached = CACHE.get(playerUuid);
 		if (cached != null) {

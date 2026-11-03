@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.apache.commons.lang.WordUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -13,6 +14,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.tfminecraft.advancedcrafting.AdvancedCrafting;
 import net.tfminecraft.advancedcrafting.lifecycle.CraftLifecycle;
 import net.tfminecraft.advancedcrafting.lifecycle.PlayerAlloyForgeTracker;
 import net.tfminecraft.advancedcrafting.loaders.IngredientLoader;
@@ -87,6 +89,12 @@ final class AlloyRecipeCommand {
 			p.sendMessage("§cThe recipe for §f" + alloy.getName() + " §cwas never written down.");
 			return;
 		}
+		// The forge reads this index, so a combo that now makes something else must not be shown.
+		String result = AdvancedCrafting.getAlloyRecipeStore().getResultByCombo(recipe.comboKey());
+		if (result != null && !result.equalsIgnoreCase(alloy.getId())) {
+			p.sendMessage("§cThat recipe no longer makes §f" + alloy.getName() + "§c.");
+			return;
+		}
 		p.sendMessage("§6Recipe for §r" + alloy.getName());
 		p.sendMessage("§7Base: §r" + ingredientName(recipe.getBaseId()));
 		List<String> catalysts = new ArrayList<>();
@@ -140,20 +148,6 @@ final class AlloyRecipeCommand {
 				// The item source (MMOItems, ItemsAdder) may be missing; fall back to the id.
 			}
 		}
-		return "§f" + titleCase(id);
-	}
-
-	static String titleCase(String id) {
-		StringBuilder out = new StringBuilder();
-		for (String word : id.split("_")) {
-			if (word.isEmpty()) {
-				continue;
-			}
-			if (out.length() > 0) {
-				out.append(' ');
-			}
-			out.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
-		}
-		return out.toString();
+		return "§f" + WordUtils.capitalize(id.replace('_', ' '));
 	}
 }

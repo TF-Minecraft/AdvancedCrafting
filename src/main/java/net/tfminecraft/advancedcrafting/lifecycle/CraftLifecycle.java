@@ -40,14 +40,35 @@ public final class CraftLifecycle {
 		}
 	}
 
-	/**
-	 * Records a forge without firing events, for a player who has gone offline
-	 * (a new alloy whose naming prompt timed out after they left).
-	 */
+	/** Records a forge without firing events: a new alloy, as soon as it is forged and before it is named. */
 	public static void recordForge(UUID playerUuid, String alloyId) {
 		if (tracker != null) {
 			tracker.recordForge(playerUuid, alloyId);
 		}
+	}
+
+	/** Moves every player's record of a newly named alloy from its generated id to its chosen one. */
+	public static void renameAlloy(String oldId, String newId) {
+		if (tracker != null) {
+			tracker.renameAlloy(oldId, newId);
+		}
+	}
+
+	/**
+	 * Credits a discovery whose naming prompt timed out. The forge was already recorded when the
+	 * alloy was forged, so this fires the crafted and discovered events directly.
+	 */
+	public static void fireAlloyDiscovered(Player player, String alloyId) {
+		if (player == null || alloyId == null || alloyId.isBlank()) {
+			return;
+		}
+		String normalizedId = alloyId.toLowerCase(Locale.ROOT);
+		UUID playerUuid = player.getUniqueId();
+		if (tracker != null) {
+			tracker.recordForge(playerUuid, normalizedId);
+		}
+		Bukkit.getPluginManager().callEvent(new AlloyCraftedEvent(player, playerUuid, normalizedId));
+		Bukkit.getPluginManager().callEvent(new AlloyDiscoveredEvent(player, playerUuid, normalizedId));
 	}
 
 	public static void fireItemCrafted(Player player, String recipeId, String categoryId) {

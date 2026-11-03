@@ -7,6 +7,8 @@ import java.util.List;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.tfminecraft.advancedcrafting.database.AlloyDatabase;
+import net.tfminecraft.advancedcrafting.database.AlloyRecipeStore;
 import net.tfminecraft.advancedcrafting.lifecycle.AlloyDiscoveredEvent;
 import net.tfminecraft.advancedcrafting.lifecycle.CraftLifecycle;
 import net.tfminecraft.advancedcrafting.lifecycle.PlayerAlloyForgeTracker;
@@ -30,11 +32,17 @@ class AlloyRecipeCommandTest extends CoverageSupport {
   CommandManager manager;
   PlayerAlloyForgeTracker tracker;
 
+  AlloyRecipeStore store;
+
   @BeforeEach
-  void setupTracker() {
+  void setupTracker() throws Exception {
     manager = new CommandManager();
     tracker = new PlayerAlloyForgeTracker(temp.toFile());
     CraftLifecycle.init(tracker);
+    store = new AlloyRecipeStore(temp.resolve("data/alloy-recipes").toFile());
+    var field = AdvancedCrafting.class.getDeclaredField("alloyRecipeStore");
+    field.setAccessible(true);
+    field.set(plugin, store);
   }
 
   @AfterEach
@@ -152,6 +160,16 @@ class AlloyRecipeCommandTest extends CoverageSupport {
     var lines = drain(p);
     assertTrue(lines.get(1).contains("Iron Ingot"));
     assertTrue(lines.get(2).endsWith("none"));
+
+    var moved = new AlloyRecipe("iron_ingot", List.of("coal"));
+    addAlloy("moved", "§7Moved", moved);
+    tracker.recordForge(p.getUniqueId(), "moved");
+    store.upsert(moved, "moved");
+    assertTrue(alloy(p, "recipe", "moved"));
+    assertTrue(drain(p).get(0).contains("Recipe for"));
+    store.upsert(moved, "scrap");
+    assertTrue(alloy(p, "recipe", "moved"));
+    assertTrue(p.nextMessage().contains("no longer makes"));
   }
 
   @Test
@@ -186,8 +204,9 @@ class AlloyRecipeCommandTest extends CoverageSupport {
     var console = mock(CommandSender.class);
     assertTrue(alloy(console, "recipes"));
     assertTrue(alloy(console, "recipe", "bronze"));
-    verify(console, times(2)).sendMessage("§cPlayers only.");
-    assertFalse(alloy(console, "name", "x"));
+    assertTrue(alloy(console, "name", "x"));
+    verify(console, times(3)).sendMessage("§cPlayers only.");
+    assertFalse(alloy(console, "other"));
     assertFalse(alloy(console));
 
     var p = server.addPlayer("NoTracker");
@@ -234,10 +253,7 @@ class AlloyRecipeCommandTest extends CoverageSupport {
     assertThrows(UnsupportedOperationException.class, () -> tracker.getForgedIds(id).add("x"));
   }
 
-  @Test
-  void namingTimeoutStillRecordsTheDiscoverer() throws Exception {
-    var online = server.addPlayer("Online");
-    var offline = server.addPlayer("Offline");
+  java.util.List<String> discoveries() {
     var events = new java.util.ArrayList<String>();
     server
         .getPluginManager()
@@ -247,16 +263,91 @@ class AlloyRecipeCommandTest extends CoverageSupport {
             org.bukkit.event.EventPriority.NORMAL,
             (l, e) -> events.add(((AlloyDiscoveredEvent) e).getAlloyId()),
             org.mockbukkit.mockbukkit.MockBukkit.createMockPlugin());
+    return events;
+  }
+
+  @Test
+  void namingTimeoutCreditsTheDiscovererIfOnline() throws Exception {
+    var online = server.addPlayer("Online");
+    var offline = server.addPlayer("Offline");
+    var events = discoveries();
     var method =
-        AlloyManager.class.getDeclaredMethod(
-            "namingTimedOut", org.bukkit.entity.Player.class, String.class);
+        AlloyManager.class.getDeclaredMethod("namingTimedOut", java.util.UUID.class, String.class);
     method.setAccessible(true);
-    method.invoke(null, online, "Generated");
+    tracker.recordForge(online.getUniqueId(), "generated");
+    method.invoke(null, online.getUniqueId(), "Generated");
+    assertTrue(online.nextMessage().contains("Naming timed out"));
     assertTrue(tracker.hasForged(online.getUniqueId(), "generated"));
     assertEquals(List.of("generated"), events);
     offline.disconnect();
-    method.invoke(null, offline, "other");
-    assertTrue(tracker.hasForged(offline.getUniqueId(), "other"));
+    method.invoke(null, offline.getUniqueId(), "other");
+    assertFalse(tracker.hasForged(offline.getUniqueId(), "other"));
     assertEquals(List.of("generated"), events);
+    CraftLifecycle.fireAlloyDiscovered(null, "x");
+    CraftLifecycle.fireAlloyDiscovered(online, null);
+    CraftLifecycle.fireAlloyDiscovered(online, " ");
+    CraftLifecycle.init(null);
+    CraftLifecycle.fireAlloyDiscovered(online, "untracked");
+    CraftLifecycle.renameAlloy("a", "b");
+    assertEquals(List.of("generated", "untracked"), events);
+  }
+
+  @Test
+  void namingMovesEveryRecordToTheChosenId() throws Exception {
+    var finder = server.addPlayer("Finder");
+    var copier = server.addPlayer("Copier");
+    var events = discoveries();
+    var m = new AlloyManager();
+    var base = ingredient("iron", "base: true");
+    var alloy =
+        spy(
+            new Alloy(
+                "ferrum_vex",
+                "Ferrum Vex",
+                new AlloyData(
+                    base,
+                    new net.tfminecraft.advancedcrafting.objects.data.StatData(),
+                    new java.util.HashMap<>(),
+                    null)));
+    doReturn(new ItemStack(Material.GOLD_INGOT)).when(alloy).build();
+    AlloyManager.addAlloy(alloy);
+    tracker.recordForge(finder.getUniqueId(), "ferrum_vex");
+    tracker.recordForge(copier.getUniqueId(), "ferrum_vex");
+    tracker.recordForge(copier.getUniqueId(), "brass");
+    var naming = AlloyManager.class.getDeclaredField("naming");
+    naming.setAccessible(true);
+    @SuppressWarnings("unchecked")
+    var map = (java.util.Map<org.bukkit.entity.Player, Object>) naming.get(m);
+    map.put(
+        finder,
+        new net.tfminecraft.advancedcrafting.objects.alloys.NamableAlloy(
+            alloy, new ItemStack(Material.IRON_INGOT)));
+    try (var db = mockConstruction(AlloyDatabase.class)) {
+      m.nameAlloy(finder, "Bright_Steel");
+    }
+    assertEquals(List.of("bright_steel"), List.copyOf(tracker.getForgedIds(finder.getUniqueId())));
+    assertEquals(
+        List.of("brass", "bright_steel"), List.copyOf(tracker.getForgedIds(copier.getUniqueId())));
+    assertEquals(List.of("bright_steel"), events);
+  }
+
+  @Test
+  void renameSkipsBadInputAndForeignFiles() throws Exception {
+    var id = java.util.UUID.randomUUID();
+    tracker.recordForge(id, "old");
+    var notes = temp.resolve("forged-alloys/notes.json");
+    java.nio.file.Files.writeString(notes, "[\"old\"]");
+    java.nio.file.Files.writeString(temp.resolve("forged-alloys/readme.txt"), "x");
+    for (String[] pair :
+        new String[][] {{null, "x"}, {"old", null}, {" ", "x"}, {"old", " "}, {"OLD", "old"}})
+      tracker.renameAlloy(pair[0], pair[1]);
+    assertTrue(tracker.hasForged(id, "old"));
+    tracker.renameAlloy("Old", "New");
+    assertTrue(tracker.hasForged(id, "new"));
+    assertFalse(tracker.hasForged(id, "old"));
+    assertEquals("[\"old\"]", java.nio.file.Files.readString(notes));
+    var gone = new PlayerAlloyForgeTracker(temp.resolve("elsewhere").toFile());
+    java.nio.file.Files.delete(temp.resolve("elsewhere/forged-alloys"));
+    gone.renameAlloy("a", "b");
   }
 }
