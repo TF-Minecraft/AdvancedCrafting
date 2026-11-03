@@ -12,8 +12,8 @@ commands:
     usage: /<command>
     description: AdvancedCrafting Command
   alloy:
-    usage: /<command>
-    description: Alloy Command
+    usage: "/<command> name <name> | recipes | recipe [name]"
+    description: Name a new alloy, or see the recipes of alloys you have forged
 
 permissions:
   advancedcrafting.admin:

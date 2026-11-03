@@ -101,12 +101,22 @@ public class AlloyManager implements Listener{
 					if(entry.getValue().tick()) {
 						entry.getKey().sendMessage("§cNaming timed out.");
 						naming.remove(entry.getKey());
+						namingTimedOut(entry.getKey(), entry.getValue().getAlloy().getId());
 					}
 				}
 			}
 		}.runTaskTimer(AdvancedCrafting.plugin, 0, 20L);
 	}
 	
+	/** The alloy keeps its generated name, but its discoverer has still forged it. */
+	static void namingTimedOut(Player p, String alloyId) {
+		if (p.isOnline()) {
+			CraftLifecycle.fireAlloyOutcome(p, alloyId);
+		} else {
+			CraftLifecycle.recordForge(p.getUniqueId(), alloyId);
+		}
+	}
+
 	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
 	@SuppressWarnings("deprecation")
 	@EventHandler

@@ -7,8 +7,10 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,6 +46,22 @@ public final class PlayerAlloyForgeTracker {
 		forged.add(normalizedId);
 		saveForgedIds(playerUuid, forged);
 		return true;
+	}
+
+	/** True once this account has forged the alloy (a real alloy, not scrap). */
+	public boolean hasForged(UUID playerUuid, String alloyId) {
+		if (playerUuid == null || alloyId == null || alloyId.isBlank()) {
+			return false;
+		}
+		return loadForgedIds(playerUuid).contains(alloyId.toLowerCase(Locale.ROOT));
+	}
+
+	/** The alloy ids this account has forged, sorted; a read-only copy. */
+	public Set<String> getForgedIds(UUID playerUuid) {
+		if (playerUuid == null) {
+			return Set.of();
+		}
+		return Collections.unmodifiableSet(new TreeSet<>(loadForgedIds(playerUuid)));
 	}
 
 	private Set<String> loadForgedIds(UUID playerUuid) {

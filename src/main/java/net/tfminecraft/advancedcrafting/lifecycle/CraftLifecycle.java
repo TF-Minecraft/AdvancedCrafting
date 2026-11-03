@@ -40,6 +40,16 @@ public final class CraftLifecycle {
 		}
 	}
 
+	/**
+	 * Records a forge without firing events, for a player who has gone offline
+	 * (a new alloy whose naming prompt timed out after they left).
+	 */
+	public static void recordForge(UUID playerUuid, String alloyId) {
+		if (tracker != null) {
+			tracker.recordForge(playerUuid, alloyId);
+		}
+	}
+
 	public static void fireItemCrafted(Player player, String recipeId, String categoryId) {
 		if (player == null || recipeId == null || recipeId.isBlank()) {
 			return;

@@ -191,7 +191,9 @@ class CommandCoverageTest extends CoverageSupport {
           entry.getValue(),
           manager.onTabComplete(p, cmd("ac"), "ac", entry.getKey().toArray(String[]::new)),
           entry.getKey().toString());
-    assertEquals(List.of("name"), manager.onTabComplete(p, cmd("alloy"), "alloy", new String[] {}));
+    assertEquals(
+        List.of("name", "recipe", "recipes"),
+        manager.onTabComplete(p, cmd("alloy"), "alloy", new String[] {}));
     assertEquals(
         List.of("name"), manager.onTabComplete(p, cmd("alloy"), "alloy", new String[] {"n"}));
     assertTrue(
