@@ -153,6 +153,43 @@ class ForgerCoverageTest extends CoverageSupport {
   }
 
   @Test
+  void successfulForgesTeachTheRecipeButScrapDoesNot() throws Exception {
+    var p = server.addPlayer();
+    var loc = new Location(server.addSimpleWorld("world"), 0, 1, 2);
+    var station = new AlloyStation(loc);
+    station.addIngredient(ingredient("iron", "base: true"));
+    station.addIngredient(ingredient("copper", ""));
+    var knownRecipes = new net.tfminecraft.advancedcrafting.lifecycle.KnownAlloyRecipes(temp.toFile());
+    net.tfminecraft.advancedcrafting.lifecycle.KnownAlloyRecipes.init(knownRecipes);
+    var alloy = mock(Alloy.class, RETURNS_DEEP_STUBS);
+    when(alloy.getId()).thenReturn("known");
+    when(alloy.getData().getRecipe()).thenReturn(AlloyRecipe.fromStation(station));
+    when(alloy.build())
+        .thenAnswer(i -> new org.bukkit.inventory.ItemStack(org.bukkit.Material.IRON_INGOT));
+    AlloyManager.addAlloy(alloy);
+    try {
+      try (var dbs =
+          mockConstruction(
+              AlloyDatabase.class, (db, ctx) -> when(db.getResult(station)).thenReturn("scrap"))) {
+        Cache.scrap = "MATERIAL.SCRAP";
+        when(net.Indyuce.mmoitems.MMOItems.plugin.getItems().getMMOItem(any(), eq("SCRAP")).newBuilder().build())
+            .thenAnswer(i -> new org.bukkit.inventory.ItemStack(org.bukkit.Material.IRON_NUGGET));
+        assertNull(forger(station, 0).forge(p));
+      }
+      assertFalse(knownRecipes.knows(p.getUniqueId(), alloy));
+      try (var dbs =
+          mockConstruction(
+              AlloyDatabase.class, (db, ctx) -> when(db.getResult(station)).thenReturn("known"))) {
+        assertNull(forger(station, 0).forge(p));
+      }
+      assertTrue(knownRecipes.knows(p.getUniqueId(), alloy));
+    } finally {
+      net.tfminecraft.advancedcrafting.lifecycle.KnownAlloyRecipes.init(null);
+      AlloyManager.removeAlloy("known");
+    }
+  }
+
+  @Test
   void deterministicMergeCoversGuaranteedInheritanceCapsAndProtectedStats() throws Exception {
     Cache.maxFactor = 1.5;
     Cache.gemstoneStatBaseChance = 100;

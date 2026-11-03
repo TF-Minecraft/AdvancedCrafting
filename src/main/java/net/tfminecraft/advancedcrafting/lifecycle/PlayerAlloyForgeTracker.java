@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -48,52 +47,12 @@ public final class PlayerAlloyForgeTracker {
 		return true;
 	}
 
-	/** True once this account has forged the alloy (a real alloy, not scrap). */
-	public boolean hasForged(UUID playerUuid, String alloyId) {
-		if (playerUuid == null || alloyId == null || alloyId.isBlank()) {
-			return false;
-		}
-		return loadForgedIds(playerUuid).contains(alloyId.toLowerCase(Locale.ROOT));
-	}
-
-	/** The alloy ids this account has forged, sorted; a read-only copy. */
+	/** The alloy ids this account has forged; a read-only copy. */
 	public Set<String> getForgedIds(UUID playerUuid) {
 		if (playerUuid == null) {
 			return Set.of();
 		}
-		return Collections.unmodifiableSet(new TreeSet<>(loadForgedIds(playerUuid)));
-	}
-
-	/**
-	 * Rewrites every player file that lists {@code oldId} to list {@code newId} instead. Runs once
-	 * per newly named alloy; the files are small and only players who have forged alloys have one.
-	 */
-	public void renameAlloy(String oldId, String newId) {
-		if (oldId == null || newId == null || oldId.isBlank() || newId.isBlank()) {
-			return;
-		}
-		String from = oldId.toLowerCase(Locale.ROOT);
-		String to = newId.toLowerCase(Locale.ROOT);
-		if (from.equals(to)) {
-			return;
-		}
-		File[] files = dataFolder.listFiles((dir, name) -> name.endsWith(".json"));
-		if (files == null) {
-			return;
-		}
-		for (File file : files) {
-			UUID playerUuid;
-			try {
-				playerUuid = UUID.fromString(file.getName().substring(0, file.getName().length() - ".json".length()));
-			} catch (IllegalArgumentException ex) {
-				continue;
-			}
-			Set<String> forged = loadForgedIds(playerUuid);
-			if (forged.remove(from)) {
-				forged.add(to);
-				saveForgedIds(playerUuid, forged);
-			}
-		}
+		return Collections.unmodifiableSet(new HashSet<>(loadForgedIds(playerUuid)));
 	}
 
 	private Set<String> loadForgedIds(UUID playerUuid) {

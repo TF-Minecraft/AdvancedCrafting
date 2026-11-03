@@ -3,7 +3,7 @@ package net.tfminecraft.advancedcrafting.managers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.entity.Player;
@@ -15,8 +15,7 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.tfminecraft.advancedcrafting.AdvancedCrafting;
-import net.tfminecraft.advancedcrafting.lifecycle.CraftLifecycle;
-import net.tfminecraft.advancedcrafting.lifecycle.PlayerAlloyForgeTracker;
+import net.tfminecraft.advancedcrafting.lifecycle.KnownAlloyRecipes;
 import net.tfminecraft.advancedcrafting.loaders.IngredientLoader;
 import net.tfminecraft.advancedcrafting.objects.alloys.Alloy;
 import net.tfminecraft.advancedcrafting.objects.data.AlloyRecipe;
@@ -61,7 +60,7 @@ final class AlloyRecipeCommand {
 		String typed = String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length));
 		String id = typed.replace(' ', '_').toLowerCase(Locale.ROOT);
 		Alloy alloy = AlloyManager.getAlloyById(id);
-		if (alloy == null || !knows(p, alloy.getId())) {
+		if (alloy == null || !knows(p, alloy)) {
 			p.sendMessage("§cYou don't know the recipe for §f" + typed + "§c.");
 			return;
 		}
@@ -75,7 +74,7 @@ final class AlloyRecipeCommand {
 			return;
 		}
 		Alloy alloy = AlloyManager.getAlloyById(AcItemTags.getId(held));
-		if (alloy == null || !knows(p, alloy.getId())) {
+		if (alloy == null || !knows(p, alloy)) {
 			String name = held.getItemMeta().hasDisplayName() ? held.getItemMeta().getDisplayName() : "this alloy";
 			p.sendMessage("§cYou don't know the recipe for §f" + name + "§c. Forge it yourself to learn it.");
 			return;
@@ -84,14 +83,11 @@ final class AlloyRecipeCommand {
 	}
 
 	private void sendRecipe(Player p, Alloy alloy) {
+		// knows() already required a recipe.
 		AlloyRecipe recipe = alloy.getData().getRecipe();
-		if (recipe == null) {
-			p.sendMessage("§cThe recipe for §f" + alloy.getName() + " §cwas never written down.");
-			return;
-		}
 		// The forge reads this index, so a combo that now makes something else must not be shown.
 		String result = AdvancedCrafting.getAlloyRecipeStore().getResultByCombo(recipe.comboKey());
-		if (result != null && !result.equalsIgnoreCase(alloy.getId())) {
+		if (!alloy.getId().equalsIgnoreCase(result)) {
 			p.sendMessage("§cThat recipe no longer makes §f" + alloy.getName() + "§c.");
 			return;
 		}
@@ -115,24 +111,19 @@ final class AlloyRecipeCommand {
 	}
 
 	private List<Alloy> knownAlloys(Player p) {
-		PlayerAlloyForgeTracker tracker = CraftLifecycle.getTracker();
-		if (tracker == null) {
-			return List.of();
-		}
-		Set<String> ids = tracker.getForgedIds(p.getUniqueId());
 		List<Alloy> known = new ArrayList<>();
-		for (String id : ids) {
+		for (String id : new TreeSet<>(AlloyManager.getAlloyIds())) {
 			Alloy alloy = AlloyManager.getAlloyById(id);
-			if (alloy != null) {
+			if (knows(p, alloy)) {
 				known.add(alloy);
 			}
 		}
 		return known;
 	}
 
-	private boolean knows(Player p, String alloyId) {
-		PlayerAlloyForgeTracker tracker = CraftLifecycle.getTracker();
-		return tracker != null && tracker.hasForged(p.getUniqueId(), alloyId);
+	private boolean knows(Player p, Alloy alloy) {
+		KnownAlloyRecipes known = KnownAlloyRecipes.get();
+		return known != null && known.knows(p.getUniqueId(), alloy);
 	}
 
 	/** The ingredient's item name with its colour, or its id in title case if the item can't be built. */

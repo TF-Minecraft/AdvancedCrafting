@@ -2,9 +2,7 @@ package net.tfminecraft.advancedcrafting.managers;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -101,27 +99,14 @@ public class AlloyManager implements Listener{
 			public void run() {
 				for(Map.Entry<Player, NamableAlloy> entry : ((HashMap<Player, NamableAlloy>) naming.clone()).entrySet()) {
 					if(entry.getValue().tick()) {
+						entry.getKey().sendMessage("§cNaming timed out.");
 						naming.remove(entry.getKey());
-						namingTimedOut(entry.getKey().getUniqueId(), entry.getValue().getAlloy().getId());
 					}
 				}
 			}
 		}.runTaskTimer(AdvancedCrafting.plugin, 0, 20L);
 	}
 	
-	/**
-	 * The alloy keeps its generated name. It was recorded for its discoverer when forged; this credits
-	 * the discovery as naming would have. The player is looked up again, since they may have relogged.
-	 */
-	static void namingTimedOut(UUID playerUuid, String alloyId) {
-		Player p = Bukkit.getPlayer(playerUuid);
-		if (p == null) {
-			return;
-		}
-		p.sendMessage("§cNaming timed out.");
-		CraftLifecycle.fireAlloyDiscovered(p, alloyId);
-	}
-
 	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
 	@SuppressWarnings("deprecation")
 	@EventHandler
@@ -212,8 +197,6 @@ public class AlloyManager implements Listener{
 		p.getInventory().getItemInMainHand().setType(Material.BUCKET);
 		removeStation(station);
 		if(alloy != null) {
-			// Recorded now, so a restart, a second discovery or a timeout before naming can't lose it.
-			CraftLifecycle.recordForge(p.getUniqueId(), alloy.getAlloy().getId());
 			p.sendTitle(StringFormatter.formatHex("#d1743fNew Alloy"), StringFormatter.formatHex("#b0a996Use #36e3a4/alloy name #b0a996to name it!"), 10, 80, 10);
 			p.sendMessage("§cThe naming prompt times out in 60 seconds.");
 			naming.put(p, alloy);
@@ -261,7 +244,6 @@ public class AlloyManager implements Listener{
 		p.sendMessage("§aNamed the new alloy "+name);
 		addAlloy(alloy.getAlloy());
 		CraftLifecycle.fireAlloyOutcome(p, alloy.getAlloy().getId());
-		CraftLifecycle.renameAlloy(oldId, alloy.getAlloy().getId());
 		naming.remove(p);
 	}
 	
