@@ -19,6 +19,7 @@ import net.tfminecraft.advancedcrafting.objects.alloys.Alloy;
 import net.tfminecraft.advancedcrafting.objects.CraftStack;
 import net.tfminecraft.advancedcrafting.objects.data.StatData;
 import net.tfminecraft.advancedcrafting.objects.ingredients.Ingredient;
+import net.tfminecraft.advancedcrafting.utils.TierBonusCalculator.TierSource;
 
 public class IngredientManager implements Listener{
 	private HashMap<String, Ingredient> ingredients = new HashMap<>();
@@ -48,7 +49,7 @@ public class IngredientManager implements Listener{
 		if(i.getType().isAir()) return;
 
 		CraftStack cs = new CraftStack(i);
-		StatData source = resolveStatData(cs, i);
+		PreviewSource source = resolveSource(cs, i);
 		if(source == null) return;
 
 		e.setCancelled(true);
@@ -59,25 +60,32 @@ public class IngredientManager implements Listener{
 		}
 
 		InventoryManager inv = new InventoryManager();
-		inv.templatePreviewView(p, source);
+		inv.templatePreviewView(p, source.stats(), source.tier());
 	}
 
-	private StatData resolveStatData(CraftStack cs, ItemStack item) {
+	/** The hovered material's stats plus its type and tier (for templates with a tier-bonus). */
+	private record PreviewSource(StatData stats, TierSource tier) {
+		static PreviewSource of(Ingredient ing) {
+			return new PreviewSource(ing.getIngredientData().getStatData(), TierSource.of(ing.getIngredientData()));
+		}
+	}
+
+	private PreviewSource resolveSource(CraftStack cs, ItemStack item) {
 		if(cs.isIngredient()) {
 			Ingredient ing = cs.getIngredient();
 			if(ing != null) {
-				return ing.getIngredientData().getStatData();
+				return PreviewSource.of(ing);
 			}
 		}
 		if(cs.isAlloy()) {
 			Alloy alloy = cs.getAlloy();
 			if(alloy != null) {
-				return alloy.getData().getStatData();
+				return new PreviewSource(alloy.getData().getStatData(), TierSource.of(alloy.getData()));
 			}
 		}
 		Ingredient ing = getFromItem(item);
 		if(ing != null) {
-			return ing.getIngredientData().getStatData();
+			return PreviewSource.of(ing);
 		}
 		return null;
 	}

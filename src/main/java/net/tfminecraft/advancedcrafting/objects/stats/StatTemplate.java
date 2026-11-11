@@ -26,6 +26,9 @@ public class StatTemplate {
 	private Map<String, Double> factors = new HashMap<>();
 	private List<StatModifier> baseStats = new ArrayList<>();
 	private Map<String, Double> baseStatAmounts = new HashMap<>();
+	/** Ingredient type id -> stat added per tier of that type's average material tier. */
+	private Map<String, StatModifier> tierBonuses = new TreeMap<>();
+	private double tierBonusNeutral;
 	private int revision;
 
 	public StatTemplate(String key, ConfigurationSection config) {
@@ -51,6 +54,34 @@ public class StatTemplate {
 				baseStats.add(base);
 				baseStatAmounts.put(base.getType().toLowerCase(), base.getAmount());
 			}
+		}
+		loadTierBonuses(key, config);
+	}
+
+	/**
+	 * {@code tier-bonus: {leather: attack_damage(0.125)}} adds 0.125 x (average leather tier -
+	 * {@code tier-bonus-neutral}) to the crafted item. The stat must also be in {@code stats}.
+	 */
+	private void loadTierBonuses(String key, ConfigurationSection config) {
+		tierBonusNeutral = config.getDouble("tier-bonus-neutral", 0);
+		ConfigurationSection section = config.getConfigurationSection("tier-bonus");
+		if (section == null) {
+			return;
+		}
+		for (String typeId : section.getKeys(false)) {
+			StatModifier bonus;
+			try {
+				bonus = new StatModifier(section.getString(typeId));
+			} catch (RuntimeException e) {
+				Bukkit.getLogger().warning("AC: Stat template " + key + " has an invalid tier-bonus for "
+						+ typeId + ": " + section.get(typeId));
+				continue;
+			}
+			if (!allowsIngredientStat(bonus.getType())) {
+				Bukkit.getLogger().warning("AC: Stat template " + key + " tier-bonus stat " + bonus.getType()
+						+ " is not in its stats list, so it has no effect");
+			}
+			tierBonuses.put(typeId.toLowerCase(), new StatModifier(bonus.getType().toLowerCase(), bonus.getAmount()));
 		}
 	}
 
@@ -92,6 +123,30 @@ public class StatTemplate {
 		return amount != null ? amount : 0;
 	}
 
+	public boolean hasTierBonuses() {
+		return !tierBonuses.isEmpty();
+	}
+
+	public boolean hasTierBonus(String typeId) {
+		return typeId != null && tierBonuses.containsKey(typeId.toLowerCase());
+	}
+
+	/**
+	 * The stat this template adds for materials of {@code typeId} at {@code averageTier}, or null when
+	 * the type has no bonus or the bonus is zero (average tier equal to the neutral tier).
+	 */
+	public StatModifier getTierBonus(String typeId, double averageTier) {
+		if (!hasTierBonus(typeId)) {
+			return null;
+		}
+		StatModifier perTier = tierBonuses.get(typeId.toLowerCase());
+		double amount = perTier.getAmount() * (averageTier - tierBonusNeutral);
+		if (amount == 0) {
+			return null;
+		}
+		return new StatModifier(perTier.getType(), amount);
+	}
+
 	public int getRevision() {
 		return revision;
 	}
@@ -116,6 +171,14 @@ public class StatTemplate {
 				.map(e -> e.getKey().toLowerCase() + "(" + e.getValue() + ")")
 				.collect(Collectors.toList());
 		sb.append("factors=").append(String.join(",", factorParts));
+		// Only templates that use tier bonuses add this part, so every other template keeps its revision.
+		if (hasTierBonuses()) {
+			List<String> bonusParts = tierBonuses.entrySet().stream()
+					.map(e -> e.getKey() + ":" + e.getValue().getType() + "(" + e.getValue().getAmount() + ")")
+					.collect(Collectors.toList());
+			sb.append(";tierBonus=").append(String.join(",", bonusParts))
+					.append(";tierBonusNeutral=").append(tierBonusNeutral);
+		}
 		return sb.toString();
 	}
 }

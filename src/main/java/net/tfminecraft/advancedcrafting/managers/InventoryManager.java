@@ -26,6 +26,8 @@ import net.tfminecraft.advancedcrafting.objects.data.StatData;
 import net.tfminecraft.advancedcrafting.objects.ingredients.IngredientType;
 import net.tfminecraft.advancedcrafting.objects.stats.StatTemplate;
 import net.tfminecraft.advancedcrafting.utils.StatTemplateMath;
+import net.tfminecraft.advancedcrafting.utils.TierBonusCalculator;
+import net.tfminecraft.advancedcrafting.utils.TierBonusCalculator.TierSource;
 
 
 public class InventoryManager {
@@ -76,12 +78,17 @@ public class InventoryManager {
 		p.openInventory(i);
 	}
 
+	public void templatePreviewView(Player p, StatData source) {
+		templatePreviewView(p, source, null);
+	}
+
+	/** {@code tier}: the hovered material's type and tier, so templates with a tier-bonus show it. */
 	// Keep the existing legacy text representation, formatting, and exact-string comparisons.
 	@SuppressWarnings("deprecation")
-	public void templatePreviewView(Player p, StatData source) {
+	public void templatePreviewView(Player p, StatData source, TierSource tier) {
 		int count = 0;
 		for (StatTemplate template : StatTemplateLoader.getAll()) {
-			if (StatTemplateMath.hasOverlap(source, template)) {
+			if (StatTemplateMath.hasOverlap(TierBonusCalculator.withBonus(source, template, tier), template)) {
 				count++;
 			}
 		}
@@ -93,13 +100,14 @@ public class InventoryManager {
 		Inventory i = AdvancedCrafting.plugin.getServer().createInventory(null, size, STAT_PREVIEW_TITLE);
 		int slot = 0;
 		for (StatTemplate template : StatTemplateLoader.getAll()) {
-			if (!StatTemplateMath.hasOverlap(source, template)) {
+			StatData shown = TierBonusCalculator.withBonus(source, template, tier);
+			if (!StatTemplateMath.hasOverlap(shown, template)) {
 				continue;
 			}
 			if (slot >= i.getSize()) {
 				break;
 			}
-			i.setItem(slot, getTemplatePreviewItem(source, template));
+			i.setItem(slot, getTemplatePreviewItem(shown, template));
 			slot++;
 		}
 		int slotn = 0;

@@ -85,7 +85,7 @@ class IngredientManagerCoverageTest extends CoverageSupport {
       manager.convertItem(event);
       assertTrue(event.isCancelled());
       verify(menu.constructed().getFirst())
-          .templatePreviewView(player, iron.getIngredientData().getStatData());
+          .templatePreviewView(player, iron.getIngredientData().getStatData(), null);
       manager.convertItem(event);
       assertEquals(2, menu.constructed().size());
       var alloy =
