@@ -73,10 +73,15 @@ public final class BucketStatAverager {
 	}
 
 	public static StatData computeFromInputs(List<CraftInput> inputs) {
-		if (inputs == null || inputs.isEmpty()) {
-			return new StatData();
-		}
+		return compute(toMaterials(inputs));
+	}
+
+	/** Craft record inputs as a {@code kind.id -> amount} material map (empty for no inputs). */
+	public static Map<String, Integer> toMaterials(List<CraftInput> inputs) {
 		Map<String, Integer> materials = new HashMap<>();
+		if (inputs == null) {
+			return materials;
+		}
 		for (CraftInput input : inputs) {
 			if (input == null || input.getAmount() <= 0) {
 				continue;
@@ -88,7 +93,7 @@ public final class BucketStatAverager {
 			String key = kind.toLowerCase() + "." + input.getId().toLowerCase();
 			materials.merge(key, input.getAmount(), Integer::sum);
 		}
-		return compute(materials);
+		return materials;
 	}
 
 	private static String resolveBucket(String key) {

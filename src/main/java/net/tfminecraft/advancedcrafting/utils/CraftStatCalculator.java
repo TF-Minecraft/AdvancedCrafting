@@ -21,14 +21,16 @@ public final class CraftStatCalculator {
 		if (recipe == null) {
 			return new StatData();
 		}
-		return applyPipeline(BucketStatAverager.computeFromInputs(inputs), recipe);
+		return compute(recipe, BucketStatAverager.toMaterials(inputs));
 	}
 
 	public static StatData compute(CraftingRecipe recipe, Map<String, Integer> materials) {
 		if (recipe == null) {
 			return new StatData();
 		}
-		return applyPipeline(BucketStatAverager.compute(materials), recipe);
+		StatData stats = BucketStatAverager.compute(materials);
+		TierBonusCalculator.apply(stats, recipe.getStatTemplate(), materials);
+		return applyTemplate(stats, recipe);
 	}
 
 	public static Set<String> collectManagedStatIds(CraftingRecipe recipe) {
@@ -46,10 +48,6 @@ public final class CraftStatCalculator {
 			}
 		}
 		return ids;
-	}
-
-	private static StatData applyPipeline(StatData stats, CraftingRecipe recipe) {
-		return applyTemplate(stats, recipe);
 	}
 
 	private static StatData applyTemplate(StatData stats, CraftingRecipe recipe) {

@@ -28,6 +28,12 @@ sword:
     - spell_vampirism
     - lifesteal
     - max_item_damage
+  # Sword = steady damage, no extra bonus: each tier of leather and wool adds 0.125 attack damage,
+  # around rare (tier 2), so common/rare/epic/legendary give -0.25/0/+0.25/+0.5 (2026-11-11).
+  tier-bonus:
+    leather: attack_damage(0.125)
+    wool: attack_damage(0.125)
+  tier-bonus-neutral: 2
 
 battleaxe:
   name: "§fBattleaxe"
@@ -93,7 +99,9 @@ spear:
     - magic_damage
     - spell_vampirism
     - lifesteal
+    - entity_interaction_range
     - max_item_damage
+  # Reach: 0.2 from the spear + leather/wool 0.03-0.10 each = 0.26-0.40 (2026-11-11).
   factors:
     attack_damage: 0.90
 
@@ -110,7 +118,9 @@ polearm:
     - magic_damage
     - spell_vampirism
     - lifesteal
+    - entity_interaction_range
     - max_item_damage
+  # Reach: 0.4 from the polearm + leather/wool 0.03-0.10 each = 0.46-0.60 (2026-11-11).
   # Two-handed (2026-11-01): no off-hand, so hits deal 1.5x to keep up with a one-hander
   # plus shortsword/shield at the slower 1.2 attack speed.
   factors:
@@ -167,7 +177,6 @@ greataxe:
   base-stats:
     - attack_speed(1.2)
     - blunt_power(3)
-    - movement_speed(0.1)
   stats:
     - attack_damage
     - attack_speed
@@ -179,14 +188,13 @@ greataxe:
     - lifesteal
     - movement_speed
     - max_item_damage
-  # Two-handed, so it never has an off-hand shortsword: movement is (0.1 + leather/wool) x 2,
-  # what a battleaxe plus an off-hand shortsword with a 0.2 movement base give with the same
-  # leather and wool.
+  # Two-handed, so it never has an off-hand shortsword: movement is leather/wool x 1.5 = 0.9-1.8,
+  # a battleaxe plus a shortsword (half a battleaxe), so a battleaxe is 2/3 of it (2026-11-11).
   # Two-handed (2026-11-01): no off-hand, so hits deal 1.5x to keep up with a one-hander
   # plus shortsword/shield at the slower 1.2 attack speed.
   # Blunt splash = blunt_rating % of the hit (MythicLib base 33 does not add): x0.9 = 45-72%.
   factors:
-    movement_speed: 2.0
+    movement_speed: 1.5
     attack_damage: 1.5
     blunt_rating: 0.9
 

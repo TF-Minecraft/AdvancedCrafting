@@ -107,6 +107,7 @@ global-stat-offsets:
 
 stat-aliases:
     - max_item_damage->Durability
+    - entity_interaction_range->Reach
     - max_health->Max Health
     - health_regeneration->Health Regeneration
     - armor->Armor
