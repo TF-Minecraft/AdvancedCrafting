@@ -30,14 +30,17 @@ public final class AcItemRefresher {
 		if (item == null || item.getType().isAir()) {
 			return item;
 		}
+		ItemStack current = item;
 		CraftStatRefresher.RefreshResult crafted = CraftStatRefresher.refreshIfOutdated(item);
 		if (crafted.isChanged()) {
-			return ArmourLookMigrator.migrate(crafted.getItem());
+			current = crafted.getItem();
+		} else {
+			AcItemLoreRefresher.RefreshResult lore = AcItemLoreRefresher.refreshIfOutdated(item);
+			if (lore.isChanged()) {
+				current = lore.getItem();
+			}
 		}
-		AcItemLoreRefresher.RefreshResult lore = AcItemLoreRefresher.refreshIfOutdated(item);
-		if (lore.isChanged()) {
-			return ArmourLookMigrator.migrate(lore.getItem());
-		}
-		return ArmourLookMigrator.migrate(item);
+		// After the stat refresh, which rebuilds from the item's own (possibly old) class list.
+		return ArmourLookMigrator.migrate(RequiredClassSync.sync(current));
 	}
 }
