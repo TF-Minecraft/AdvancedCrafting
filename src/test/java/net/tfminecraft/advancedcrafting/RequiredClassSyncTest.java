@@ -50,6 +50,11 @@ class RequiredClassSyncTest extends CoverageSupport {
     assertNull(update(mmo, NOW));
     assertSame(data, mmo.getData(ItemStats.REQUIRED_CLASS));
     assertEquals(Set.of("Warden", "Cleric"), RequiredClassSync.classSet(List.of(" Warden ", "", "Cleric", "Warden")));
+    // MMOItems matches class names ignoring case, so a case-only difference is no change.
+    assertTrue(RequiredClassSync.sameClasses(List.of("warden", "CLERIC"), List.of("Cleric", "Warden")));
+    assertFalse(RequiredClassSync.sameClasses(List.of("Warden"), List.of("Warden", "Cleric")));
+    mmo.setData(ItemStats.REQUIRED_CLASS, new StringListData(List.of("crusader", "templar", "cleric", "juggernaut", "warden")));
+    assertNull(update(mmo, NOW));
   }
 
   @Test
@@ -190,6 +195,15 @@ class RequiredClassSyncTest extends CoverageSupport {
       verify(mmo, never()).setData(any(), any());
       verify(mmo, never()).removeData(any());
       verify(history, never()).setOriginalData(any());
+    }
+  }
+
+  @Test
+  void aFailedClassSyncKeepsTheItem() {
+    var item = new ItemStack(Material.PAPER);
+    try (var sync = mockStatic(RequiredClassSync.class)) {
+      sync.when(() -> RequiredClassSync.sync(any())).thenThrow(new IllegalStateException("broken stat"));
+      assertSame(item, AcItemRefresher.refreshIfOutdated(item));
     }
   }
 

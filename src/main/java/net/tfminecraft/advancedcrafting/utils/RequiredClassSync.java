@@ -3,8 +3,10 @@ package net.tfminecraft.advancedcrafting.utils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
@@ -49,7 +51,7 @@ public final class RequiredClassSync {
 		}
 		List<String> wanted = new ArrayList<>(classSet(listOf(template.getBaseItemData().get(ItemStats.REQUIRED_CLASS))));
 		// The cheap check covers almost every item; only a stat history needs the full MMOItems read.
-		if (!nbt.hasTag(HISTORY_TAG) && classSet(Arrays.asList(nbt.getString(TAG).split(","))).equals(Set.copyOf(wanted))) {
+		if (!nbt.hasTag(HISTORY_TAG) && sameClasses(Arrays.asList(nbt.getString(TAG).split(",")), wanted)) {
 			return item;
 		}
 		LiveMMOItem mmo = new LiveMMOItem(nbt);
@@ -72,13 +74,14 @@ public final class RequiredClassSync {
 
 	/**
 	 * Gives the item the wanted classes, in that order, and touches no other stat. With a stat history only its
-	 * original layer changes, so gem and external layers stay. Returns the classes it had, or null when they
-	 * already matched (as sets: order, spacing and repeats do not count).
+	 * original layer changes, so gem and external layers stay; when the template has no classes the whole class
+	 * stat goes, history included. Returns the classes it had, or null when they already matched (as sets: case,
+	 * order, spacing and repeats do not count).
 	 */
 	public static List<String> update(MMOItem mmo, List<String> wanted) {
 		StatHistory history = mmo.getStatHistory(ItemStats.REQUIRED_CLASS);
 		List<String> before = listOf(history != null ? history.getOriginalData() : mmo.getData(ItemStats.REQUIRED_CLASS));
-		if (classSet(before).equals(classSet(wanted))) {
+		if (sameClasses(before, wanted)) {
 			return null;
 		}
 		StringListData classes = new StringListData(wanted);
@@ -101,6 +104,19 @@ public final class RequiredClassSync {
 			if (!trimmed.isEmpty()) {
 				result.add(trimmed);
 			}
+		}
+		return result;
+	}
+
+	/** Same classes as sets, ignoring case as MMOItems does when it checks a player's class. */
+	public static boolean sameClasses(Collection<String> a, Collection<String> b) {
+		return lowerCase(classSet(a)).equals(lowerCase(classSet(b)));
+	}
+
+	private static Set<String> lowerCase(Set<String> names) {
+		Set<String> result = new HashSet<>();
+		for (String name : names) {
+			result.add(name.toLowerCase(Locale.ROOT));
 		}
 		return result;
 	}
