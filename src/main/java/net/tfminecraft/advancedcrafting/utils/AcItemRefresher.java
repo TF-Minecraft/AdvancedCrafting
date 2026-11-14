@@ -1,5 +1,6 @@
 package net.tfminecraft.advancedcrafting.utils;
 
+import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 
 import net.tfminecraft.advancedcrafting.objects.CraftStack;
@@ -30,14 +31,25 @@ public final class AcItemRefresher {
 		if (item == null || item.getType().isAir()) {
 			return item;
 		}
+		ItemStack current = item;
 		CraftStatRefresher.RefreshResult crafted = CraftStatRefresher.refreshIfOutdated(item);
 		if (crafted.isChanged()) {
-			return ArmourLookMigrator.migrate(crafted.getItem());
+			current = crafted.getItem();
+		} else {
+			AcItemLoreRefresher.RefreshResult lore = AcItemLoreRefresher.refreshIfOutdated(item);
+			if (lore.isChanged()) {
+				current = lore.getItem();
+			}
 		}
-		AcItemLoreRefresher.RefreshResult lore = AcItemLoreRefresher.refreshIfOutdated(item);
-		if (lore.isChanged()) {
-			return ArmourLookMigrator.migrate(lore.getItem());
+		// After the stat refresh, which rebuilds from the item's own (possibly old) class list. A failure here keeps
+		// the stat refresh already done.
+		ItemStack synced;
+		try {
+			synced = RequiredClassSync.sync(current);
+		} catch (RuntimeException e) {
+			Bukkit.getLogger().warning("[AC][ClassSync] could not update the classes of an item, kept as is: " + e);
+			synced = current;
 		}
-		return ArmourLookMigrator.migrate(item);
+		return ArmourLookMigrator.migrate(synced);
 	}
 }
