@@ -213,10 +213,10 @@ light_armor:
     - magic_damage_reduction
     - max_item_damage
   factors:
-    max_health: 0.4
-    physical_damage_reduction: 0.4
-    projectile_damage_reduction: 0.4
-    magic_damage_reduction: 0.4
+    max_health: 0.6
+    physical_damage_reduction: 0.6
+    projectile_damage_reduction: 0.6
+    magic_damage_reduction: 0.6
 
 medium_armor:
   name: "§fMedium Armor"
@@ -234,10 +234,10 @@ medium_armor:
     - magic_damage_reduction
     - max_item_damage
   factors:
-    max_health: 0.4
-    physical_damage_reduction: 0.4
-    projectile_damage_reduction: 0.4
-    magic_damage_reduction: 0.4
+    max_health: 0.6
+    physical_damage_reduction: 0.6
+    projectile_damage_reduction: 0.6
+    magic_damage_reduction: 0.6
 
 heavy_armor:
   name: "§fHeavy Armor"
@@ -255,10 +255,10 @@ heavy_armor:
     - magic_damage_reduction
     - max_item_damage
   factors:
-    max_health: 0.4
-    physical_damage_reduction: 0.4
-    projectile_damage_reduction: 0.4
-    magic_damage_reduction: 0.4
+    max_health: 0.6
+    physical_damage_reduction: 0.6
+    projectile_damage_reduction: 0.6
+    magic_damage_reduction: 0.6
 
 infantry_armor:
   name: "§fInfantry Armor"
@@ -275,10 +275,10 @@ infantry_armor:
     - magic_damage_reduction
     - max_item_damage
   factors:
-    max_health: 0.4
-    physical_damage_reduction: 0.4
-    projectile_damage_reduction: 0.4
-    magic_damage_reduction: 0.4
+    max_health: 0.6
+    physical_damage_reduction: 0.6
+    projectile_damage_reduction: 0.6
+    magic_damage_reduction: 0.6
 
 shortbow:
   name: "§fShortbow"
