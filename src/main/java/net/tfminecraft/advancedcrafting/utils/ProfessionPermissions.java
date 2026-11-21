@@ -6,6 +6,7 @@ import net.tfminecraft.advancedcrafting.cache.Cache;
 import net.tfminecraft.advancedcrafting.loaders.IngredientLoader;
 import net.tfminecraft.advancedcrafting.managers.AlloyManager;
 import net.tfminecraft.advancedcrafting.objects.alloys.Alloy;
+import net.tfminecraft.advancedcrafting.objects.data.AlloyRecipe;
 import net.tfminecraft.advancedcrafting.objects.data.IngredientData;
 import net.tfminecraft.advancedcrafting.objects.data.PermissionNamespace;
 import net.tfminecraft.advancedcrafting.objects.ingredients.Ingredient;
@@ -96,6 +97,31 @@ public final class ProfessionPermissions {
 			return true;
 		}
 		return hasIngredientPerm(player, data.getPermission());
+	}
+
+	/**
+	 * The permission an alloy needs: the same as its base (the metal or wood it was forged on).
+	 * Null when the base is not recorded, no longer configured or needs no permission.
+	 */
+	public static String alloyPermission(Alloy alloy) {
+		if (alloy == null || alloy.getData() == null) {
+			return null;
+		}
+		AlloyRecipe recipe = alloy.getData().getRecipe();
+		if (recipe == null) {
+			return null;
+		}
+		Ingredient base = IngredientLoader.getByString(recipe.getBaseId());
+		if (base == null || base.getIngredientData() == null) {
+			return null;
+		}
+		return base.getIngredientData().getPermission();
+	}
+
+	/** True when the player may work the alloy; alloys whose base needs no known permission stay usable. */
+	public static boolean canUseAlloy(Player player, Alloy alloy) {
+		String permission = alloyPermission(alloy);
+		return permission == null || hasIngredientPerm(player, permission);
 	}
 
 	public static int resolveTier(IngredientData data) {
