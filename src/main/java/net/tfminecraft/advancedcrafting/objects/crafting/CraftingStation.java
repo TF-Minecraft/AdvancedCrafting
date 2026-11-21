@@ -204,6 +204,12 @@ public class CraftingStation {
 		if(c.isAlloy()) {
 			Alloy a = c.getAlloy();
 			if (a == null) return StationFeedback.NOT_INGREDIENT;
+			// An alloy needs the same Smith perk as its base; alloys without a known base stay usable.
+			if (!ProfessionPermissions.canUseAlloy(p, a)) {
+				p.sendMessage(ProfessionPermissions.missingIngredientPermissionMessage(
+						ProfessionPermissions.alloyPermission(a)));
+				return StationFeedback.NO_PERMS;
+			}
 			key = "alloy."+a.getId();
 			type = a.getData().getType();
 			mergeHits = a.getData().getHits();

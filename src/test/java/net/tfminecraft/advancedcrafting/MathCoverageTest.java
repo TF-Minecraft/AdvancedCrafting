@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import java.util.*;
 import net.tfminecraft.advancedcrafting.cache.Cache;
 import net.tfminecraft.advancedcrafting.loaders.*;
+import net.tfminecraft.advancedcrafting.objects.alloys.Alloy;
 import net.tfminecraft.advancedcrafting.objects.data.*;
 import net.tfminecraft.advancedcrafting.objects.ingredients.*;
 import net.tfminecraft.advancedcrafting.objects.stats.*;
@@ -179,6 +180,28 @@ class MathCoverageTest extends CoverageSupport {
     assertFalse(ProfessionPermissions.canUseIngredient(player, null));
     assertFalse(ProfessionPermissions.canUseIngredient(player, mock(Ingredient.class)));
     assertEquals(0, ProfessionPermissions.resolveAlloyTier("unknown"));
+    StatData none = new StatData();
+    Alloy forged = new Alloy("a", "A", new AlloyData(base, none, new HashMap<>(), null));
+    assertNull(ProfessionPermissions.alloyPermission(null));
+    assertNull(ProfessionPermissions.alloyPermission(mock(Alloy.class)));
+    assertNull(ProfessionPermissions.alloyPermission(forged));
+    assertTrue(ProfessionPermissions.canUseAlloy(null, forged));
+    forged.getData().setRecipe(new AlloyRecipe("gone", List.of()));
+    assertNull(ProfessionPermissions.alloyPermission(forged));
+    Ingredient blank = mock(Ingredient.class);
+    when(blank.getId()).thenReturn("blank");
+    IngredientLoader.oList.add(blank);
+    forged.getData().setRecipe(new AlloyRecipe("blank", List.of()));
+    assertNull(ProfessionPermissions.alloyPermission(forged));
+    forged.getData().setRecipe(new AlloyRecipe("copper", List.of()));
+    assertNull(ProfessionPermissions.alloyPermission(forged));
+    assertTrue(ProfessionPermissions.canUseAlloy(null, forged));
+    forged.getData().setRecipe(new AlloyRecipe("IRON", List.of("copper")));
+    assertEquals("smith", ProfessionPermissions.alloyPermission(forged));
+    assertTrue(ProfessionPermissions.canUseAlloy(player, forged));
+    assertFalse(ProfessionPermissions.canUseAlloy(null, forged));
+    when(player.hasPermission("professions.smith")).thenReturn(false);
+    assertFalse(ProfessionPermissions.canUseAlloy(player, forged));
   }
 
   @Test

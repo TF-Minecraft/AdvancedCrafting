@@ -95,6 +95,57 @@ class StationCoverageTest extends CoverageSupport {
   }
 
   @Test
+  void alloysNeedTheirBasePermissionUnlessTheBaseIsUnknown() throws Exception {
+    var p = server.addPlayer();
+    var station = new CraftingStation(loc());
+    station.setRecipe(recipe("recipe: ['metal.3']"));
+    Cache.permissionNamespaces.put("mythril_smith", new PermissionNamespace("mythril_smith", "Mythril Smith"));
+    var mythril =
+        ingredient("mythril", "base: true\npermission: mythril_smith\nhits: ['strike.2']");
+    ingredient("tin", "hits: ['strike.1']");
+    var forged =
+        new Alloy(
+            "starsteel",
+            "Starsteel",
+            new AlloyData(
+                mythril,
+                new net.tfminecraft.advancedcrafting.objects.data.StatData(),
+                new HashMap<>(Map.of(HitLoader.map.get("strike"), 1)),
+                null));
+    forged.getData().setRecipe(new AlloyRecipe("mythril", List.of("tin")));
+    AlloyManager.addAlloy(forged);
+    var item = alloyItem("starsteel");
+    item.setAmount(5);
+    p.getInventory().setItemInMainHand(item);
+    // Without the base's perk the alloy is refused with the ingredient refusal message.
+    assertEquals(StationFeedback.NO_PERMS, station.addMaterial(p, item));
+    assertEquals(
+        ProfessionPermissions.missingIngredientPermissionMessage("mythril_smith"), p.nextMessage());
+    assertTrue(station.getCurrentMaterials().isEmpty());
+    assertEquals(5, p.getInventory().getItemInMainHand().getAmount());
+    // An old alloy with no recorded base keeps working as before.
+    var old =
+        new Alloy(
+            "oldsteel",
+            "Oldsteel",
+            new AlloyData(
+                mythril,
+                new net.tfminecraft.advancedcrafting.objects.data.StatData(),
+                new HashMap<>(),
+                null));
+    AlloyManager.addAlloy(old);
+    var oldItem = alloyItem("oldsteel");
+    p.getInventory().setItemInMainHand(oldItem);
+    assertEquals(StationFeedback.SUCCESS, station.addMaterial(p, oldItem));
+    // With the perk the recorded-base alloy is accepted.
+    p.addAttachment(
+        org.mockbukkit.mockbukkit.MockBukkit.createMockPlugin(), "professions.mythril_smith", true);
+    p.getInventory().setItemInMainHand(item);
+    assertEquals(StationFeedback.SUCCESS, station.addMaterial(p, item));
+    assertEquals(1, station.getCurrentMaterials().get("alloy.starsteel"));
+  }
+
+  @Test
   void statusLinesShowMaterialsAndHitsDoneButNoNeededHits() throws Exception {
     var p = server.addPlayer();
     var station = new CraftingStation(loc());
